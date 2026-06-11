@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
 import { Input } from '../components/Input';
@@ -22,15 +23,30 @@ import { maskDate, isValidDate, toISO, displayDate } from '../utils/date';
 import { DOCUMENT_KIND_LABELS } from '../labels';
 import { PetDocument, DocumentKind, RootStackParamList } from '../types';
 
+type Nav = NativeStackNavigationProp<RootStackParamList, 'Documents'>;
 type Route = RouteProp<RootStackParamList, 'Documents'>;
 
-const KINDS: DocumentKind[] = ['exam', 'prescription', 'vaccination_card', 'other'];
+const KINDS: DocumentKind[] = ['vaccination_card', 'exam', 'prescription', 'other'];
 
 const KIND_ICONS: Record<DocumentKind, keyof typeof Ionicons.glyphMap> = {
   exam: 'flask',
   prescription: 'receipt',
   vaccination_card: 'card',
   other: 'document',
+};
+
+const KIND_COLORS: Record<DocumentKind, string> = {
+  vaccination_card: colors.success,
+  exam: colors.primaryLight,
+  prescription: colors.warning,
+  other: colors.textSubtle,
+};
+
+const KIND_HINTS: Record<DocumentKind, string> = {
+  vaccination_card: 'Carteira de vacinação do pet',
+  exam: 'Hemogramas, raio-x, ultrassom...',
+  prescription: 'Receitas e prescrições do veterinário',
+  other: 'Qualquer outro documento',
 };
 
 interface PendingFile {
@@ -40,13 +56,12 @@ interface PendingFile {
 }
 
 export default function DocumentsScreen() {
-  const navigation = useNavigation();
-  const { petId } = useRoute<Route>().params;
+  const navigation = useNavigation<Nav>();
+  const { petId, kind } = useRoute<Route>().params;
 
   const [documents, setDocuments] = useState<PetDocument[]>([]);
   const [pending, setPending] = useState<PendingFile | null>(null);
   const [title, setTitle] = useState('');
-  const [kind, setKind] = useState<DocumentKind>('exam');
   const [date, setDate] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -70,7 +85,7 @@ export default function DocumentsScreen() {
   }
 
   async function handleSave() {
-    if (!pending) return;
+    if (!pending || !kind) return;
     if (!title.trim()) {
       Alert.alert('Campo obrigatório', 'Informe o título do documento.');
       return;
@@ -96,7 +111,6 @@ export default function DocumentsScreen() {
       setPending(null);
       setTitle('');
       setDate('');
-      setKind('exam');
       load();
     } catch {
       Alert.alert('Erro', 'Não foi possível salvar o documento.');
@@ -135,6 +149,59 @@ export default function DocumentsScreen() {
     ]);
   }
 
+  // ------------------------- Modo 1: lista de categorias -------------------------
+
+  if (!kind) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Exames e Documentos</Text>
+          <View style={{ width: 24 }} />
+        </View>
+
+        <View style={styles.categories}>
+          {KINDS.map(k => {
+            const count = documents.filter(d => d.kind === k).length;
+            return (
+              <TouchableOpacity
+                key={k}
+                style={styles.categoryCard}
+                onPress={() => navigation.navigate('Documents', { petId, kind: k })}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={DOCUMENT_KIND_LABELS[k]}
+              >
+                <View style={[styles.categoryIcon, { backgroundColor: KIND_COLORS[k] + '18' }]}>
+                  <Ionicons name={KIND_ICONS[k]} size={20} color={KIND_COLORS[k]} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.categoryTitle}>{DOCUMENT_KIND_LABELS[k]}</Text>
+                  <Text style={styles.categoryHint}>{KIND_HINTS[k]}</Text>
+                </View>
+                <View style={styles.categoryCount}>
+                  <Text style={styles.categoryCountText}>{count}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ----------------------- Modo 2: documentos da categoria -----------------------
+
+  const kindDocs = documents.filter(d => d.kind === kind);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -146,7 +213,7 @@ export default function DocumentsScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Exames e Documentos</Text>
+        <Text style={styles.headerTitle}>{DOCUMENT_KIND_LABELS[kind]}</Text>
         <TouchableOpacity
           onPress={pickFile}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -169,25 +236,12 @@ export default function DocumentsScreen() {
             </TouchableOpacity>
           </View>
 
-          <Input label="Título" placeholder="Ex: Hemograma completo" value={title} onChangeText={setTitle} />
-
-          <View style={styles.field}>
-            <Text style={styles.fieldLabel}>Tipo</Text>
-            <View style={styles.chips}>
-              {KINDS.map(k => (
-                <TouchableOpacity
-                  key={k}
-                  style={[styles.chip, kind === k && styles.chipActive]}
-                  onPress={() => setKind(k)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.chipText, kind === k && styles.chipTextActive]}>
-                    {DOCUMENT_KIND_LABELS[k]}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+          <Input
+            label="Título"
+            placeholder={kind === 'exam' ? 'Ex: Hemograma completo' : 'Ex: ' + DOCUMENT_KIND_LABELS[kind]}
+            value={title}
+            onChangeText={setTitle}
+          />
 
           <Input
             label="Data"
@@ -209,7 +263,7 @@ export default function DocumentsScreen() {
         </View>
       ) : (
         <FlatList
-          data={documents}
+          data={kindDocs}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
@@ -221,13 +275,11 @@ export default function DocumentsScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.docIcon}>
-                <Ionicons name={KIND_ICONS[item.kind]} size={18} color={colors.primaryLight} />
+                <Ionicons name={KIND_ICONS[item.kind]} size={18} color={KIND_COLORS[item.kind]} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.docTitle}>{item.title}</Text>
-                <Text style={styles.docMeta}>
-                  {DOCUMENT_KIND_LABELS[item.kind]} · {displayDate(item.date)}
-                </Text>
+                <Text style={styles.docMeta}>{displayDate(item.date)}</Text>
               </View>
               <Ionicons name="open-outline" size={16} color={colors.textMuted} />
             </TouchableOpacity>
@@ -235,9 +287,9 @@ export default function DocumentsScreen() {
           ListEmptyComponent={
             <View style={styles.emptyWrapper}>
               <EmptyState
-                icon="folder-open-outline"
-                title="Nenhum documento"
-                text="Toque em + para anexar exames, receitas ou a carteirinha de vacinação (PDF ou imagem). Toque e segure um documento para excluir."
+                icon={KIND_ICONS[kind]}
+                title={`Nenhum documento em ${DOCUMENT_KIND_LABELS[kind]}`}
+                text="Toque em + para anexar um PDF ou imagem. Toque e segure um documento para excluir."
               />
             </View>
           }
@@ -257,6 +309,36 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  categories: { padding: spacing.lg, gap: spacing.sm },
+  categoryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+  },
+  categoryIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  categoryHint: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  categoryCount: {
+    minWidth: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.surfaceElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  categoryCountText: { fontSize: 12, fontWeight: '600', color: colors.textSubtle },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   emptyWrapper: { paddingTop: spacing.xxl },
   form: { padding: spacing.lg, gap: spacing.lg },
@@ -271,20 +353,6 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   fileName: { flex: 1, fontSize: 13, color: colors.textSubtle },
-  field: { gap: spacing.xs },
-  fieldLabel: { fontSize: 13, fontWeight: '500', color: colors.textSubtle, letterSpacing: 0.3 },
-  chips: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.full,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { fontSize: 13, color: colors.textMuted, fontWeight: '500' },
-  chipTextActive: { color: '#fff' },
   saveBtn: {
     backgroundColor: colors.primary,
     borderRadius: radius.md,

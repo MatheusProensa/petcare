@@ -14,6 +14,8 @@ import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navig
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Input } from '../components/Input';
 import { EmptyState } from '../components/EmptyState';
 import { colors, spacing, radius } from '../theme';
@@ -119,31 +121,76 @@ export default function DocumentsScreen() {
     }
   }
 
+  function isImage(doc: PetDocument): boolean {
+    if (doc.mimeType?.startsWith('image/')) return true;
+    return /\.(jpe?g|png|gif|webp|heic)$/i.test(doc.uri);
+  }
+
+  // Visualiza sem abrir a folha de compartilhamento: imagens dentro do app,
+  // PDFs no leitor padrão do sistema.
   async function openDocument(doc: PetDocument) {
+    if (isImage(doc)) {
+      navigation.navigate('DocumentViewer', {
+        uri: doc.uri,
+        title: doc.title,
+        mimeType: doc.mimeType,
+      });
+      return;
+    }
     if (Platform.OS === 'web') {
       Alert.alert('Indisponível', 'Abra os documentos pelo aplicativo no celular.');
       return;
     }
     try {
-      await Sharing.shareAsync(doc.uri, { mimeType: doc.mimeType });
+      if (Platform.OS === 'android') {
+        const contentUri = await FileSystem.getContentUriAsync(doc.uri);
+        await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+          data: contentUri,
+          type: doc.mimeType ?? 'application/pdf',
+          flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+        });
+      } else {
+        await Sharing.shareAsync(doc.uri, { mimeType: doc.mimeType });
+      }
     } catch {
-      Alert.alert('Erro', 'Não foi possível abrir o documento.');
+      Alert.alert(
+        'Não foi possível abrir',
+        'Nenhum aplicativo de PDF encontrado. Instale um leitor de PDF ou use o toque longo para compartilhar.',
+      );
     }
   }
 
-  function confirmDelete(doc: PetDocument) {
-    Alert.alert('Excluir documento', `Remover "${doc.title}"?`, [
+  async function shareDocument(doc: PetDocument) {
+    try {
+      await Sharing.shareAsync(doc.uri, { mimeType: doc.mimeType });
+    } catch {
+      Alert.alert('Erro', 'Não foi possível compartilhar o documento.');
+    }
+  }
+
+  function showOptions(doc: PetDocument) {
+    Alert.alert(doc.title, 'O que deseja fazer?', [
       { text: 'Cancelar', style: 'cancel' },
+      { text: 'Compartilhar', onPress: () => shareDocument(doc) },
       {
         text: 'Excluir',
         style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteDocument(doc.id);
-            load();
-          } catch {
-            Alert.alert('Erro', 'Não foi possível excluir o documento.');
-          }
+        onPress: () => {
+          Alert.alert('Excluir documento', `Remover "${doc.title}"?`, [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Excluir',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await deleteDocument(doc.id);
+                  load();
+                } catch {
+                  Alert.alert('Erro', 'Não foi possível excluir o documento.');
+                }
+              },
+            },
+          ]);
         },
       },
     ]);
@@ -271,7 +318,7 @@ export default function DocumentsScreen() {
             <TouchableOpacity
               style={styles.docRow}
               onPress={() => openDocument(item)}
-              onLongPress={() => confirmDelete(item)}
+              onLongPress={() => showOptions(item)}
               activeOpacity={0.7}
             >
               <View style={styles.docIcon}>
@@ -289,7 +336,7 @@ export default function DocumentsScreen() {
               <EmptyState
                 icon={KIND_ICONS[kind]}
                 title={`Nenhum documento em ${DOCUMENT_KIND_LABELS[kind]}`}
-                text="Toque em + para anexar um PDF ou imagem. Toque e segure um documento para excluir."
+                text="Toque em + para anexar um PDF ou imagem. Toque para visualizar; toque e segure para compartilhar ou excluir."
               />
             </View>
           }

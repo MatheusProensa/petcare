@@ -86,6 +86,7 @@ export type RootStackParamList = {
   MedicalProfile: { petId: string };
   Emergency: { petId: string };
   Documents: { petId: string; kind?: DocumentKind };
+  DocumentViewer: { uri: string; title: string; mimeType?: string };
   Stats: { petId: string };
   Search: undefined;
 };

@@ -12,6 +12,7 @@ import WeightScreen from './src/screens/WeightScreen';
 import MedicalProfileScreen from './src/screens/MedicalProfileScreen';
 import EmergencyScreen from './src/screens/EmergencyScreen';
 import DocumentsScreen from './src/screens/DocumentsScreen';
+import DocumentViewerScreen from './src/screens/DocumentViewerScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import SearchScreen from './src/screens/SearchScreen';
 
@@ -32,6 +33,7 @@ export default function App() {
         <Stack.Screen name="MedicalProfile" component={MedicalProfileScreen} />
         <Stack.Screen name="Emergency" component={EmergencyScreen} />
         <Stack.Screen name="Documents" component={DocumentsScreen} />
+        <Stack.Screen name="DocumentViewer" component={DocumentViewerScreen} />
         <Stack.Screen name="Stats" component={StatsScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
       </Stack.Navigator>

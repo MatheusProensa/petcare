@@ -26,6 +26,7 @@ import {
 import { getVaccineStatus, eventDateOf } from '../services/events';
 import { TimelineItem, TimelineBadge } from '../components/TimelineItem';
 import { EmptyState } from '../components/EmptyState';
+import { MedicalProfileCard } from '../components/MedicalProfileCard';
 import { Pet, MedicalRecord, WeightEntry, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'PetDetail'>;
@@ -37,6 +38,33 @@ interface TimelineEntry {
   createdAt: string;
   record?: MedicalRecord;
   weight?: WeightEntry;
+}
+
+function QuickAction({
+  icon,
+  label,
+  color = colors.primaryLight,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  color?: string;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity
+      style={styles.quickAction}
+      onPress={onPress}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <View style={[styles.quickActionIcon, { backgroundColor: color + '18' }]}>
+        <Ionicons name={icon} size={18} color={color} />
+      </View>
+      <Text style={styles.quickActionLabel}>{label}</Text>
+    </TouchableOpacity>
+  );
 }
 
 const VACCINE_STATUS_BADGES: Record<string, TimelineBadge> = {
@@ -260,6 +288,32 @@ export default function PetDetailScreen() {
               {[SPECIES_LABELS[pet.species], pet.breed, age].filter(Boolean).join(' · ')}
             </Text>
 
+            <View style={styles.quickActions}>
+              <QuickAction
+                icon="scale"
+                label="Peso"
+                onPress={() => navigation.navigate('Weight', { petId })}
+              />
+              <QuickAction
+                icon="folder-open"
+                label="Documentos"
+                onPress={() => navigation.navigate('Documents', { petId })}
+              />
+              <QuickAction
+                icon="warning"
+                label="Emergência"
+                color={colors.danger}
+                onPress={() => navigation.navigate('Emergency', { petId })}
+              />
+            </View>
+
+            <View style={{ width: '100%', marginBottom: spacing.lg }}>
+              <MedicalProfileCard
+                profile={pet.medicalProfile}
+                onPress={() => navigation.navigate('MedicalProfile', { petId })}
+              />
+            </View>
+
             <View style={styles.divider} />
 
             <View style={styles.sectionRow}>
@@ -335,6 +389,30 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   petMeta: { fontSize: 14, color: colors.textMuted, marginBottom: spacing.lg },
+  quickActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    width: '100%',
+    marginBottom: spacing.md,
+  },
+  quickAction: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing.md,
+  },
+  quickActionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickActionLabel: { fontSize: 12, fontWeight: '500', color: colors.textSubtle },
   divider: { width: '100%', height: 1, backgroundColor: colors.border, marginBottom: spacing.lg },
   sectionRow: {
     flexDirection: 'row',

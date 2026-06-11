@@ -17,7 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Input } from '../components/Input';
 import { colors, spacing, radius } from '../theme';
 import { getPets, savePet } from '../storage';
-import { persistPhoto, deletePhoto } from '../storage/photos';
+import { persistPhoto, deletePhoto } from '../storage/files';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
 import { SPECIES_LABELS } from '../labels';
 import { Pet, Species, RootStackParamList } from '../types';

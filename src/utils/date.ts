@@ -35,6 +35,23 @@ export function displayDate(iso: string): string {
   return `${d}/${m}/${y}`;
 }
 
+/** Dias entre hoje e uma data ISO (negativo = já passou). */
+export function daysUntilISO(iso: string): number {
+  const [y, m, d] = iso.split('-').map(Number);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((new Date(y, m - 1, d).getTime() - today.getTime()) / 86400000);
+}
+
+/** "hoje", "amanhã", "em 5 dias", "há 3 dias". */
+export function formatDaysUntil(days: number): string {
+  if (days === 0) return 'hoje';
+  if (days === 1) return 'amanhã';
+  if (days === -1) return 'ontem';
+  if (days > 1) return `em ${days} dias`;
+  return `há ${-days} dias`;
+}
+
 export function calcAge(iso: string): string {
   if (!iso) return '';
   const birth = new Date(iso);

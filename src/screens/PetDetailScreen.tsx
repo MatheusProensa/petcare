@@ -14,31 +14,70 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, radius } from '../theme';
-import { getPets, getRecords, deletePet, deleteRecord } from '../storage';
-import { calcAge, displayDate } from '../utils/date';
-import { SPECIES_LABELS, RECORD_TYPE_LABELS } from '../labels';
-import { Pet, MedicalRecord, RecordType, RootStackParamList } from '../types';
+import { getPets, getRecords, getWeights, deletePet, deleteRecord } from '../storage';
+import { calcAge, displayDate, formatDaysUntil, daysUntilISO } from '../utils/date';
+import {
+  SPECIES_LABELS,
+  RECORD_TYPE_LABELS,
+  RECORD_TYPE_COLORS,
+  RECORD_TYPE_ICONS,
+  FREQUENCY_LABELS,
+} from '../labels';
+import { getVaccineStatus, eventDateOf } from '../services/events';
+import { TimelineItem, TimelineBadge } from '../components/TimelineItem';
+import { EmptyState } from '../components/EmptyState';
+import { Pet, MedicalRecord, WeightEntry, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'PetDetail'>;
 type Route = RouteProp<RootStackParamList, 'PetDetail'>;
 
-const TYPE_COLOR: Record<RecordType, string> = {
-  vaccine: '#10b981',
-  consultation: '#38bdf8',
-  medication: '#f59e0b',
+interface TimelineEntry {
+  id: string;
+  date: string;
+  createdAt: string;
+  record?: MedicalRecord;
+  weight?: WeightEntry;
+}
+
+const VACCINE_STATUS_BADGES: Record<string, TimelineBadge> = {
+  ok: { label: 'Em dia', color: colors.success },
+  due_soon: { label: 'Reforço próximo', color: colors.warning },
+  overdue: { label: 'Atrasada', color: colors.danger },
 };
 
-const TYPE_ICON: Record<RecordType, keyof typeof Ionicons.glyphMap> = {
-  vaccine: 'shield-checkmark',
-  consultation: 'medical',
-  medication: 'medkit',
-};
+function recordLines(record: MedicalRecord): string[] {
+  const lines: string[] = [];
+  if (record.type === 'vaccine') {
+    const details = [record.manufacturer, record.batch, record.clinic].filter(Boolean).join(' · ');
+    if (details) lines.push(details);
+    if (record.nextDate) lines.push(`Reforço: ${displayDate(record.nextDate)}`);
+  }
+  if (record.type === 'consultation') {
+    const details = [record.vet, record.clinic].filter(Boolean).join(' · ');
+    if (details) lines.push(details);
+    if (record.diagnosis) lines.push(`Diagnóstico: ${record.diagnosis}`);
+    if (record.nextDate) lines.push(`Retorno: ${displayDate(record.nextDate)}`);
+  }
+  if (record.type === 'medication') {
+    const details = [
+      record.frequency ? FREQUENCY_LABELS[record.frequency] : undefined,
+      record.endDate ? `até ${displayDate(record.endDate)}` : undefined,
+    ].filter(Boolean).join(' · ');
+    if (details) lines.push(details);
+  }
+  if (record.type === 'deworming' && record.nextDate) {
+    lines.push(`Próxima dose: ${displayDate(record.nextDate)}`);
+  }
+  if (record.description) lines.push(record.description);
+  return lines;
+}
 
 export default function PetDetailScreen() {
   const navigation = useNavigation<Nav>();
   const { petId } = useRoute<Route>().params;
   const [pet, setPet] = useState<Pet | null>(null);
   const [records, setRecords] = useState<MedicalRecord[]>([]);
+  const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
@@ -47,6 +86,7 @@ export default function PetDetailScreen() {
       Promise.all([
         getPets().then(pets => setPet(pets.find(p => p.id === petId) ?? null)),
         getRecords(petId).then(setRecords),
+        getWeights(petId).then(setWeights),
       ])
         .catch(() => Alert.alert('Erro', 'Não foi possível carregar os dados do pet.'))
         .finally(() => setLoading(false));
@@ -125,6 +165,47 @@ export default function PetDetailScreen() {
 
   const age = calcAge(pet.birthDate);
 
+  const timeline: TimelineEntry[] = [
+    ...records.map(r => ({ id: r.id, date: r.date, createdAt: r.createdAt, record: r })),
+    ...weights.map(w => ({ id: w.id, date: w.date, createdAt: w.createdAt, weight: w })),
+  ].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+
+  function renderEntry({ item, index }: { item: TimelineEntry; index: number }) {
+    const isLast = index === timeline.length - 1;
+    if (item.weight) {
+      return (
+        <TimelineItem
+          icon="scale"
+          color={colors.primaryLight}
+          dateLabel={displayDate(item.weight.date)}
+          title={`Peso: ${item.weight.weightKg.toLocaleString('pt-BR')} kg`}
+          isLast={isLast}
+          onPress={() => navigation.navigate('AddWeight', { petId, weightId: item.weight!.id })}
+        />
+      );
+    }
+    const record = item.record!;
+    const status = getVaccineStatus(record);
+    const eventDate = eventDateOf(record);
+    const lines = recordLines(record);
+    if (eventDate && daysUntilISO(eventDate) >= 0) {
+      lines.push(`⏰ ${formatDaysUntil(daysUntilISO(eventDate))}`);
+    }
+    return (
+      <TimelineItem
+        icon={RECORD_TYPE_ICONS[record.type]}
+        color={RECORD_TYPE_COLORS[record.type]}
+        dateLabel={`${displayDate(record.date)} · ${RECORD_TYPE_LABELS[record.type]}`}
+        title={record.title}
+        lines={lines}
+        badge={record.type === 'vaccine' && status ? VACCINE_STATUS_BADGES[status] : undefined}
+        isLast={isLast}
+        onPress={() => navigation.navigate('AddRecord', { petId, recordId: record.id })}
+        onLongPress={() => confirmDeleteRecord(record.id)}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -158,7 +239,7 @@ export default function PetDetailScreen() {
       </View>
 
       <FlatList
-        data={records}
+        data={timeline}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
@@ -182,11 +263,13 @@ export default function PetDetailScreen() {
             <View style={styles.divider} />
 
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionTitle}>Histórico de Saúde</Text>
+              <Text style={styles.sectionTitle}>Linha do Tempo</Text>
               <TouchableOpacity
                 style={styles.addBtn}
                 onPress={() => navigation.navigate('AddRecord', { petId })}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Novo registro"
               >
                 <Ionicons name="add" size={16} color="#fff" />
                 <Text style={styles.addBtnText}>Novo</Text>
@@ -194,39 +277,13 @@ export default function PetDetailScreen() {
             </View>
           </View>
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate('AddRecord', { petId, recordId: item.id })}
-            onLongPress={() => confirmDeleteRecord(item.id)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.cardTop}>
-              <View style={[styles.badge, { backgroundColor: TYPE_COLOR[item.type] + '22' }]}>
-                <Ionicons name={TYPE_ICON[item.type]} size={12} color={TYPE_COLOR[item.type]} />
-                <Text style={[styles.badgeText, { color: TYPE_COLOR[item.type] }]}>
-                  {RECORD_TYPE_LABELS[item.type]}
-                </Text>
-              </View>
-              <Text style={styles.cardDate}>{displayDate(item.date)}</Text>
-            </View>
-            <Text style={styles.cardDesc}>{item.description}</Text>
-            {item.nextDate ? (
-              <View style={styles.nextRow}>
-                <Ionicons name="calendar-outline" size={12} color={colors.textMuted} />
-                <Text style={styles.nextText}>Retorno: {displayDate(item.nextDate)}</Text>
-              </View>
-            ) : null}
-          </TouchableOpacity>
-        )}
+        renderItem={renderEntry}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons name="document-text-outline" size={36} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>Nenhum registro ainda</Text>
-            <Text style={styles.emptyText}>
-              Toque em "Novo" para registrar vacinas, consultas ou remédios.
-            </Text>
-          </View>
+          <EmptyState
+            icon="document-text-outline"
+            title="Nenhum registro ainda"
+            text='Toque em "Novo" para registrar vacinas, consultas, remédios, vermífugos ou observações.'
+          />
         }
       />
     </SafeAreaView>
@@ -297,41 +354,4 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   addBtnText: { fontSize: 13, fontWeight: '600', color: '#fff' },
-  card: {
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.xs,
-  },
-  cardTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: radius.full,
-  },
-  badgeText: { fontSize: 12, fontWeight: '600' },
-  cardDate: { fontSize: 12, color: colors.textMuted },
-  cardDesc: { fontSize: 14, color: colors.textSubtle, lineHeight: 20 },
-  nextRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  nextText: { fontSize: 12, color: colors.textMuted },
-  empty: {
-    alignItems: 'center',
-    paddingTop: spacing.xxl,
-    paddingHorizontal: spacing.xl,
-    gap: spacing.sm,
-  },
-  emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.textMuted },
-  emptyText: { fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
 });

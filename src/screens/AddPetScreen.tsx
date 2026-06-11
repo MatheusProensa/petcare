@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,25 +12,43 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Input } from '../components/Input';
 import { colors, spacing, radius } from '../theme';
-import { savePet } from '../storage';
-import { persistPhoto } from '../storage/photos';
-import { maskDate, isValidDate, isFuture, toISO } from '../utils/date';
-import { Species } from '../types';
+import { getPets, savePet } from '../storage';
+import { persistPhoto, deletePhoto } from '../storage/photos';
+import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
+import { Pet, Species, RootStackParamList } from '../types';
 
 const SPECIES: Species[] = ['Cão', 'Gato', 'Pássaro', 'Outro'];
 
 export default function AddPetScreen() {
   const navigation = useNavigation();
+  const { petId } = useRoute<RouteProp<RootStackParamList, 'AddPet'>>().params;
+  const [original, setOriginal] = useState<Pet | null>(null);
   const [name, setName] = useState('');
   const [species, setSpecies] = useState<Species>('Cão');
   const [breed, setBreed] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [photo, setPhoto] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!petId) return;
+    getPets()
+      .then(pets => {
+        const pet = pets.find(p => p.id === petId);
+        if (!pet) return;
+        setOriginal(pet);
+        setName(pet.name);
+        setSpecies(pet.species);
+        setBreed(pet.breed);
+        setBirthDate(displayDate(pet.birthDate));
+        setPhoto(pet.photo);
+      })
+      .catch(() => Alert.alert('Erro', 'Não foi possível carregar os dados do pet.'));
+  }, [petId]);
 
   async function pickPhoto() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -62,15 +80,19 @@ export default function AddPetScreen() {
     }
     setSaving(true);
     try {
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const id = original?.id ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const storedPhoto = photo ? await persistPhoto(photo, id) : undefined;
+      if (original?.photo && original.photo !== storedPhoto) {
+        await deletePhoto(original.photo);
+      }
       await savePet({
         id,
         name: name.trim(),
         species,
         breed: breed.trim(),
         birthDate: birthDate ? toISO(birthDate) : '',
-        photo: photo ? await persistPhoto(photo, id) : undefined,
-        createdAt: new Date().toISOString(),
+        photo: storedPhoto,
+        createdAt: original?.createdAt ?? new Date().toISOString(),
       });
       navigation.goBack();
     } catch {
@@ -88,7 +110,7 @@ export default function AddPetScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Novo Pet</Text>
+        <Text style={styles.headerTitle}>{petId ? 'Editar Pet' : 'Novo Pet'}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -161,7 +183,9 @@ export default function AddPetScreen() {
             disabled={saving}
             activeOpacity={0.85}
           >
-            <Text style={styles.saveBtnText}>{saving ? 'Salvando...' : 'Salvar Pet'}</Text>
+            <Text style={styles.saveBtnText}>
+              {saving ? 'Salvando...' : petId ? 'Salvar Alterações' : 'Salvar Pet'}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

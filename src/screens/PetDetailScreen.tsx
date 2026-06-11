@@ -129,12 +129,20 @@ export default function PetDetailScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{pet.name}</Text>
-        <TouchableOpacity
-          onPress={confirmDeletePet}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-        >
-          <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AddPet', { petId })}
+            hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+          >
+            <Ionicons name="create-outline" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={confirmDeletePet}
+            hitSlop={{ top: 12, bottom: 12, left: 8, right: 12 }}
+          >
+            <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -177,6 +185,7 @@ export default function PetDetailScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
+            onPress={() => navigation.navigate('AddRecord', { petId, recordId: item.id })}
             onLongPress={() => confirmDeleteRecord(item.id)}
             activeOpacity={0.8}
           >
@@ -222,6 +231,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingBottom: 48 },
   hero: {
     alignItems: 'center',

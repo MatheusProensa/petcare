@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,9 +14,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Input } from '../components/Input';
 import { colors, spacing, radius } from '../theme';
-import { saveRecord } from '../storage';
-import { maskDate, isValidDate, isFuture, toISO } from '../utils/date';
-import { RecordType, RootStackParamList } from '../types';
+import { getRecords, saveRecord, deleteRecord } from '../storage';
+import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
+import { MedicalRecord, RecordType, RootStackParamList } from '../types';
 
 type Route = RouteProp<RootStackParamList, 'AddRecord'>;
 
@@ -31,13 +31,29 @@ const TYPE_COLOR: Record<RecordType, string> = {
 export default function AddRecordScreen() {
   const navigation = useNavigation();
   const route = useRoute<Route>();
-  const { petId } = route.params;
+  const { petId, recordId } = route.params;
 
+  const [original, setOriginal] = useState<MedicalRecord | null>(null);
   const [type, setType] = useState<RecordType>('Vacina');
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [nextDate, setNextDate] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!recordId) return;
+    getRecords(petId)
+      .then(records => {
+        const record = records.find(r => r.id === recordId);
+        if (!record) return;
+        setOriginal(record);
+        setType(record.type);
+        setDate(displayDate(record.date));
+        setDescription(record.description);
+        setNextDate(record.nextDate ? displayDate(record.nextDate) : '');
+      })
+      .catch(() => Alert.alert('Erro', 'Não foi possível carregar o registro.'));
+  }, [petId, recordId]);
 
   async function handleSave() {
     if (!date || !isValidDate(date)) {
@@ -63,19 +79,38 @@ export default function AddRecordScreen() {
     setSaving(true);
     try {
       await saveRecord({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        id: original?.id ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         petId,
         type,
         date: toISO(date),
         description: description.trim(),
         nextDate: nextDate ? toISO(nextDate) : undefined,
-        createdAt: new Date().toISOString(),
+        createdAt: original?.createdAt ?? new Date().toISOString(),
       });
       navigation.goBack();
     } catch {
       setSaving(false);
       Alert.alert('Erro', 'Não foi possível salvar o registro. Tente novamente.');
     }
+  }
+
+  function confirmDelete() {
+    if (!original) return;
+    Alert.alert('Excluir registro', 'Deseja remover este registro?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Excluir',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteRecord(original.id);
+            navigation.goBack();
+          } catch {
+            Alert.alert('Erro', 'Não foi possível excluir o registro.');
+          }
+        },
+      },
+    ]);
   }
 
   return (
@@ -87,7 +122,7 @@ export default function AddRecordScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Novo Registro</Text>
+        <Text style={styles.headerTitle}>{recordId ? 'Editar Registro' : 'Novo Registro'}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -147,8 +182,17 @@ export default function AddRecordScreen() {
             disabled={saving}
             activeOpacity={0.85}
           >
-            <Text style={styles.saveBtnText}>{saving ? 'Salvando...' : 'Salvar Registro'}</Text>
+            <Text style={styles.saveBtnText}>
+              {saving ? 'Salvando...' : recordId ? 'Salvar Alterações' : 'Salvar Registro'}
+            </Text>
           </TouchableOpacity>
+
+          {original && (
+            <TouchableOpacity style={styles.deleteBtn} onPress={confirmDelete} activeOpacity={0.7}>
+              <Ionicons name="trash-outline" size={16} color={colors.danger} />
+              <Text style={styles.deleteBtnText}>Excluir registro</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -193,4 +237,12 @@ const styles = StyleSheet.create({
   },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  deleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+  },
+  deleteBtnText: { fontSize: 14, fontWeight: '500', color: colors.danger },
 });

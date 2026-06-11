@@ -15,6 +15,7 @@ import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navig
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, radius } from '../theme';
 import { getPets, getRecords, deletePet, deleteRecord } from '../storage';
+import { calcAge, displayDate } from '../utils/date';
 import { Pet, MedicalRecord, RecordType, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'PetDetail'>;
@@ -32,27 +33,6 @@ const TYPE_ICON: Record<RecordType, keyof typeof Ionicons.glyphMap> = {
   Remédio: 'medkit',
 };
 
-function calcAge(iso: string): string {
-  if (!iso) return '';
-  const birth = new Date(iso);
-  const now = new Date();
-  if (birth > now) return '';
-  let years = now.getFullYear() - birth.getFullYear();
-  let months = now.getMonth() - birth.getMonth();
-  if (months < 0 || (months === 0 && now.getDate() < birth.getDate())) {
-    years--;
-    months += 12;
-  }
-  if (years === 0) return `${months} ${months === 1 ? 'mês' : 'meses'}`;
-  return `${years} ${years === 1 ? 'ano' : 'anos'}`;
-}
-
-function displayDate(iso: string): string {
-  if (!iso) return '';
-  const [y, m, d] = iso.split('-');
-  return `${d}/${m}/${y}`;
-}
-
 export default function PetDetailScreen() {
   const navigation = useNavigation<Nav>();
   const { petId } = useRoute<Route>().params;
@@ -66,7 +46,9 @@ export default function PetDetailScreen() {
       Promise.all([
         getPets().then(pets => setPet(pets.find(p => p.id === petId) ?? null)),
         getRecords(petId).then(setRecords),
-      ]).finally(() => setLoading(false));
+      ])
+        .catch(() => Alert.alert('Erro', 'Não foi possível carregar os dados do pet.'))
+        .finally(() => setLoading(false));
     }, [petId]),
   );
 

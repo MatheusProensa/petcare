@@ -15,6 +15,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Input } from '../components/Input';
 import { colors, spacing, radius } from '../theme';
 import { saveRecord } from '../storage';
+import { maskDate, isValidDate, isFuture, toISO } from '../utils/date';
 import { RecordType, RootStackParamList } from '../types';
 
 type Route = RouteProp<RootStackParamList, 'AddRecord'>;
@@ -26,25 +27,6 @@ const TYPE_COLOR: Record<RecordType, string> = {
   Consulta: '#38bdf8',
   Remédio: '#f59e0b',
 };
-
-function maskDate(text: string): string {
-  const digits = text.replace(/\D/g, '').slice(0, 8);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-}
-
-function isValidDate(d: string): boolean {
-  if (d.length < 10) return false;
-  const [day, month, year] = d.split('/').map(Number);
-  if (!day || !month || !year || year < 1900 || year > 2100) return false;
-  return new Date(year, month - 1, day).getMonth() === month - 1;
-}
-
-function toISO(d: string): string {
-  const [day, month, year] = d.split('/');
-  return `${year}-${month}-${day}`;
-}
 
 export default function AddRecordScreen() {
   const navigation = useNavigation();
@@ -62,12 +44,20 @@ export default function AddRecordScreen() {
       Alert.alert('Campo obrigatório', 'Informe uma data válida (DD/MM/AAAA).');
       return;
     }
+    if (isFuture(date)) {
+      Alert.alert('Data inválida', 'A data do registro não pode ser no futuro.');
+      return;
+    }
     if (!description.trim()) {
       Alert.alert('Campo obrigatório', 'Informe a descrição do registro.');
       return;
     }
     if (nextDate && !isValidDate(nextDate)) {
       Alert.alert('Data inválida', 'Verifique a próxima data.');
+      return;
+    }
+    if (nextDate && toISO(nextDate) <= toISO(date)) {
+      Alert.alert('Data inválida', 'A próxima data deve ser depois da data do registro.');
       return;
     }
     setSaving(true);

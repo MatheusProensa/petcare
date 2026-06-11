@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -49,7 +50,9 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      getPets().then(setPets);
+      getPets()
+        .then(setPets)
+        .catch(() => Alert.alert('Erro', 'Não foi possível carregar seus pets.'));
     }, []),
   );
 

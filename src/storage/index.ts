@@ -7,13 +7,11 @@ const KEYS = {
   RECORDS: '@petcare:records',
 };
 
+// Não engole erros: se os dados estiverem corrompidos, é melhor falhar
+// (e a tela avisar) do que retornar [] e deixar um save sobrescrever tudo.
 async function read<T>(key: string): Promise<T[]> {
-  try {
-    const data = await AsyncStorage.getItem(key);
-    return data ? (JSON.parse(data) as T[]) : [];
-  } catch {
-    return [];
-  }
+  const data = await AsyncStorage.getItem(key);
+  return data ? (JSON.parse(data) as T[]) : [];
 }
 
 async function write(key: string, value: unknown): Promise<void> {

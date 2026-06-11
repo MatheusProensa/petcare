@@ -18,29 +18,10 @@ import { Input } from '../components/Input';
 import { colors, spacing, radius } from '../theme';
 import { savePet } from '../storage';
 import { persistPhoto } from '../storage/photos';
+import { maskDate, isValidDate, isFuture, toISO } from '../utils/date';
 import { Species } from '../types';
 
 const SPECIES: Species[] = ['Cão', 'Gato', 'Pássaro', 'Outro'];
-
-function maskDate(text: string): string {
-  const digits = text.replace(/\D/g, '').slice(0, 8);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-}
-
-function isValidDate(d: string): boolean {
-  if (d.length < 10) return false;
-  const [day, month, year] = d.split('/').map(Number);
-  if (!day || !month || !year || year < 1900 || year > new Date().getFullYear()) return false;
-  const date = new Date(year, month - 1, day);
-  return date.getMonth() === month - 1;
-}
-
-function toISO(d: string): string {
-  const [day, month, year] = d.split('/');
-  return `${year}-${month}-${day}`;
-}
 
 export default function AddPetScreen() {
   const navigation = useNavigation();
@@ -73,6 +54,10 @@ export default function AddPetScreen() {
     }
     if (birthDate && !isValidDate(birthDate)) {
       Alert.alert('Data inválida', 'Verifique a data de nascimento (DD/MM/AAAA).');
+      return;
+    }
+    if (birthDate && isFuture(birthDate)) {
+      Alert.alert('Data inválida', 'A data de nascimento não pode ser no futuro.');
       return;
     }
     setSaving(true);

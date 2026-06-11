@@ -24,6 +24,7 @@ import {
   FREQUENCY_LABELS,
 } from '../labels';
 import { getVaccineStatus, eventDateOf } from '../services/events';
+import { sharePetSummary } from '../services/share';
 import { TimelineItem, TimelineBadge } from '../components/TimelineItem';
 import { EmptyState } from '../components/EmptyState';
 import { MedicalProfileCard } from '../components/MedicalProfileCard';
@@ -305,6 +306,24 @@ export default function PetDetailScreen() {
                 color={colors.danger}
                 onPress={() => navigation.navigate('Emergency', { petId })}
               />
+              <QuickAction
+                icon="stats-chart"
+                label="Estatísticas"
+                color={colors.accent}
+                onPress={() => navigation.navigate('Stats', { petId })}
+              />
+              <QuickAction
+                icon="share-social"
+                label="Compartilhar"
+                color={colors.success}
+                onPress={async () => {
+                  try {
+                    await sharePetSummary(pet!, records, weights);
+                  } catch {
+                    // usuário cancelou o compartilhamento
+                  }
+                }}
+              />
             </View>
 
             <View style={{ width: '100%', marginBottom: spacing.lg }}>
@@ -391,12 +410,14 @@ const styles = StyleSheet.create({
   petMeta: { fontSize: 14, color: colors.textMuted, marginBottom: spacing.lg },
   quickActions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
     width: '100%',
     marginBottom: spacing.md,
   },
   quickAction: {
-    flex: 1,
+    flexBasis: '30%',
+    flexGrow: 1,
     alignItems: 'center',
     gap: spacing.xs,
     backgroundColor: colors.surface,

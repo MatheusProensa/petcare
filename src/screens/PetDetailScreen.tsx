@@ -16,21 +16,22 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, radius } from '../theme';
 import { getPets, getRecords, deletePet, deleteRecord } from '../storage';
 import { calcAge, displayDate } from '../utils/date';
+import { SPECIES_LABELS, RECORD_TYPE_LABELS } from '../labels';
 import { Pet, MedicalRecord, RecordType, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'PetDetail'>;
 type Route = RouteProp<RootStackParamList, 'PetDetail'>;
 
 const TYPE_COLOR: Record<RecordType, string> = {
-  Vacina: '#10b981',
-  Consulta: '#38bdf8',
-  Remédio: '#f59e0b',
+  vaccine: '#10b981',
+  consultation: '#38bdf8',
+  medication: '#f59e0b',
 };
 
 const TYPE_ICON: Record<RecordType, keyof typeof Ionicons.glyphMap> = {
-  Vacina: 'shield-checkmark',
-  Consulta: 'medical',
-  Remédio: 'medkit',
+  vaccine: 'shield-checkmark',
+  consultation: 'medical',
+  medication: 'medkit',
 };
 
 export default function PetDetailScreen() {
@@ -164,7 +165,7 @@ export default function PetDetailScreen() {
 
             <Text style={styles.petName}>{pet.name}</Text>
             <Text style={styles.petMeta}>
-              {[pet.species, pet.breed, age].filter(Boolean).join(' · ')}
+              {[SPECIES_LABELS[pet.species], pet.breed, age].filter(Boolean).join(' · ')}
             </Text>
 
             <View style={styles.divider} />
@@ -192,7 +193,9 @@ export default function PetDetailScreen() {
             <View style={styles.cardTop}>
               <View style={[styles.badge, { backgroundColor: TYPE_COLOR[item.type] + '22' }]}>
                 <Ionicons name={TYPE_ICON[item.type]} size={12} color={TYPE_COLOR[item.type]} />
-                <Text style={[styles.badgeText, { color: TYPE_COLOR[item.type] }]}>{item.type}</Text>
+                <Text style={[styles.badgeText, { color: TYPE_COLOR[item.type] }]}>
+                  {RECORD_TYPE_LABELS[item.type]}
+                </Text>
               </View>
               <Text style={styles.cardDate}>{displayDate(item.date)}</Text>
             </View>

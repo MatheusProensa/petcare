@@ -19,16 +19,17 @@ import { colors, spacing, radius } from '../theme';
 import { getPets, savePet } from '../storage';
 import { persistPhoto, deletePhoto } from '../storage/photos';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
+import { SPECIES_LABELS } from '../labels';
 import { Pet, Species, RootStackParamList } from '../types';
 
-const SPECIES: Species[] = ['Cão', 'Gato', 'Pássaro', 'Outro'];
+const SPECIES: Species[] = ['dog', 'cat', 'bird', 'other'];
 
 export default function AddPetScreen() {
   const navigation = useNavigation();
   const { petId } = useRoute<RouteProp<RootStackParamList, 'AddPet'>>().params;
   const [original, setOriginal] = useState<Pet | null>(null);
   const [name, setName] = useState('');
-  const [species, setSpecies] = useState<Species>('Cão');
+  const [species, setSpecies] = useState<Species>('dog');
   const [breed, setBreed] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [photo, setPhoto] = useState<string | undefined>();
@@ -151,7 +152,9 @@ export default function AddPetScreen() {
                     onPress={() => setSpecies(s)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.chipText, species === s && styles.chipTextActive]}>{s}</Text>
+                    <Text style={[styles.chipText, species === s && styles.chipTextActive]}>
+                      {SPECIES_LABELS[s]}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>

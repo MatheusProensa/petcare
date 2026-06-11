@@ -14,6 +14,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, radius } from '../theme';
 import { getPets } from '../storage';
+import { SPECIES_LABELS } from '../labels';
 import { Pet, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -34,7 +35,7 @@ function PetCard({ pet, onPress }: { pet: Pet; onPress: () => void }) {
       <View style={styles.cardInfo}>
         <Text style={styles.petName}>{pet.name}</Text>
         <Text style={styles.petSubtitle}>
-          {pet.species}{pet.breed ? ` · ${pet.breed}` : ''}
+          {SPECIES_LABELS[pet.species]}{pet.breed ? ` · ${pet.breed}` : ''}
         </Text>
       </View>
 

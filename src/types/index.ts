@@ -1,5 +1,7 @@
-export type Species = 'Cão' | 'Gato' | 'Pássaro' | 'Outro';
-export type RecordType = 'Vacina' | 'Consulta' | 'Remédio';
+// Chaves estáveis persistidas no storage — a tradução para exibição
+// fica em src/labels.ts. Não renomear sem escrever migração.
+export type Species = 'dog' | 'cat' | 'bird' | 'other';
+export type RecordType = 'vaccine' | 'consultation' | 'medication';
 
 export interface Pet {
   id: string;

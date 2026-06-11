@@ -16,16 +16,17 @@ import { Input } from '../components/Input';
 import { colors, spacing, radius } from '../theme';
 import { getRecords, saveRecord, deleteRecord } from '../storage';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
+import { RECORD_TYPE_LABELS } from '../labels';
 import { MedicalRecord, RecordType, RootStackParamList } from '../types';
 
 type Route = RouteProp<RootStackParamList, 'AddRecord'>;
 
-const RECORD_TYPES: RecordType[] = ['Vacina', 'Consulta', 'Remédio'];
+const RECORD_TYPES: RecordType[] = ['vaccine', 'consultation', 'medication'];
 
 const TYPE_COLOR: Record<RecordType, string> = {
-  Vacina: '#10b981',
-  Consulta: '#38bdf8',
-  Remédio: '#f59e0b',
+  vaccine: '#10b981',
+  consultation: '#38bdf8',
+  medication: '#f59e0b',
 };
 
 export default function AddRecordScreen() {
@@ -34,7 +35,7 @@ export default function AddRecordScreen() {
   const { petId, recordId } = route.params;
 
   const [original, setOriginal] = useState<MedicalRecord | null>(null);
-  const [type, setType] = useState<RecordType>('Vacina');
+  const [type, setType] = useState<RecordType>('vaccine');
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [nextDate, setNextDate] = useState('');
@@ -142,7 +143,9 @@ export default function AddRecordScreen() {
                   onPress={() => setType(t)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.typeChipText, type === t && { color: TYPE_COLOR[t] }]}>{t}</Text>
+                  <Text style={[styles.typeChipText, type === t && { color: TYPE_COLOR[t] }]}>
+                    {RECORD_TYPE_LABELS[t]}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>

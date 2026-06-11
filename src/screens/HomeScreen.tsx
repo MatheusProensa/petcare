@@ -103,6 +103,8 @@ export default function HomeScreen() {
         style={[styles.fab, { bottom: fabBottom }]}
         onPress={() => navigation.navigate('AddPet', {})}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Adicionar pet"
       >
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>

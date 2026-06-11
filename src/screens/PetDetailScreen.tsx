@@ -107,7 +107,12 @@ export default function PetDetailScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+          >
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
@@ -126,6 +131,8 @@ export default function PetDetailScreen() {
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
@@ -134,12 +141,16 @@ export default function PetDetailScreen() {
           <TouchableOpacity
             onPress={() => navigation.navigate('AddPet', { petId })}
             hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Editar pet"
           >
             <Ionicons name="create-outline" size={20} color={colors.textMuted} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={confirmDeletePet}
             hitSlop={{ top: 12, bottom: 12, left: 8, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Excluir pet"
           >
             <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
           </TouchableOpacity>

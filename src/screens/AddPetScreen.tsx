@@ -108,6 +108,8 @@ export default function AddPetScreen() {
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
@@ -118,7 +120,13 @@ export default function AddPetScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-          <TouchableOpacity style={styles.photoBtn} onPress={pickPhoto} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.photoBtn}
+            onPress={pickPhoto}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Adicionar foto do pet"
+          >
             {photo ? (
               <Image source={{ uri: photo }} style={styles.photo} />
             ) : (

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Pet, MedicalRecord } from '../types';
+import { deletePhoto } from './photos';
 
 const KEYS = {
   PETS: '@petcare:pets',
@@ -36,6 +37,7 @@ export async function savePet(pet: Pet): Promise<void> {
 
 export async function deletePet(petId: string): Promise<void> {
   const pets = await getPets();
+  await deletePhoto(pets.find(p => p.id === petId)?.photo);
   await write(KEYS.PETS, pets.filter(p => p.id !== petId));
 
   const records = await read<MedicalRecord>(KEYS.RECORDS);

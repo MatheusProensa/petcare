@@ -17,6 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Input } from '../components/Input';
 import { colors, spacing, radius } from '../theme';
 import { savePet } from '../storage';
+import { persistPhoto } from '../storage/photos';
 import { Species } from '../types';
 
 const SPECIES: Species[] = ['Cão', 'Gato', 'Pássaro', 'Outro'];
@@ -76,13 +77,14 @@ export default function AddPetScreen() {
     }
     setSaving(true);
     try {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       await savePet({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        id,
         name: name.trim(),
         species,
         breed: breed.trim(),
         birthDate: birthDate ? toISO(birthDate) : '',
-        photo,
+        photo: photo ? await persistPhoto(photo, id) : undefined,
         createdAt: new Date().toISOString(),
       });
       navigation.goBack();

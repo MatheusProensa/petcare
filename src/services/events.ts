@@ -23,20 +23,32 @@ function normalizeTitle(title: string): string {
 }
 
 /**
- * O próximo evento deste registro já foi cumprido? Vale para vacina e
- * vermífugo: uma dose posterior com o mesmo nome "quita" o reforço anterior.
+ * O próximo evento deste registro já foi cumprido?
+ * - Vacina/vermífugo: uma dose posterior com o mesmo nome quita o reforço.
+ * - Consulta: qualquer consulta posterior à data do registro quita o retorno.
  */
 export function isEventFulfilled(record: MedicalRecord, all: MedicalRecord[]): boolean {
-  if (record.type !== 'vaccine' && record.type !== 'deworming') return false;
   if (!record.nextDate) return false;
-  return all.some(
-    other =>
-      other.id !== record.id &&
-      other.petId === record.petId &&
-      other.type === record.type &&
-      normalizeTitle(other.title) === normalizeTitle(record.title) &&
-      other.date > record.date,
-  );
+  if (record.type === 'vaccine' || record.type === 'deworming') {
+    return all.some(
+      other =>
+        other.id !== record.id &&
+        other.petId === record.petId &&
+        other.type === record.type &&
+        normalizeTitle(other.title) === normalizeTitle(record.title) &&
+        other.date > record.date,
+    );
+  }
+  if (record.type === 'consultation') {
+    return all.some(
+      other =>
+        other.id !== record.id &&
+        other.petId === record.petId &&
+        other.type === 'consultation' &&
+        other.date > record.date,
+    );
+  }
+  return false;
 }
 
 export function getVaccineStatus(
@@ -89,8 +101,10 @@ export function getUpcomingEvents(pets: Pet[], records: MedicalRecord[]): Upcomi
     if (!date) continue;
     const pet = petById.get(record.petId);
     if (!pet) continue;
-    // Reforço/dose já aplicado em um registro mais novo: não gera alerta.
+    // Reforço/dose/retorno já cumprido em um registro mais novo: não gera alerta.
     if (isEventFulfilled(record, records)) continue;
+    // Tratamento que chegou ao fim não está "atrasado" — está concluído.
+    if (record.type === 'medication' && daysUntilISO(date) < 0) continue;
     const daysUntil = daysUntilISO(date);
     const window = record.reminderDays?.length
       ? Math.max(...record.reminderDays)
@@ -112,10 +126,15 @@ export function getUpcomingEvents(pets: Pet[], records: MedicalRecord[]): Upcomi
   return events.sort((a, b) => a.date.localeCompare(b.date));
 }
 
-/** Medicamento em uso: contínuo, sem data final ou com fim no futuro. */
+/** Sem data final e sem uso contínuo, o remédio conta como ativo por este prazo. */
+const OPEN_MEDICATION_ACTIVE_DAYS = 30;
+
+/** Medicamento em uso: contínuo, com fim no futuro ou iniciado recentemente. */
 export function isActiveMedication(record: MedicalRecord): boolean {
   if (record.type !== 'medication') return false;
   if (record.frequency === 'continuous') return true;
-  if (!record.endDate) return true;
+  if (!record.endDate) {
+    return daysUntilISO(record.date) >= -OPEN_MEDICATION_ACTIVE_DAYS;
+  }
   return daysUntilISO(record.endDate) >= 0;
 }

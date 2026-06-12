@@ -47,7 +47,7 @@ export function daysUntilISO(iso: string): number {
 export function formatDaysUntil(days: number): string {
   if (days === 0) return 'hoje';
   if (days === 1) return 'amanhã';
-  if (days === -1) return 'ontem';
+  if (days === -1) return 'há 1 dia';
   if (days > 1) return `em ${days} dias`;
   return `há ${-days} dias`;
 }

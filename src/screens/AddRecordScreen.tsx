@@ -168,7 +168,9 @@ export default function AddRecordScreen() {
       };
       if (type !== 'medication' && type !== 'note' && nextDate) record.nextDate = toISO(nextDate);
       if (type === 'medication') {
-        if (endDate) record.endDate = toISO(endDate);
+        // Uso contínuo não tem data final, mesmo que o campo tenha sido
+        // preenchido antes de trocar a frequência.
+        if (endDate && frequency !== 'continuous') record.endDate = toISO(endDate);
         record.frequency = frequency;
       }
       if (type === 'vaccine') {

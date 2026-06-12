@@ -29,12 +29,14 @@ export interface Palette {
 }
 
 export const palettes: Record<ThemeScheme, Palette> = {
+  // Paleta oficial da marca PetCare:
+  // laranja #E66A3A / #F59E0B / #FFB27A · navy #1B2940 / #0B1120 · off-white #F8FAFC
   dark: {
-    background: '#0F172A',
-    surface: '#1E293B',
-    surfaceElevated: '#27364D',
-    primary: '#D85A30',
-    primaryLight: '#F0997B',
+    background: '#0B1120',
+    surface: '#1B2940',
+    surfaceElevated: '#26364E',
+    primary: '#E66A3A',
+    primaryLight: '#FFB27A',
     info: '#38BDF8',
     success: '#10B981',
     warning: '#F59E0B',
@@ -43,23 +45,23 @@ export const palettes: Record<ThemeScheme, Palette> = {
     text: '#F8FAFC',
     textMuted: '#64748B',
     textSubtle: '#94A3B8',
-    border: '#2A3950',
+    border: '#2A3B55',
   },
   light: {
-    background: '#FDF9F3',
+    background: '#F8FAFC',
     surface: '#FFFFFF',
-    surfaceElevated: '#F4EBDD',
-    primary: '#D85A30',
+    surfaceElevated: '#EEF2F7',
+    primary: '#E66A3A',
     primaryLight: '#C2410C',
     info: '#0369A1',
     success: '#0E9F6E',
     warning: '#B45309',
     danger: '#DC2626',
     accent: '#7C3AED',
-    text: '#2C2C2A',
-    textMuted: '#8A877E',
-    textSubtle: '#5F5E5A',
-    border: '#EDE5D8',
+    text: '#1B2940',
+    textMuted: '#64748B',
+    textSubtle: '#475569',
+    border: '#E2E8F0',
   },
 };
 

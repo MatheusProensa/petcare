@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Input } from '../components/Input';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getWeights, saveWeight, deleteWeight } from '../storage';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
 import { WeightEntry, RootStackParamList } from '../types';
@@ -36,6 +36,8 @@ function parseWeight(text: string): number | null {
 
 export default function AddWeightScreen() {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { petId, weightId } = useRoute<Route>().params;
 
   const [original, setOriginal] = useState<WeightEntry | null>(null);
@@ -165,7 +167,7 @@ export default function AddWeightScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',

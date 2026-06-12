@@ -13,13 +13,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, getRecords, getWeights, deletePet, deleteRecord } from '../storage';
 import { calcAge, displayDate, formatDaysUntil, daysUntilISO } from '../utils/date';
 import {
   SPECIES_LABELS,
   RECORD_TYPE_LABELS,
-  RECORD_TYPE_COLORS,
+  recordTypeColors,
   RECORD_TYPE_ICONS,
   FREQUENCY_LABELS,
 } from '../labels';
@@ -44,7 +44,7 @@ interface TimelineEntry {
 function QuickAction({
   icon,
   label,
-  color = colors.primaryLight,
+  color,
   onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
@@ -52,6 +52,9 @@ function QuickAction({
   color?: string;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const tint = color ?? colors.primaryLight;
   return (
     <TouchableOpacity
       style={styles.quickAction}
@@ -60,19 +63,21 @@ function QuickAction({
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <View style={[styles.quickActionIcon, { backgroundColor: color + '18' }]}>
-        <Ionicons name={icon} size={18} color={color} />
+      <View style={[styles.quickActionIcon, { backgroundColor: tint + '18' }]}>
+        <Ionicons name={icon} size={18} color={tint} />
       </View>
       <Text style={styles.quickActionLabel}>{label}</Text>
     </TouchableOpacity>
   );
 }
 
-const VACCINE_STATUS_BADGES: Record<string, TimelineBadge> = {
-  ok: { label: 'Em dia', color: colors.success },
-  due_soon: { label: 'Reforço próximo', color: colors.warning },
-  overdue: { label: 'Atrasada', color: colors.danger },
-};
+function vaccineStatusBadges(colors: Palette): Record<string, TimelineBadge> {
+  return {
+    ok: { label: 'Em dia', color: colors.success },
+    due_soon: { label: 'Reforço próximo', color: colors.warning },
+    overdue: { label: 'Atrasada', color: colors.danger },
+  };
+}
 
 function recordLines(record: MedicalRecord): string[] {
   const lines: string[] = [];
@@ -103,6 +108,10 @@ function recordLines(record: MedicalRecord): string[] {
 
 export default function PetDetailScreen() {
   const navigation = useNavigation<Nav>();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const RECORD_TYPE_COLORS = recordTypeColors(colors);
+  const VACCINE_STATUS_BADGES = vaccineStatusBadges(colors);
   const { petId } = useRoute<Route>().params;
   const [pet, setPet] = useState<Pet | null>(null);
   const [records, setRecords] = useState<MedicalRecord[]>([]);
@@ -363,7 +372,7 @@ export default function PetDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   errorText: { fontSize: 15, color: colors.textMuted },

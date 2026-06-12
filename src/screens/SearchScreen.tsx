@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, getAllRecords } from '../storage';
 import { maskDate, isValidDate, toISO } from '../utils/date';
 import { RECORD_TYPE_LABELS } from '../labels';
@@ -33,6 +33,8 @@ function matchesQuery(record: MedicalRecord, query: string): boolean {
 
 export default function SearchScreen() {
   const navigation = useNavigation<Nav>();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [pets, setPets] = useState<Pet[]>([]);
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [query, setQuery] = useState('');
@@ -170,7 +172,7 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 
 interface Props {
   icon: keyof typeof Ionicons.glyphMap;
@@ -10,11 +10,14 @@ interface Props {
   color?: string;
 }
 
-export function StatCard({ icon, label, value, color = colors.primaryLight }: Props) {
+export function StatCard({ icon, label, value, color }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const tint = color ?? colors.primaryLight;
   return (
     <View style={styles.card}>
-      <View style={[styles.iconWrapper, { backgroundColor: color + '18' }]}>
-        <Ionicons name={icon} size={16} color={color} />
+      <View style={[styles.iconWrapper, { backgroundColor: tint + '18' }]}>
+        <Ionicons name={icon} size={16} color={tint} />
       </View>
       <Text style={styles.value}>{value}</Text>
       <Text style={styles.label} numberOfLines={1}>
@@ -24,7 +27,7 @@ export function StatCard({ icon, label, value, color = colors.primaryLight }: Pr
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: colors.surface,

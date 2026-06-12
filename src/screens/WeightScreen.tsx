@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getWeights } from '../storage';
 import { displayDate } from '../utils/date';
 import { WeightCard } from '../components/WeightCard';
@@ -17,6 +17,8 @@ type Route = RouteProp<RootStackParamList, 'Weight'>;
 
 export default function WeightScreen() {
   const navigation = useNavigation<Nav>();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { petId } = useRoute<Route>().params;
   const [weights, setWeights] = useState<WeightEntry[]>([]);
 
@@ -108,7 +110,7 @@ export default function WeightScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',

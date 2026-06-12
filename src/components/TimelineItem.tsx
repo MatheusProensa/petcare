@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useThemedStyles, Palette } from '../theme';
 
 export interface TimelineBadge {
   label: string;
@@ -31,6 +31,7 @@ export function TimelineItem({
   onPress,
   onLongPress,
 }: Props) {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.row}>
       <View style={styles.rail}>
@@ -66,7 +67,7 @@ export function TimelineItem({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     paddingHorizontal: spacing.lg,

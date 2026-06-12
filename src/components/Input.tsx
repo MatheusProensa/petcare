@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, TextInput, TextInputProps, StyleSheet } from 'react-native';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 
 interface Props extends TextInputProps {
   label: string;
 }
 
 export function Input({ label, style, ...props }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
@@ -20,7 +22,7 @@ export function Input({ label, style, ...props }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   wrapper: { gap: spacing.xs },
   label: {
     fontSize: 13,

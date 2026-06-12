@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Input } from '../components/Input';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, getRecords, getTutorInfo, saveTutorInfo } from '../storage';
 import { isActiveMedication } from '../services/events';
 import { FREQUENCY_LABELS } from '../labels';
@@ -23,6 +23,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList, 'Emergency'>;
 type Route = RouteProp<RootStackParamList, 'Emergency'>;
 
 function InfoBlock({ label, value }: { label: string; value?: string }) {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.infoBlock}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -33,6 +34,8 @@ function InfoBlock({ label, value }: { label: string; value?: string }) {
 
 export default function EmergencyScreen() {
   const navigation = useNavigation<Nav>();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { petId } = useRoute<Route>().params;
 
   const [pet, setPet] = useState<Pet | null>(null);
@@ -194,7 +197,7 @@ export default function EmergencyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',

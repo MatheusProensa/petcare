@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useThemedStyles, Palette } from '../theme';
 import { getPets } from '../storage';
 import { PetCard } from '../components/PetCard';
 import { EmptyState } from '../components/EmptyState';
@@ -15,6 +15,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
+  const styles = useThemedStyles(createStyles);
   const [pets, setPets] = useState<Pet[]>([]);
 
   useFocusEffect(
@@ -76,7 +77,7 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

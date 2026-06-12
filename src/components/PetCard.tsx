@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { SPECIES_LABELS } from '../labels';
 import { Pet } from '../types';
 
@@ -12,6 +12,8 @@ interface Props {
 }
 
 export function PetCard({ pet, subtitle, onPress }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.photoWrapper}>
@@ -36,7 +38,7 @@ export function PetCard({ pet, subtitle, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',

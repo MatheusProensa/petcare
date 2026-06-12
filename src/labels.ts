@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Species, RecordType, Frequency, DocumentKind } from './types';
-import { colors } from './theme';
+import { Palette } from './theme';
 
 export const SPECIES_LABELS: Record<Species, string> = {
   dog: 'Cão',
@@ -17,13 +17,15 @@ export const RECORD_TYPE_LABELS: Record<RecordType, string> = {
   note: 'Observação',
 };
 
-export const RECORD_TYPE_COLORS: Record<RecordType, string> = {
-  vaccine: colors.success,
-  consultation: colors.primaryLight,
-  medication: colors.warning,
-  deworming: colors.accent,
-  note: colors.textSubtle,
-};
+export function recordTypeColors(colors: Palette): Record<RecordType, string> {
+  return {
+    vaccine: colors.success,
+    consultation: colors.info,
+    medication: colors.warning,
+    deworming: colors.accent,
+    note: colors.textSubtle,
+  };
+}
 
 export const RECORD_TYPE_ICONS: Record<RecordType, keyof typeof Ionicons.glyphMap> = {
   vaccine: 'shield-checkmark',

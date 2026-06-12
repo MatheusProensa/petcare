@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import * as Sharing from 'expo-sharing';
-import { colors, spacing } from '../theme';
+import { spacing, useTheme, useThemedStyles, Palette } from '../theme';
 import { RootStackParamList } from '../types';
 
 type Route = RouteProp<RootStackParamList, 'DocumentViewer'>;
@@ -12,6 +12,8 @@ type Route = RouteProp<RootStackParamList, 'DocumentViewer'>;
 /** Visualizador de imagens dentro do app (sem sair para compartilhar). */
 export default function DocumentViewerScreen() {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { uri, title, mimeType } = useRoute<Route>().params;
 
   async function handleShare() {
@@ -51,7 +53,7 @@ export default function DocumentViewerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   header: {
     flexDirection: 'row',

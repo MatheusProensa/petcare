@@ -18,7 +18,7 @@ import * as IntentLauncher from 'expo-intent-launcher';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Input } from '../components/Input';
 import { EmptyState } from '../components/EmptyState';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getDocuments, saveDocument, deleteDocument } from '../storage';
 import { persistDocumentFile } from '../storage/files';
 import { maskDate, isValidDate, toISO, displayDate } from '../utils/date';
@@ -37,12 +37,14 @@ const KIND_ICONS: Record<DocumentKind, keyof typeof Ionicons.glyphMap> = {
   other: 'document',
 };
 
-const KIND_COLORS: Record<DocumentKind, string> = {
-  vaccination_card: colors.success,
-  exam: colors.primaryLight,
-  prescription: colors.warning,
-  other: colors.textSubtle,
-};
+function kindColors(colors: Palette): Record<DocumentKind, string> {
+  return {
+    vaccination_card: colors.success,
+    exam: colors.info,
+    prescription: colors.warning,
+    other: colors.textSubtle,
+  };
+}
 
 const KIND_HINTS: Record<DocumentKind, string> = {
   vaccination_card: 'Carteira de vacinação do pet',
@@ -59,6 +61,9 @@ interface PendingFile {
 
 export default function DocumentsScreen() {
   const navigation = useNavigation<Nav>();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const KIND_COLORS = kindColors(colors);
   const { petId, kind } = useRoute<Route>().params;
 
   const [documents, setDocuments] = useState<PetDocument[]>([]);
@@ -346,7 +351,7 @@ export default function DocumentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',

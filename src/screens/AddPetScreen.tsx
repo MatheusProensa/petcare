@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Input } from '../components/Input';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, savePet } from '../storage';
 import { persistPhoto, deletePhoto } from '../storage/files';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
@@ -26,6 +26,8 @@ const SPECIES: Species[] = ['dog', 'cat', 'bird', 'other'];
 
 export default function AddPetScreen() {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { petId } = useRoute<RouteProp<RootStackParamList, 'AddPet'>>().params;
   const [original, setOriginal] = useState<Pet | null>(null);
   const [name, setName] = useState('');
@@ -204,7 +206,7 @@ export default function AddPetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',

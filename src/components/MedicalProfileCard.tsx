@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { MedicalProfile } from '../types';
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
 }
 
 export function MedicalProfileCard({ profile, onPress }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const filled =
     profile &&
     (profile.allergies ||
@@ -46,7 +48,7 @@ export function MedicalProfileCard({ profile, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',

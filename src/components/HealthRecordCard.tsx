@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius } from '../theme';
-import { RECORD_TYPE_LABELS, RECORD_TYPE_COLORS, RECORD_TYPE_ICONS } from '../labels';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { RECORD_TYPE_LABELS, recordTypeColors, RECORD_TYPE_ICONS } from '../labels';
 import { displayDate } from '../utils/date';
 import { MedicalRecord } from '../types';
 
@@ -13,7 +13,9 @@ interface Props {
 }
 
 export function HealthRecordCard({ record, petName, onPress }: Props) {
-  const color = RECORD_TYPE_COLORS[record.type];
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const color = recordTypeColors(colors)[record.type];
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.top}>
@@ -34,7 +36,7 @@ export function HealthRecordCard({ record, petName, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,

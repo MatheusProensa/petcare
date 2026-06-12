@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { RECORD_TYPE_ICONS } from '../labels';
 import { displayDate, formatDaysUntil } from '../utils/date';
 import { UpcomingEvent } from '../services/events';
@@ -12,6 +12,8 @@ interface Props {
 }
 
 export function ReminderCard({ event, onPress }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const color = event.overdue
     ? colors.danger
     : event.daysUntil <= 3
@@ -39,7 +41,7 @@ export function ReminderCard({ event, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',

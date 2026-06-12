@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, getAllRecords } from '../storage';
 import { getUpcomingEvents, isActiveMedication, UpcomingEvent } from '../services/events';
 import { StatCard } from '../components/StatCard';
@@ -23,6 +23,8 @@ type Nav = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
 
 export default function DashboardScreen() {
   const navigation = useNavigation<Nav>();
+  const { colors, scheme, toggleTheme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [pets, setPets] = useState<Pet[]>([]);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [activeMedsCount, setActiveMedsCount] = useState(0);
@@ -48,14 +50,28 @@ export default function DashboardScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.logo}>PetCare</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Search')}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            accessibilityRole="button"
-            accessibilityLabel="Buscar registros"
-          >
-            <Ionicons name="search" size={22} color={colors.textSubtle} />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              onPress={toggleTheme}
+              hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={scheme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+            >
+              <Ionicons
+                name={scheme === 'dark' ? 'sunny-outline' : 'moon-outline'}
+                size={21}
+                color={colors.textSubtle}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Search')}
+              hitSlop={{ top: 12, bottom: 12, left: 8, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Buscar registros"
+            >
+              <Ionicons name="search" size={22} color={colors.textSubtle} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <Text style={styles.title}>Visão Geral</Text>
@@ -149,7 +165,7 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   scroll: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   header: {
@@ -159,6 +175,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xs,
   },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   logo: {
     fontSize: 18,
     fontWeight: '700',

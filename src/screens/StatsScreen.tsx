@@ -3,9 +3,9 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, getWeights } from '../storage';
-import { RECORD_TYPE_LABELS, RECORD_TYPE_COLORS, RECORD_TYPE_ICONS } from '../labels';
+import { RECORD_TYPE_LABELS, recordTypeColors, RECORD_TYPE_ICONS } from '../labels';
 import { WeightChart } from '../components/WeightChart';
 import { MedicalRecord, WeightEntry, RecordType, RootStackParamList } from '../types';
 
@@ -15,6 +15,9 @@ const TYPES: RecordType[] = ['vaccine', 'consultation', 'medication', 'deworming
 
 export default function StatsScreen() {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const RECORD_TYPE_COLORS = recordTypeColors(colors);
   const { petId } = useRoute<Route>().params;
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [weights, setWeights] = useState<WeightEntry[]>([]);
@@ -116,7 +119,7 @@ export default function StatsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',

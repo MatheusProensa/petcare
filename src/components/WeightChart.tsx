@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useThemedStyles, Palette } from '../theme';
 import { displayDate } from '../utils/date';
 import { WeightEntry } from '../types';
 
@@ -13,6 +13,7 @@ interface Props {
 }
 
 export function WeightChart({ weights, title = 'Evolução' }: Props) {
+  const styles = useThemedStyles(createStyles);
   // Ordem cronológica para o gráfico.
   const data = [...weights].reverse();
   if (data.length < 2) return null;
@@ -45,7 +46,7 @@ export function WeightChart({ weights, title = 'Evolução' }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   wrapper: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,

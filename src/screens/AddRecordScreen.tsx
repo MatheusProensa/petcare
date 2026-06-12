@@ -13,12 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Input } from '../components/Input';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, saveRecord, deleteRecord } from '../storage';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
 import {
   RECORD_TYPE_LABELS,
-  RECORD_TYPE_COLORS,
+  recordTypeColors,
   FREQUENCY_LABELS,
   REMINDER_OPTIONS,
 } from '../labels';
@@ -66,6 +66,9 @@ function trimOrUndefined(value: string): string | undefined {
 
 export default function AddRecordScreen() {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const RECORD_TYPE_COLORS = recordTypeColors(colors);
   const route = useRoute<Route>();
   const { petId, recordId, initialType } = route.params;
 
@@ -448,7 +451,7 @@ export default function AddRecordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',

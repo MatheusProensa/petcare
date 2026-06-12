@@ -1,6 +1,7 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
+import { ThemeProvider, useTheme } from './src/theme';
 import { RootStackParamList } from './src/types';
 import DashboardScreen from './src/screens/DashboardScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -18,10 +19,25 @@ import SearchScreen from './src/screens/SearchScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function App() {
+function Root() {
+  const { colors, scheme } = useTheme();
+
+  const navTheme = {
+    ...DefaultTheme,
+    dark: scheme === 'dark',
+    colors: {
+      ...DefaultTheme.colors,
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.background,
+      text: colors.text,
+      border: colors.border,
+    },
+  };
+
   return (
-    <NavigationContainer>
-      <StatusBar style="light" />
+    <NavigationContainer theme={navTheme}>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack.Navigator initialRouteName="Dashboard" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
@@ -38,5 +54,13 @@ export default function App() {
         <Stack.Screen name="Search" component={SearchScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <Root />
+    </ThemeProvider>
   );
 }

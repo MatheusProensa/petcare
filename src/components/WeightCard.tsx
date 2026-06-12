@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { displayDate } from '../utils/date';
 import { WeightEntry } from '../types';
 
@@ -11,6 +11,8 @@ interface Props {
 }
 
 export function WeightCard({ weights }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const latest = weights[0];
   const previous = weights[1];
   const diff = latest && previous ? latest.weightKg - previous.weightKg : null;
@@ -49,7 +51,7 @@ export function WeightCard({ weights }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',

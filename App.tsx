@@ -10,6 +10,7 @@ import PetDetailScreen from './src/screens/PetDetailScreen';
 import AddRecordScreen from './src/screens/AddRecordScreen';
 import AddWeightScreen from './src/screens/AddWeightScreen';
 import WeightScreen from './src/screens/WeightScreen';
+import VaccinesScreen from './src/screens/VaccinesScreen';
 import MedicalProfileScreen from './src/screens/MedicalProfileScreen';
 import EmergencyScreen from './src/screens/EmergencyScreen';
 import DocumentsScreen from './src/screens/DocumentsScreen';
@@ -46,6 +47,7 @@ function Root() {
         <Stack.Screen name="AddRecord" component={AddRecordScreen} />
         <Stack.Screen name="AddWeight" component={AddWeightScreen} />
         <Stack.Screen name="Weight" component={WeightScreen} />
+        <Stack.Screen name="Vaccines" component={VaccinesScreen} />
         <Stack.Screen name="MedicalProfile" component={MedicalProfileScreen} />
         <Stack.Screen name="Emergency" component={EmergencyScreen} />
         <Stack.Screen name="Documents" component={DocumentsScreen} />

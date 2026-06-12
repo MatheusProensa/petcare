@@ -301,6 +301,12 @@ export default function PetDetailScreen() {
 
             <View style={styles.quickActions}>
               <QuickAction
+                icon="shield-checkmark"
+                label="Vacinas"
+                color={colors.success}
+                onPress={() => navigation.navigate('Vaccines', { petId })}
+              />
+              <QuickAction
                 icon="scale"
                 label="Peso"
                 onPress={() => navigation.navigate('Weight', { petId })}

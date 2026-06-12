@@ -1,16 +1,51 @@
 import { MedicalRecord, Pet, RecordType } from '../types';
 import { daysUntilISO } from '../utils/date';
 
-export type VaccineStatus = 'ok' | 'due_soon' | 'overdue';
+export type VaccineStatus = 'ok' | 'due_soon' | 'overdue' | 'completed';
 
 /** Janela padrão de alerta quando o usuário não configurou lembrete. */
 const DEFAULT_REMINDER_DAYS = 3;
 /** Vacina fica "amarela" quando o reforço está a este número de dias ou menos. */
 const VACCINE_DUE_SOON_DAYS = 15;
 
-export function getVaccineStatus(record: MedicalRecord): VaccineStatus | null {
+/**
+ * Compara títulos ignorando maiúsculas e marcações de dose ("V10 2ª dose"
+ * casa com "V10"), para reconhecer doses da mesma vacina/vermífugo.
+ */
+function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/\b\d+\s*[ªºa°]?\s*dose\b/g, '')
+    .replace(/\bdose\s*\d*\b/g, '')
+    .replace(/\brefor[çc]o\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * O próximo evento deste registro já foi cumprido? Vale para vacina e
+ * vermífugo: uma dose posterior com o mesmo nome "quita" o reforço anterior.
+ */
+export function isEventFulfilled(record: MedicalRecord, all: MedicalRecord[]): boolean {
+  if (record.type !== 'vaccine' && record.type !== 'deworming') return false;
+  if (!record.nextDate) return false;
+  return all.some(
+    other =>
+      other.id !== record.id &&
+      other.petId === record.petId &&
+      other.type === record.type &&
+      normalizeTitle(other.title) === normalizeTitle(record.title) &&
+      other.date > record.date,
+  );
+}
+
+export function getVaccineStatus(
+  record: MedicalRecord,
+  all: MedicalRecord[],
+): VaccineStatus | null {
   if (record.type !== 'vaccine') return null;
   if (!record.nextDate) return 'ok';
+  if (isEventFulfilled(record, all)) return 'completed';
   const days = daysUntilISO(record.nextDate);
   if (days < 0) return 'overdue';
   if (days <= VACCINE_DUE_SOON_DAYS) return 'due_soon';
@@ -54,6 +89,8 @@ export function getUpcomingEvents(pets: Pet[], records: MedicalRecord[]): Upcomi
     if (!date) continue;
     const pet = petById.get(record.petId);
     if (!pet) continue;
+    // Reforço/dose já aplicado em um registro mais novo: não gera alerta.
+    if (isEventFulfilled(record, records)) continue;
     const daysUntil = daysUntilISO(date);
     const window = record.reminderDays?.length
       ? Math.max(...record.reminderDays)

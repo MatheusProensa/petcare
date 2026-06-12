@@ -23,7 +23,7 @@ import {
   RECORD_TYPE_ICONS,
   FREQUENCY_LABELS,
 } from '../labels';
-import { getVaccineStatus, eventDateOf } from '../services/events';
+import { getVaccineStatus, eventDateOf, isEventFulfilled } from '../services/events';
 import { sharePetSummary } from '../services/share';
 import { TimelineItem, TimelineBadge } from '../components/TimelineItem';
 import { EmptyState } from '../components/EmptyState';
@@ -76,6 +76,7 @@ function vaccineStatusBadges(colors: Palette): Record<string, TimelineBadge> {
     ok: { label: 'Em dia', color: colors.success },
     due_soon: { label: 'Reforço próximo', color: colors.warning },
     overdue: { label: 'Atrasada', color: colors.danger },
+    completed: { label: 'Reforço aplicado', color: colors.info },
   };
 }
 
@@ -223,10 +224,10 @@ export default function PetDetailScreen() {
       );
     }
     const record = item.record!;
-    const status = getVaccineStatus(record);
+    const status = getVaccineStatus(record, records);
     const eventDate = eventDateOf(record);
     const lines = recordLines(record);
-    if (eventDate && daysUntilISO(eventDate) >= 0) {
+    if (eventDate && daysUntilISO(eventDate) >= 0 && !isEventFulfilled(record, records)) {
       lines.push(`⏰ ${formatDaysUntil(daysUntilISO(eventDate))}`);
     }
     return (

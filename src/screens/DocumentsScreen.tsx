@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -81,7 +82,35 @@ export default function DocumentsScreen() {
 
   useFocusEffect(load);
 
-  async function pickFile() {
+  async function pickFromCamera() {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permissão necessária', 'Precisamos de acesso à câmera para tirar a foto.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.8 });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    const name = `foto-${Date.now()}.jpg`;
+    setPending({ uri: asset.uri, name, mimeType: asset.mimeType ?? 'image/jpeg' });
+    setTitle(prev => prev || (kind ? DOCUMENT_KIND_LABELS[kind] : ''));
+  }
+
+  async function pickFromGallery() {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permissão necessária', 'Precisamos de acesso à galeria para selecionar a foto.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    const name = asset.fileName ?? `foto-${Date.now()}.jpg`;
+    setPending({ uri: asset.uri, name, mimeType: asset.mimeType ?? 'image/jpeg' });
+    setTitle(prev => prev || name.replace(/\.\w+$/, ''));
+  }
+
+  async function pickFromFiles() {
     const result = await DocumentPicker.getDocumentAsync({
       type: ['application/pdf', 'image/*'],
       copyToCacheDirectory: true,
@@ -90,6 +119,15 @@ export default function DocumentsScreen() {
     const asset = result.assets[0];
     setPending({ uri: asset.uri, name: asset.name, mimeType: asset.mimeType });
     setTitle(asset.name.replace(/\.\w+$/, ''));
+  }
+
+  function pickFile() {
+    Alert.alert('Adicionar documento', 'De onde vem o arquivo?', [
+      { text: 'Tirar foto', onPress: pickFromCamera },
+      { text: 'Galeria', onPress: pickFromGallery },
+      { text: 'Arquivo (PDF/imagem)', onPress: pickFromFiles },
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
   }
 
   async function handleSave() {

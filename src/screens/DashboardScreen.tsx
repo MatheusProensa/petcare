@@ -111,6 +111,7 @@ export default function DashboardScreen() {
                 label="Remédios ativos"
                 value={activeMedsCount}
                 color={colors.accent}
+                onPress={() => navigation.navigate('Home')}
               />
             </View>
 

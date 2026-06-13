@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, getAllRecords } from '../storage';
+import { isActiveMedication } from '../services/events';
 import { maskDate, isValidDate, toISO } from '../utils/date';
 import { RECORD_TYPE_LABELS } from '../labels';
 import { HealthRecordCard } from '../components/HealthRecordCard';
@@ -41,6 +42,7 @@ export default function SearchScreen() {
   const [typeFilter, setTypeFilter] = useState<RecordType | null>(null);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [onlyActiveMeds, setOnlyActiveMeds] = useState(false);
 
   useEffect(() => {
     Promise.all([getPets().then(setPets), getAllRecords().then(setRecords)]).catch(() =>
@@ -55,10 +57,11 @@ export default function SearchScreen() {
     .filter(r => !query.trim() || matchesQuery(r, query.trim()))
     .filter(r => !(fromDate.length === 10 && isValidDate(fromDate)) || r.date >= toISO(fromDate))
     .filter(r => !(toDate.length === 10 && isValidDate(toDate)) || r.date <= toISO(toDate))
+    .filter(r => !onlyActiveMeds || isActiveMedication(r))
     .sort((a, b) => b.date.localeCompare(a.date));
 
   const hasFilter =
-    query.trim() || typeFilter || (fromDate.length === 10 && isValidDate(fromDate)) ||
+    query.trim() || typeFilter || onlyActiveMeds || (fromDate.length === 10 && isValidDate(fromDate)) ||
     (toDate.length === 10 && isValidDate(toDate));
 
   return (
@@ -108,6 +111,15 @@ export default function SearchScreen() {
               </TouchableOpacity>
             );
           })}
+          <TouchableOpacity
+            style={[styles.chip, onlyActiveMeds && styles.chipActive]}
+            onPress={() => setOnlyActiveMeds(v => !v)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.chipText, onlyActiveMeds && styles.chipTextActive]}>
+              Remédios em uso
+            </Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.dateRow}>
           <View style={styles.dateBox}>

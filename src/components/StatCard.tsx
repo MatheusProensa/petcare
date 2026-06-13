@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 
@@ -8,14 +8,16 @@ interface Props {
   label: string;
   value: string | number;
   color?: string;
+  onPress?: () => void;
 }
 
-export function StatCard({ icon, label, value, color }: Props) {
+export function StatCard({ icon, label, value, color, onPress }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const tint = color ?? colors.primaryLight;
+  const Wrapper = onPress ? TouchableOpacity : View;
   return (
-    <View style={styles.card}>
+    <Wrapper style={styles.card} onPress={onPress} activeOpacity={onPress ? 0.8 : undefined}>
       <View style={[styles.iconWrapper, { backgroundColor: tint + '18' }]}>
         <Ionicons name={icon} size={16} color={tint} />
       </View>
@@ -23,7 +25,7 @@ export function StatCard({ icon, label, value, color }: Props) {
       <Text style={styles.label} numberOfLines={1}>
         {label}
       </Text>
-    </View>
+    </Wrapper>
   );
 }
 

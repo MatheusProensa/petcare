@@ -5,7 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
-import { getPets } from '../storage';
+import { getPets, getAllRecords } from '../storage';
+import { getUpcomingEvents, isActiveMedication } from '../services/events';
 import { PetCard } from '../components/PetCard';
 import { EmptyState } from '../components/EmptyState';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -19,11 +20,25 @@ export default function HomeScreen() {
   const styles = useThemedStyles(createStyles);
   const { scheme } = useTheme();
   const [pets, setPets] = useState<Pet[]>([]);
+  const [activeMedsByPet, setActiveMedsByPet] = useState<Record<string, number>>({});
+  const [alertsByPet, setAlertsByPet] = useState<Record<string, number>>({});
 
   useFocusEffect(
     useCallback(() => {
-      getPets()
-        .then(setPets)
+      Promise.all([getPets(), getAllRecords()])
+        .then(([loadedPets, records]) => {
+          setPets(loadedPets);
+
+          const meds: Record<string, number> = {};
+          const alerts: Record<string, number> = {};
+          loadedPets.forEach(pet => {
+            const petRecords = records.filter(r => r.petId === pet.id);
+            meds[pet.id] = petRecords.filter(isActiveMedication).length;
+            alerts[pet.id] = getUpcomingEvents([pet], records).filter(e => e.pending).length;
+          });
+          setActiveMedsByPet(meds);
+          setAlertsByPet(alerts);
+        })
         .catch(() => Alert.alert('Erro', 'Não foi possível carregar seus pets.'));
     }, []),
   );
@@ -62,6 +77,8 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <PetCard
             pet={item}
+            activeMeds={activeMedsByPet[item.id]}
+            pendingAlerts={alertsByPet[item.id]}
             onPress={() => navigation.navigate('PetDetail', { petId: item.id })}
           />
         )}

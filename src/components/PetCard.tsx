@@ -8,10 +8,12 @@ import { Pet } from '../types';
 interface Props {
   pet: Pet;
   subtitle?: string;
+  activeMeds?: number;
+  pendingAlerts?: number;
   onPress: () => void;
 }
 
-export function PetCard({ pet, subtitle, onPress }: Props) {
+export function PetCard({ pet, subtitle, activeMeds, pendingAlerts, onPress }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   return (
@@ -36,6 +38,19 @@ export function PetCard({ pet, subtitle, onPress }: Props) {
           {subtitle ?? `${SPECIES_LABELS[pet.species]}${pet.breed ? ` · ${pet.breed}` : ''}`}
         </Text>
       </View>
+
+      {!!pendingAlerts && (
+        <View style={[styles.badge, { backgroundColor: colors.warning + '22' }]}>
+          <Ionicons name="notifications" size={12} color={colors.warning} />
+          <Text style={[styles.badgeText, { color: colors.warning }]}>{pendingAlerts}</Text>
+        </View>
+      )}
+      {!!activeMeds && (
+        <View style={[styles.badge, { backgroundColor: colors.accent + '22' }]}>
+          <Ionicons name="medkit" size={12} color={colors.accent} />
+          <Text style={[styles.badgeText, { color: colors.accent }]}>{activeMeds}</Text>
+        </View>
+      )}
 
       <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
     </TouchableOpacity>
@@ -87,5 +102,17 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   petSubtitle: {
     fontSize: 13,
     color: colors.textMuted,
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

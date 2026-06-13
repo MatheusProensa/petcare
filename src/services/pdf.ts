@@ -33,6 +33,7 @@ function recordDetails(r: MedicalRecord): string {
   const parts: string[] = [];
   if (r.type === 'vaccine' && r.nextDate) parts.push(`Reforço: ${displayDate(r.nextDate)}`);
   if (r.type === 'consultation' && r.diagnosis) parts.push(`Diagnóstico: ${r.diagnosis}`);
+  if (r.type === 'medication' && r.dosage) parts.push(r.dosage);
   if (r.type === 'medication' && r.frequency) parts.push(FREQUENCY_LABELS[r.frequency]);
   if (r.description) parts.push(r.description);
   return parts.map(esc).join(' · ');

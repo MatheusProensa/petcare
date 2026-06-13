@@ -15,37 +15,47 @@ export function WeightCard({ weights }: Props) {
   const styles = useThemedStyles(createStyles);
   const latest = weights[0];
   const previous = weights[1];
+  const oldest = weights[weights.length - 1];
   const diff = latest && previous ? latest.weightKg - previous.weightKg : null;
+  const totalDiff = latest && oldest && oldest !== latest ? latest.weightKg - oldest.weightKg : null;
 
   return (
-    <View style={styles.card}>
-      <View style={styles.iconWrapper}>
-        <Ionicons name="scale" size={20} color={colors.primaryLight} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.label}>Último peso</Text>
-        <Text style={styles.value}>
-          {latest ? `${latest.weightKg.toLocaleString('pt-BR')} kg` : '—'}
-        </Text>
-        {latest ? <Text style={styles.date}>{displayDate(latest.date)}</Text> : null}
-      </View>
-      {diff !== null && (
-        <View style={styles.diffWrapper}>
-          <Ionicons
-            name={diff === 0 ? 'remove' : diff > 0 ? 'trending-up' : 'trending-down'}
-            size={16}
-            color={diff === 0 ? colors.textMuted : diff > 0 ? colors.warning : colors.success}
-          />
-          <Text
-            style={[
-              styles.diff,
-              { color: diff === 0 ? colors.textMuted : diff > 0 ? colors.warning : colors.success },
-            ]}
-          >
-            {diff > 0 ? '+' : ''}
-            {diff.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg
-          </Text>
+    <View>
+      <View style={styles.card}>
+        <View style={styles.iconWrapper}>
+          <Ionicons name="scale" size={20} color={colors.primaryLight} />
         </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>Último peso</Text>
+          <Text style={styles.value}>
+            {latest ? `${latest.weightKg.toLocaleString('pt-BR')} kg` : '—'}
+          </Text>
+          {latest ? <Text style={styles.date}>{displayDate(latest.date)}</Text> : null}
+        </View>
+        {diff !== null && (
+          <View style={styles.diffWrapper}>
+            <Ionicons
+              name={diff === 0 ? 'remove' : diff > 0 ? 'trending-up' : 'trending-down'}
+              size={16}
+              color={diff === 0 ? colors.textMuted : diff > 0 ? colors.warning : colors.success}
+            />
+            <Text
+              style={[
+                styles.diff,
+                { color: diff === 0 ? colors.textMuted : diff > 0 ? colors.warning : colors.success },
+              ]}
+            >
+              {diff > 0 ? '+' : ''}
+              {diff.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg
+            </Text>
+          </View>
+        )}
+      </View>
+      {totalDiff !== null && (
+        <Text style={styles.totalDiff}>
+          {totalDiff > 0 ? '+' : totalDiff < 0 ? '' : '±'}
+          {totalDiff.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg desde {displayDate(oldest.date)}
+        </Text>
       )}
     </View>
   );
@@ -75,4 +85,5 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   date: { fontSize: 12, color: colors.textMuted },
   diffWrapper: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   diff: { fontSize: 14, fontWeight: '600' },
+  totalDiff: { fontSize: 12, color: colors.textMuted, marginTop: spacing.xs, marginLeft: spacing.xs },
 });

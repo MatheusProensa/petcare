@@ -71,18 +71,19 @@ export default function AddRecordScreen() {
   const styles = useThemedStyles(createStyles);
   const RECORD_TYPE_COLORS = recordTypeColors(colors);
   const route = useRoute<Route>();
-  const { petId, recordId, initialType } = route.params;
+  const { petId, recordId, initialType, prefill } = route.params;
 
   const [original, setOriginal] = useState<MedicalRecord | null>(null);
   const [type, setType] = useState<RecordType>(initialType ?? 'vaccine');
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(prefill?.title ?? '');
   const [date, setDate] = useState('');
   const [nextDate, setNextDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [frequency, setFrequency] = useState<Frequency | undefined>();
-  const [manufacturer, setManufacturer] = useState('');
-  const [batch, setBatch] = useState('');
-  const [clinic, setClinic] = useState('');
+  const [dosage, setDosage] = useState('');
+  const [manufacturer, setManufacturer] = useState(prefill?.manufacturer ?? '');
+  const [batch, setBatch] = useState(prefill?.batch ?? '');
+  const [clinic, setClinic] = useState(prefill?.clinic ?? '');
   const [vet, setVet] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
   const [description, setDescription] = useState('');
@@ -103,6 +104,7 @@ export default function AddRecordScreen() {
         setNextDate(record.nextDate ? displayDate(record.nextDate) : '');
         setEndDate(record.endDate ? displayDate(record.endDate) : '');
         setFrequency(record.frequency);
+        setDosage(record.dosage ?? '');
         setManufacturer(record.manufacturer ?? '');
         setBatch(record.batch ?? '');
         setClinic(record.clinic ?? '');
@@ -120,6 +122,23 @@ export default function AddRecordScreen() {
 
   const futureDate = type === 'medication' ? endDate : nextDate;
   const showReminders = type !== 'note' && futureDate.length === 10;
+
+  function handleTypeChange(t: RecordType) {
+    setType(t);
+    if (t === 'note') {
+      setNextDate('');
+      setEndDate('');
+      setFrequency(undefined);
+      setReminderDays([]);
+      setCustomReminder('');
+    } else if (t === 'medication') {
+      setNextDate('');
+    } else {
+      setEndDate('');
+      setFrequency(undefined);
+      setDosage('');
+    }
+  }
 
   function toggleReminder(days: number) {
     setReminderDays(prev =>
@@ -173,6 +192,7 @@ export default function AddRecordScreen() {
         // preenchido antes de trocar a frequência.
         if (endDate && frequency !== 'continuous') record.endDate = toISO(endDate);
         record.frequency = frequency;
+        record.dosage = trimOrUndefined(dosage);
       }
       if (type === 'vaccine') {
         record.manufacturer = trimOrUndefined(manufacturer);
@@ -245,7 +265,7 @@ export default function AddRecordScreen() {
                       borderColor: RECORD_TYPE_COLORS[t],
                     },
                   ]}
-                  onPress={() => setType(t)}
+                  onPress={() => handleTypeChange(t)}
                   activeOpacity={0.7}
                 >
                   <Text
@@ -342,6 +362,12 @@ export default function AddRecordScreen() {
 
           {type === 'medication' && (
             <>
+              <Input
+                label="Dosagem (opcional)"
+                placeholder="Ex: 250mg, 1 comprimido"
+                value={dosage}
+                onChangeText={setDosage}
+              />
               <View style={styles.field}>
                 <Text style={styles.fieldLabel}>Frequência</Text>
                 <View style={styles.typeRow}>
@@ -349,7 +375,13 @@ export default function AddRecordScreen() {
                     <TouchableOpacity
                       key={f}
                       style={[styles.freqChip, frequency === f && styles.freqChipActive]}
-                      onPress={() => setFrequency(prev => (prev === f ? undefined : f))}
+                      onPress={() => {
+                        setFrequency(prev => {
+                          const next = prev === f ? undefined : f;
+                          if (next === 'continuous') setEndDate('');
+                          return next;
+                        });
+                      }}
                       activeOpacity={0.7}
                     >
                       <Text

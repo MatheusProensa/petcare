@@ -80,6 +80,27 @@ export default function VaccinesScreen() {
             </Text>
           ) : null}
           {details ? <Text style={styles.details}>{details}</Text> : null}
+          {(status === 'due_soon' || status === 'overdue') && (
+            <TouchableOpacity
+              style={styles.doseBtn}
+              onPress={() =>
+                navigation.navigate('AddRecord', {
+                  petId,
+                  initialType: 'vaccine',
+                  prefill: {
+                    title: item.title,
+                    manufacturer: item.manufacturer,
+                    batch: item.batch,
+                    clinic: item.clinic,
+                  },
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <Ionicons name="add-circle-outline" size={14} color={colors.primaryLight} />
+              <Text style={styles.doseBtnText}>Registrar dose aplicada</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -201,5 +222,13 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   badgeText: { fontSize: 11, fontWeight: '600' },
   line: { fontSize: 13, color: colors.textSubtle },
   details: { fontSize: 12, color: colors.textMuted },
+  doseBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  doseBtnText: { fontSize: 12, fontWeight: '600', color: colors.primaryLight },
   emptyWrapper: { paddingTop: spacing.xxl },
 });

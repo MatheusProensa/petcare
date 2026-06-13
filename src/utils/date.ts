@@ -65,5 +65,6 @@ export function calcAge(iso: string): string {
   }
   if (years === 0 && months === 0) return 'recém-nascido';
   if (years === 0) return `${months} ${months === 1 ? 'mês' : 'meses'}`;
-  return `${years} ${years === 1 ? 'ano' : 'anos'}`;
+  if (months === 0) return `${years} ${years === 1 ? 'ano' : 'anos'}`;
+  return `${years} ${years === 1 ? 'ano' : 'anos'} e ${months} ${months === 1 ? 'mês' : 'meses'}`;
 }

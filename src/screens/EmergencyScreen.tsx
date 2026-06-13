@@ -59,12 +59,24 @@ export default function EmergencyScreen() {
   );
 
   async function handleSaveTutor() {
+    if (tutorPhone.trim() && !/\d/.test(tutorPhone)) {
+      Alert.alert('Telefone inválido', 'Informe um número de telefone válido.');
+      return;
+    }
     try {
       await saveTutorInfo({ name: tutorName.trim(), phone: tutorPhone.trim() });
       setEditingTutor(false);
     } catch {
       Alert.alert('Erro', 'Não foi possível salvar os dados do tutor.');
     }
+  }
+
+  function handleCancelTutor() {
+    getTutorInfo().then(info => {
+      setTutorName(info.name);
+      setTutorPhone(info.phone);
+    });
+    setEditingTutor(false);
   }
 
   function call(phone?: string) {
@@ -103,12 +115,22 @@ export default function EmergencyScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Tutor</Text>
-            <TouchableOpacity
-              onPress={() => (editingTutor ? handleSaveTutor() : setEditingTutor(true))}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.cardAction}>{editingTutor ? 'Salvar' : 'Editar'}</Text>
-            </TouchableOpacity>
+            <View style={styles.cardHeaderActions}>
+              {editingTutor && (
+                <TouchableOpacity
+                  onPress={handleCancelTutor}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={styles.cardActionMuted}>Cancelar</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={() => (editingTutor ? handleSaveTutor() : setEditingTutor(true))}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.cardAction}>{editingTutor ? 'Salvar' : 'Editar'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
           {editingTutor ? (
             <View style={{ gap: spacing.md }}>
@@ -187,6 +209,7 @@ export default function EmergencyScreen() {
                 <Ionicons name="medkit" size={14} color={colors.warning} />
                 <Text style={styles.medText}>
                   {med.title}
+                  {med.dosage ? ` · ${med.dosage}` : ''}
                   {med.frequency ? ` · ${FREQUENCY_LABELS[med.frequency]}` : ''}
                 </Text>
               </View>
@@ -234,7 +257,9 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     justifyContent: 'space-between',
   },
   cardTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  cardHeaderActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   cardAction: { fontSize: 13, fontWeight: '600', color: colors.primaryLight },
+  cardActionMuted: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
   infoBlock: { gap: 2, flex: 1 },
   infoLabel: { fontSize: 11, color: colors.textMuted, letterSpacing: 0.4 },
   infoValue: { fontSize: 14, color: colors.text, lineHeight: 20 },

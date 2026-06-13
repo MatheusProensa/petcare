@@ -41,6 +41,8 @@ export interface MedicalRecord {
   /** Fim do tratamento (medicamento). */
   endDate?: string;
   frequency?: Frequency;
+  /** Dosagem do medicamento (ex: "250mg, 1 comprimido"). */
+  dosage?: string;
   manufacturer?: string;
   batch?: string;
   clinic?: string;
@@ -80,7 +82,12 @@ export type RootStackParamList = {
   Home: undefined;
   AddPet: { petId?: string };
   PetDetail: { petId: string };
-  AddRecord: { petId: string; recordId?: string; initialType?: RecordType };
+  AddRecord: {
+    petId: string;
+    recordId?: string;
+    initialType?: RecordType;
+    prefill?: { title?: string; manufacturer?: string; batch?: string; clinic?: string };
+  };
   AddWeight: { petId: string; weightId?: string };
   Weight: { petId: string };
   Vaccines: { petId: string };

@@ -8,6 +8,7 @@ import { getRecords, getWeights } from '../storage';
 import { RECORD_TYPE_LABELS, recordTypeColors, RECORD_TYPE_ICONS } from '../labels';
 import { WeightChart } from '../components/WeightChart';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { EmptyState } from '../components/EmptyState';
 import { MedicalRecord, WeightEntry, RecordType, RootStackParamList } from '../types';
 
 type Route = RouteProp<RootStackParamList, 'Stats'>;
@@ -60,6 +61,14 @@ export default function StatsScreen() {
             {total === 1 ? 'registro no prontuário' : 'registros no prontuário'}
           </Text>
         </View>
+
+        {total === 0 && (
+          <EmptyState
+            icon="bar-chart-outline"
+            title="Nenhum registro ainda"
+            text="Adicione vacinas, consultas, remédios ou pesagens para acompanhar as estatísticas aqui."
+          />
+        )}
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Registros por tipo</Text>

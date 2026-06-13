@@ -64,6 +64,10 @@ export default function SearchScreen() {
     query.trim() || typeFilter || onlyActiveMeds || (fromDate.length === 10 && isValidDate(fromDate)) ||
     (toDate.length === 10 && isValidDate(toDate));
 
+  const fromValid = fromDate.length === 10 && isValidDate(fromDate);
+  const toValid = toDate.length === 10 && isValidDate(toDate);
+  const dateRangeInvalid = fromValid && toValid && toISO(fromDate) > toISO(toDate);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -147,6 +151,9 @@ export default function SearchScreen() {
             />
           </View>
         </View>
+        {dateRangeInvalid && (
+          <Text style={styles.dateWarning}>A data "De" é posterior à data "Até".</Text>
+        )}
       </View>
 
       <FlatList
@@ -232,6 +239,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
+  dateWarning: { fontSize: 12, color: colors.warning },
   dateLabel: { fontSize: 12, color: colors.textMuted, width: 24 },
   dateInput: { flex: 1, fontSize: 13, color: colors.text, padding: 0 },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },

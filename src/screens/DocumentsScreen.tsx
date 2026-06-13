@@ -70,6 +70,7 @@ export default function DocumentsScreen() {
 
   const [documents, setDocuments] = useState<PetDocument[]>([]);
   const [pending, setPending] = useState<PendingFile | null>(null);
+  const [editingDoc, setEditingDoc] = useState<PetDocument | null>(null);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [saving, setSaving] = useState(false);
@@ -131,7 +132,7 @@ export default function DocumentsScreen() {
   }
 
   async function handleSave() {
-    if (!pending || !kind) return;
+    if ((!pending && !editingDoc) || !kind) return;
     if (!title.trim()) {
       Alert.alert('Campo obrigatório', 'Informe o título do documento.');
       return;
@@ -142,19 +143,28 @@ export default function DocumentsScreen() {
     }
     setSaving(true);
     try {
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      const uri = await persistDocumentFile(pending.uri, id);
-      await saveDocument({
-        id,
-        petId,
-        title: title.trim(),
-        kind,
-        date: toISO(date),
-        uri,
-        mimeType: pending.mimeType,
-        createdAt: new Date().toISOString(),
-      });
+      if (editingDoc) {
+        await saveDocument({
+          ...editingDoc,
+          title: title.trim(),
+          date: toISO(date),
+        });
+      } else if (pending) {
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const uri = await persistDocumentFile(pending.uri, id);
+        await saveDocument({
+          id,
+          petId,
+          title: title.trim(),
+          kind,
+          date: toISO(date),
+          uri,
+          mimeType: pending.mimeType,
+          createdAt: new Date().toISOString(),
+        });
+      }
       setPending(null);
+      setEditingDoc(null);
       setTitle('');
       setDate('');
       load();
@@ -163,6 +173,19 @@ export default function DocumentsScreen() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function startEditing(doc: PetDocument) {
+    setEditingDoc(doc);
+    setTitle(doc.title);
+    setDate(displayDate(doc.date));
+  }
+
+  function cancelForm() {
+    setPending(null);
+    setEditingDoc(null);
+    setTitle('');
+    setDate('');
   }
 
   function isImage(doc: PetDocument): boolean {
@@ -215,6 +238,7 @@ export default function DocumentsScreen() {
   function showOptions(doc: PetDocument) {
     Alert.alert(doc.title, 'O que deseja fazer?', [
       { text: 'Cancelar', style: 'cancel' },
+      { text: 'Editar', onPress: () => startEditing(doc) },
       { text: 'Compartilhar', onPress: () => shareDocument(doc) },
       {
         text: 'Excluir',
@@ -315,17 +339,19 @@ export default function DocumentsScreen() {
         </TouchableOpacity>
       </View>
 
-      {pending ? (
+      {pending || editingDoc ? (
         <View style={styles.form}>
-          <View style={styles.fileRow}>
-            <Ionicons name="attach" size={16} color={colors.primaryLight} />
-            <Text style={styles.fileName} numberOfLines={1}>
-              {pending.name}
-            </Text>
-            <TouchableOpacity onPress={() => setPending(null)}>
-              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-            </TouchableOpacity>
-          </View>
+          {pending && (
+            <View style={styles.fileRow}>
+              <Ionicons name="attach" size={16} color={colors.primaryLight} />
+              <Text style={styles.fileName} numberOfLines={1}>
+                {pending.name}
+              </Text>
+              <TouchableOpacity onPress={cancelForm}>
+                <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+          )}
 
           <Input
             label="Título"
@@ -343,14 +369,23 @@ export default function DocumentsScreen() {
             maxLength={10}
           />
 
-          <TouchableOpacity
-            style={[styles.saveBtn, saving && { opacity: 0.6 }]}
-            onPress={handleSave}
-            disabled={saving}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.saveBtnText}>{saving ? 'Salvando...' : 'Salvar Documento'}</Text>
-          </TouchableOpacity>
+          <View style={styles.formActions}>
+            {editingDoc && (
+              <TouchableOpacity style={styles.cancelBtn} onPress={cancelForm} activeOpacity={0.7}>
+                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[styles.saveBtn, { flex: 1 }, saving && { opacity: 0.6 }]}
+              onPress={handleSave}
+              disabled={saving}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.saveBtnText}>
+                {saving ? 'Salvando...' : editingDoc ? 'Salvar Alterações' : 'Salvar Documento'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <FlatList
@@ -372,7 +407,14 @@ export default function DocumentsScreen() {
                 <Text style={styles.docTitle}>{item.title}</Text>
                 <Text style={styles.docMeta}>{displayDate(item.date)}</Text>
               </View>
-              <Ionicons name="open-outline" size={16} color={colors.textMuted} />
+              <TouchableOpacity
+                onPress={() => showOptions(item)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                accessibilityRole="button"
+                accessibilityLabel="Opções do documento"
+              >
+                <Ionicons name="ellipsis-vertical" size={18} color={colors.textMuted} />
+              </TouchableOpacity>
             </TouchableOpacity>
           )}
           ListEmptyComponent={
@@ -380,7 +422,7 @@ export default function DocumentsScreen() {
               <EmptyState
                 icon={KIND_ICONS[kind]}
                 title={`Nenhum documento em ${DOCUMENT_KIND_LABELS[kind]}`}
-                text="Toque em + para anexar um PDF ou imagem. Toque para visualizar; toque e segure para compartilhar ou excluir."
+                text="Toque em + para anexar um PDF ou imagem. Toque para visualizar ou use o menu (⋮) para editar, compartilhar ou excluir."
               />
             </View>
           }
@@ -444,6 +486,16 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     padding: spacing.md,
   },
   fileName: { flex: 1, fontSize: 13, color: colors.textSubtle },
+  formActions: { flexDirection: 'row', gap: spacing.sm },
+  cancelBtn: {
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelBtnText: { fontSize: 16, fontWeight: '600', color: colors.textMuted },
   saveBtn: {
     backgroundColor: colors.primary,
     borderRadius: radius.md,

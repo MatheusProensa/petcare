@@ -82,11 +82,15 @@ export default function AddPetScreen() {
   }
 
   function pickPhoto() {
-    Alert.alert('Foto do pet', 'De onde vem a foto?', [
+    const options: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'destructive' }> = [
       { text: 'Tirar foto', onPress: pickFromCamera },
       { text: 'Galeria', onPress: pickFromGallery },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
+    ];
+    if (photo) {
+      options.push({ text: 'Remover foto', onPress: () => setPhoto(undefined), style: 'destructive' });
+    }
+    options.push({ text: 'Cancelar', style: 'cancel' });
+    Alert.alert('Foto do pet', 'De onde vem a foto?', options);
   }
 
   async function handleSave() {

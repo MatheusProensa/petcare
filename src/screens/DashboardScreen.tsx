@@ -30,6 +30,7 @@ export default function DashboardScreen() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [activeMedsCount, setActiveMedsCount] = useState(0);
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -46,7 +47,8 @@ export default function DashboardScreen() {
   );
 
   const alerts = events.filter(e => e.pending);
-  const upcoming = events.filter(e => !e.pending && e.daysUntil >= 0).slice(0, 5);
+  const allUpcoming = events.filter(e => !e.pending && e.daysUntil >= 0);
+  const upcoming = showAllUpcoming ? allUpcoming : allUpcoming.slice(0, 5);
   const hasPets = pets.length > 0;
 
   return (
@@ -148,6 +150,11 @@ export default function DashboardScreen() {
                   />
                 ))
               )}
+              {!showAllUpcoming && allUpcoming.length > 5 && (
+                <TouchableOpacity onPress={() => setShowAllUpcoming(true)} activeOpacity={0.7}>
+                  <Text style={styles.seeMore}>Ver mais {allUpcoming.length - 5}</Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             <TouchableOpacity
@@ -224,6 +231,13 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   calmText: { flex: 1, fontSize: 13, color: colors.textSubtle, lineHeight: 19 },
   emptyHint: { fontSize: 13, color: colors.textMuted },
+  seeMore: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.primaryLight,
+    textAlign: 'center',
+    paddingVertical: spacing.xs,
+  },
   petsBtn: {
     flexDirection: 'row',
     alignItems: 'center',

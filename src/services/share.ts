@@ -51,6 +51,7 @@ export function buildPetSummary(
       ];
       if (r.type === 'vaccine' && r.nextDate) parts.push(`reforço ${displayDate(r.nextDate)}`);
       if (r.type === 'consultation' && r.diagnosis) parts.push(`diagnóstico: ${r.diagnosis}`);
+      if (r.type === 'medication' && r.dosage) parts.push(r.dosage);
       if (r.type === 'medication' && r.frequency) parts.push(FREQUENCY_LABELS[r.frequency]);
       if (r.description) parts.push(r.description);
       lines.push(`• ${parts.join(' · ')}`);

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { SPECIES_LABELS } from '../labels';
+import { calcAge } from '../utils/date';
 import { Pet } from '../types';
 
 interface Props {
@@ -35,7 +36,10 @@ export function PetCard({ pet, subtitle, activeMeds, pendingAlerts, onPress }: P
       <View style={styles.cardInfo}>
         <Text style={styles.petName}>{pet.name}</Text>
         <Text style={styles.petSubtitle}>
-          {subtitle ?? `${SPECIES_LABELS[pet.species]}${pet.breed ? ` · ${pet.breed}` : ''}`}
+          {subtitle ??
+            `${SPECIES_LABELS[pet.species]}${pet.breed ? ` · ${pet.breed}` : ''}${
+              pet.birthDate ? ` · ${calcAge(pet.birthDate)}` : ''
+            }`}
         </Text>
       </View>
 

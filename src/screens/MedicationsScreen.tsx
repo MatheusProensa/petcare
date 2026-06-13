@@ -40,6 +40,7 @@ export default function MedicationsScreen() {
 
   function renderMedication(item: MedicalRecord, isActive: boolean) {
     const details = [
+      item.dosage,
       item.frequency ? FREQUENCY_LABELS[item.frequency] : undefined,
       item.endDate ? `até ${displayDate(item.endDate)}` : undefined,
     ].filter(Boolean).join(' · ');

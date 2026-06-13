@@ -275,8 +275,10 @@ export async function exportBackup(): Promise<string> {
 
 /**
  * Substitui todos os dados pelos do backup. Fotos e arquivos de documentos
- * não fazem parte do JSON (ficam no armazenamento do aparelho de origem),
- * então referências a eles são descartadas na importação.
+ * não fazem parte do JSON — apenas as referências (URI) são restauradas.
+ * Em um restore no mesmo aparelho os arquivos persistidos continuam
+ * existindo e as fotos/documentos seguem funcionando; em outro aparelho
+ * essas referências ficam inválidas e a foto/documento some.
  */
 export async function importBackup(json: string): Promise<{ pets: number; records: number }> {
   const parsed = JSON.parse(json) as Backup;
@@ -290,11 +292,11 @@ export async function importBackup(json: string): Promise<{ pets: number; record
   ) {
     throw new Error('Arquivo de backup inválido.');
   }
-  const pets = parsed.pets.map(p => ({ ...p, photo: undefined }));
-  await write(KEYS.PETS, PETS_VERSION, pets);
+  const documents = Array.isArray(parsed.documents) ? parsed.documents : [];
+  await write(KEYS.PETS, PETS_VERSION, parsed.pets);
   await write(KEYS.RECORDS, RECORDS_VERSION, parsed.records);
   await write(KEYS.WEIGHTS, WEIGHTS_VERSION, parsed.weights);
-  await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, []);
+  await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, documents);
   if (parsed.tutor) await saveTutorInfo(parsed.tutor);
-  return { pets: pets.length, records: parsed.records.length };
+  return { pets: parsed.pets.length, records: parsed.records.length };
 }

@@ -50,7 +50,7 @@ export default function AboutScreen() {
     if (result.canceled) return;
     Alert.alert(
       'Restaurar backup',
-      'Isso substitui TODOS os dados atuais pelos do arquivo. Fotos e documentos anexados não fazem parte do backup. Continuar?',
+      'Isso substitui TODOS os dados atuais pelos do arquivo. Fotos e documentos anexados só continuam disponíveis se este backup for do mesmo aparelho. Continuar?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -126,8 +126,8 @@ export default function AboutScreen() {
             <Text style={styles.backupBtnText}>Restaurar backup</Text>
           </TouchableOpacity>
           <Text style={styles.backupHint}>
-            O backup é um arquivo JSON com pets, registros e pesagens. Fotos e documentos anexados
-            não são incluídos.
+            O backup é um arquivo JSON com pets, registros, pesagens e documentos. Os arquivos de
+            fotos e documentos ficam salvos neste aparelho e não viajam dentro do backup.
           </Text>
         </View>
 

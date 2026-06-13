@@ -9,6 +9,7 @@ import { getRecords } from '../storage';
 import { displayDate, formatDaysUntil, daysUntilISO } from '../utils/date';
 import { getVaccineStatus, VaccineStatus } from '../services/events';
 import { EmptyState } from '../components/EmptyState';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { MedicalRecord, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Vaccines'>;
@@ -96,6 +97,8 @@ export default function VaccinesScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Vacinas</Text>
+        <View style={styles.headerActions}>
+        <ThemeToggle size={20} />
         <TouchableOpacity
           onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'vaccine' })}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -104,6 +107,7 @@ export default function VaccinesScreen() {
         >
           <Ionicons name="add" size={26} color={colors.primaryLight} />
         </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -135,7 +139,7 @@ export default function VaccinesScreen() {
         ListEmptyComponent={
           <View style={styles.emptyWrapper}>
             <EmptyState
-              icon="shield-checkmark-outline"
+              image={require('../../assets/icons/shield.png')}
               title="Nenhuma vacina registrada"
               text="Toque em + para registrar a primeira vacina com data de reforço, fabricante e lote."
             />
@@ -156,6 +160,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: spacing.md,
   },
   headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   summaryRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   summaryCard: {

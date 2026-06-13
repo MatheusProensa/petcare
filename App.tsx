@@ -17,6 +17,7 @@ import DocumentsScreen from './src/screens/DocumentsScreen';
 import DocumentViewerScreen from './src/screens/DocumentViewerScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import SearchScreen from './src/screens/SearchScreen';
+import AboutScreen from './src/screens/AboutScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -54,6 +55,7 @@ function Root() {
         <Stack.Screen name="DocumentViewer" component={DocumentViewerScreen} />
         <Stack.Screen name="Stats" component={StatsScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
+        <Stack.Screen name="About" component={AboutScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

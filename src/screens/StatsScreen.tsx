@@ -7,6 +7,7 @@ import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, getWeights } from '../storage';
 import { RECORD_TYPE_LABELS, recordTypeColors, RECORD_TYPE_ICONS } from '../labels';
 import { WeightChart } from '../components/WeightChart';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { MedicalRecord, WeightEntry, RecordType, RootStackParamList } from '../types';
 
 type Route = RouteProp<RootStackParamList, 'Stats'>;
@@ -49,7 +50,7 @@ export default function StatsScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Estatísticas</Text>
-        <View style={{ width: 24 }} />
+        <ThemeToggle />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>

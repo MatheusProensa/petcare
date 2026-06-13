@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Input } from '../components/Input';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, saveRecord, deleteRecord } from '../storage';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
@@ -225,7 +226,7 @@ export default function AddRecordScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{recordId ? 'Editar Registro' : 'Novo Registro'}</Text>
-        <View style={{ width: 24 }} />
+        <ThemeToggle />
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

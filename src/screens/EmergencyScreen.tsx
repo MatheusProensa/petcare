@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Input } from '../components/Input';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, getRecords, getTutorInfo, saveTutorInfo } from '../storage';
 import { isActiveMedication } from '../services/events';
@@ -87,7 +88,7 @@ export default function EmergencyScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Emergência{pet ? ` · ${pet.name}` : ''}</Text>
-        <View style={{ width: 24 }} />
+        <ThemeToggle />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>

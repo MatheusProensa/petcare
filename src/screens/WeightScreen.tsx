@@ -10,6 +10,7 @@ import { displayDate } from '../utils/date';
 import { WeightCard } from '../components/WeightCard';
 import { WeightChart } from '../components/WeightChart';
 import { EmptyState } from '../components/EmptyState';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { WeightEntry, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Weight'>;
@@ -71,6 +72,8 @@ export default function WeightScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Controle de Peso</Text>
+        <View style={styles.headerActions}>
+        <ThemeToggle size={20} />
         <TouchableOpacity
           onPress={() => navigation.navigate('AddWeight', { petId })}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -79,6 +82,7 @@ export default function WeightScreen() {
         >
           <Ionicons name="add" size={26} color={colors.primaryLight} />
         </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -99,7 +103,7 @@ export default function WeightScreen() {
         ListEmptyComponent={
           <View style={styles.emptyWrapper}>
             <EmptyState
-              icon="scale"
+              image={require('../../assets/icons/heart.png')}
               title="Nenhuma pesagem registrada"
               text="Toque em + para registrar o primeiro peso e acompanhar a evolução."
             />
@@ -120,6 +124,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: spacing.md,
   },
   headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   summary: { gap: spacing.md, marginBottom: spacing.md },
   sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginTop: spacing.sm },

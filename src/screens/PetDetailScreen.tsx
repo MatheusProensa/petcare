@@ -25,8 +25,10 @@ import {
 } from '../labels';
 import { getVaccineStatus, eventDateOf, isEventFulfilled } from '../services/events';
 import { sharePetSummary } from '../services/share';
+import { sharePetPdf } from '../services/pdf';
 import { TimelineItem, TimelineBadge } from '../components/TimelineItem';
 import { EmptyState } from '../components/EmptyState';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { MedicalProfileCard } from '../components/MedicalProfileCard';
 import { Pet, MedicalRecord, WeightEntry, RootStackParamList } from '../types';
 
@@ -258,6 +260,7 @@ export default function PetDetailScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{pet.name}</Text>
         <View style={styles.headerActions}>
+          <ThemeToggle size={20} />
           <TouchableOpacity
             onPress={() => navigation.navigate('AddPet', { petId })}
             hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
@@ -332,12 +335,30 @@ export default function PetDetailScreen() {
                 icon="share-social"
                 label="Compartilhar"
                 color={colors.success}
-                onPress={async () => {
-                  try {
-                    await sharePetSummary(pet!, records, weights);
-                  } catch {
-                    // usuário cancelou o compartilhamento
-                  }
+                onPress={() => {
+                  Alert.alert('Compartilhar prontuário', 'Escolha o formato:', [
+                    {
+                      text: 'PDF',
+                      onPress: async () => {
+                        try {
+                          await sharePetPdf(pet!, records, weights);
+                        } catch {
+                          Alert.alert('Erro', 'Não foi possível gerar o PDF.');
+                        }
+                      },
+                    },
+                    {
+                      text: 'Texto',
+                      onPress: async () => {
+                        try {
+                          await sharePetSummary(pet!, records, weights);
+                        } catch {
+                          // usuário cancelou o compartilhamento
+                        }
+                      },
+                    },
+                    { text: 'Cancelar', style: 'cancel' },
+                  ]);
                 }}
               />
             </View>
@@ -369,7 +390,7 @@ export default function PetDetailScreen() {
         renderItem={renderEntry}
         ListEmptyComponent={
           <EmptyState
-            icon="document-text-outline"
+            image={require('../../assets/icons/document.png')}
             title="Nenhum registro ainda"
             text='Toque em "Novo" para registrar vacinas, consultas, remédios, vermífugos ou observações.'
           />

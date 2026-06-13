@@ -1,21 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image, ImageSourcePropType } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 
 interface Props {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon?: keyof typeof Ionicons.glyphMap;
+  image?: ImageSourcePropType;
   title: string;
   text?: string;
 }
 
-export function EmptyState({ icon, title, text }: Props) {
+export function EmptyState({ icon, image, title, text }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.container}>
       <View style={styles.iconWrapper}>
-        <Ionicons name={icon} size={36} color={colors.primaryLight} />
+        {image ? (
+          <Image source={image} style={styles.image} resizeMode="contain" />
+        ) : icon ? (
+          <Ionicons name={icon} size={36} color={colors.primaryLight} />
+        ) : null}
       </View>
       <Text style={styles.title}>{title}</Text>
       {text ? <Text style={styles.text}>{text}</Text> : null}
@@ -39,6 +44,10 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
+  },
+  image: {
+    width: 46,
+    height: 46,
   },
   title: {
     fontSize: 17,

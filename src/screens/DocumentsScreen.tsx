@@ -17,6 +17,7 @@ import * as Sharing from 'expo-sharing';
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Input } from '../components/Input';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { EmptyState } from '../components/EmptyState';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getDocuments, saveDocument, deleteDocument } from '../storage';
@@ -216,7 +217,7 @@ export default function DocumentsScreen() {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Exames e Documentos</Text>
-          <View style={{ width: 24 }} />
+          <ThemeToggle />
         </View>
 
         <View style={styles.categories}>

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, getAllRecords } from '../storage';
 import { getUpcomingEvents, isActiveMedication, UpcomingEvent } from '../services/events';
+import { syncEventNotifications } from '../services/notifications';
 import { StatCard } from '../components/StatCard';
 import { ReminderCard } from '../components/ReminderCard';
 import { EmptyState } from '../components/EmptyState';
@@ -36,6 +38,8 @@ export default function DashboardScreen() {
           setPets(loadedPets);
           setEvents(getUpcomingEvents(loadedPets, records));
           setActiveMedsCount(records.filter(isActiveMedication).length);
+          // Mantém as notificações locais alinhadas com os eventos atuais.
+          syncEventNotifications(loadedPets, records).catch(() => {});
         })
         .catch(() => Alert.alert('Erro', 'Não foi possível carregar a visão geral.'));
     }, []),
@@ -49,7 +53,15 @@ export default function DashboardScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.logo}>PetCare</Text>
+          <Image
+            source={
+              scheme === 'dark'
+                ? require('../../assets/logo-dark.png')
+                : require('../../assets/logo-light.png')
+            }
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <View style={styles.headerActions}>
             <TouchableOpacity
               onPress={toggleTheme}
@@ -65,11 +77,19 @@ export default function DashboardScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => navigation.navigate('Search')}
-              hitSlop={{ top: 12, bottom: 12, left: 8, right: 12 }}
+              hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
               accessibilityRole="button"
               accessibilityLabel="Buscar registros"
             >
               <Ionicons name="search" size={22} color={colors.textSubtle} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('About')}
+              hitSlop={{ top: 12, bottom: 12, left: 8, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Sobre o app"
+            >
+              <Ionicons name="information-circle-outline" size={22} color={colors.textSubtle} />
             </TouchableOpacity>
           </View>
         </View>
@@ -146,7 +166,7 @@ export default function DashboardScreen() {
         ) : (
           <View style={styles.emptyWrapper}>
             <EmptyState
-              icon="paw-outline"
+              image={require('../../assets/icons/paw.png')}
               title="Bem-vindo ao PetCare"
               text="Cadastre seu primeiro pet para acompanhar vacinas, consultas, peso e muito mais."
             />
@@ -177,10 +197,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   logo: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.primaryLight,
-    letterSpacing: 0.8,
+    width: 150,
+    height: 50,
   },
   title: {
     fontSize: 34,

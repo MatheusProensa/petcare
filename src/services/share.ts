@@ -70,11 +70,3 @@ export async function sharePetSummary(
   const message = buildPetSummary(pet, records, weights);
   await Share.share({ message, title: `Prontuário de ${pet.name}` });
 }
-
-/**
- * Placeholder: exportação em PDF planejada para a próxima versão
- * (expo-print + expo-sharing). A estrutura de dados já suporta.
- */
-export async function sharePetPdf(): Promise<'not_implemented'> {
-  return 'not_implemented';
-}

@@ -1,13 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets } from '../storage';
 import { PetCard } from '../components/PetCard';
 import { EmptyState } from '../components/EmptyState';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { Pet, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -16,6 +17,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const styles = useThemedStyles(createStyles);
+  const { scheme } = useTheme();
   const [pets, setPets] = useState<Pet[]>([]);
 
   useFocusEffect(
@@ -32,7 +34,17 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.logo}>PetCare</Text>
+        <Image
+          source={
+            scheme === 'dark'
+              ? require('../../assets/logo-dark.png')
+              : require('../../assets/logo-light.png')
+          }
+          style={styles.headerLogo}
+          resizeMode="contain"
+        />
+        <View style={styles.headerSpacer} />
+        <ThemeToggle />
       </View>
 
       <View style={styles.titleSection}>
@@ -57,7 +69,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState
-            icon="paw-outline"
+            image={require('../../assets/icons/paw.png')}
             title="Nenhum pet cadastrado"
             text="Adicione seu primeiro pet e comece a registrar o histórico de saúde dele."
           />
@@ -86,12 +98,16 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
-  logo: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.primaryLight,
-    letterSpacing: 0.8,
+  headerLogo: {
+    width: 150,
+    height: 50,
+  },
+  headerSpacer: {
+    flex: 1,
   },
   titleSection: {
     paddingHorizontal: spacing.lg,

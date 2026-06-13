@@ -21,7 +21,11 @@ export function PetCard({ pet, subtitle, onPress }: Props) {
           <Image source={{ uri: pet.photo }} style={styles.photo} />
         ) : (
           <View style={styles.photoPlaceholder}>
-            <Ionicons name="paw" size={22} color={colors.primaryLight} />
+            <Image
+              source={require('../../assets/icons/paw.png')}
+              style={styles.placeholderPaw}
+              resizeMode="contain"
+            />
           </View>
         )}
       </View>
@@ -66,6 +70,10 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     backgroundColor: colors.surfaceElevated,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  placeholderPaw: {
+    width: 28,
+    height: 28,
   },
   cardInfo: {
     flex: 1,

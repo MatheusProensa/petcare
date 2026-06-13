@@ -90,4 +90,5 @@ export type RootStackParamList = {
   DocumentViewer: { uri: string; title: string; mimeType?: string };
   Stats: { petId: string };
   Search: undefined;
+  About: undefined;
 };

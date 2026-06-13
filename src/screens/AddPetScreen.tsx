@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Input } from '../components/Input';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, savePet } from '../storage';
 import { persistPhoto, deletePhoto } from '../storage/files';
@@ -53,19 +54,39 @@ export default function AddPetScreen() {
       .catch(() => Alert.alert('Erro', 'Não foi possível carregar os dados do pet.'));
   }, [petId]);
 
-  async function pickPhoto() {
+  const PICKER_OPTIONS = {
+    mediaTypes: ['images'],
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.8,
+  } satisfies ImagePicker.ImagePickerOptions;
+
+  async function pickFromGallery() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert('Permissão necessária', 'Precisamos de acesso à galeria para selecionar a foto.');
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
+    const result = await ImagePicker.launchImageLibraryAsync(PICKER_OPTIONS);
     if (!result.canceled) setPhoto(result.assets[0].uri);
+  }
+
+  async function pickFromCamera() {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permissão necessária', 'Precisamos de acesso à câmera para tirar a foto.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync(PICKER_OPTIONS);
+    if (!result.canceled) setPhoto(result.assets[0].uri);
+  }
+
+  function pickPhoto() {
+    Alert.alert('Foto do pet', 'De onde vem a foto?', [
+      { text: 'Tirar foto', onPress: pickFromCamera },
+      { text: 'Galeria', onPress: pickFromGallery },
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
   }
 
   async function handleSave() {
@@ -116,7 +137,7 @@ export default function AddPetScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{petId ? 'Editar Pet' : 'Novo Pet'}</Text>
-        <View style={{ width: 24 }} />
+        <ThemeToggle />
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

@@ -245,3 +245,56 @@ export async function getTutorInfo(): Promise<TutorInfo> {
 export async function saveTutorInfo(info: TutorInfo): Promise<void> {
   await AsyncStorage.setItem(KEYS.TUTOR, JSON.stringify(info));
 }
+
+// --------------------------------- Backup ----------------------------------
+
+const BACKUP_VERSION = 1;
+
+export interface Backup {
+  backupVersion: number;
+  exportedAt: string;
+  pets: Pet[];
+  records: MedicalRecord[];
+  weights: WeightEntry[];
+  documents: PetDocument[];
+  tutor: TutorInfo;
+}
+
+export async function exportBackup(): Promise<string> {
+  const backup: Backup = {
+    backupVersion: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    pets: await readPets(),
+    records: await readRecords(),
+    weights: await readWeights(),
+    documents: await readDocuments(),
+    tutor: await getTutorInfo(),
+  };
+  return JSON.stringify(backup, null, 2);
+}
+
+/**
+ * Substitui todos os dados pelos do backup. Fotos e arquivos de documentos
+ * não fazem parte do JSON (ficam no armazenamento do aparelho de origem),
+ * então referências a eles são descartadas na importação.
+ */
+export async function importBackup(json: string): Promise<{ pets: number; records: number }> {
+  const parsed = JSON.parse(json) as Backup;
+  if (
+    typeof parsed !== 'object' ||
+    parsed === null ||
+    typeof parsed.backupVersion !== 'number' ||
+    !Array.isArray(parsed.pets) ||
+    !Array.isArray(parsed.records) ||
+    !Array.isArray(parsed.weights)
+  ) {
+    throw new Error('Arquivo de backup inválido.');
+  }
+  const pets = parsed.pets.map(p => ({ ...p, photo: undefined }));
+  await write(KEYS.PETS, PETS_VERSION, pets);
+  await write(KEYS.RECORDS, RECORDS_VERSION, parsed.records);
+  await write(KEYS.WEIGHTS, WEIGHTS_VERSION, parsed.weights);
+  await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, []);
+  if (parsed.tutor) await saveTutorInfo(parsed.tutor);
+  return { pets: pets.length, records: parsed.records.length };
+}

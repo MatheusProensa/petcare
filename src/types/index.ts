@@ -84,6 +84,7 @@ export type RootStackParamList = {
   AddWeight: { petId: string; weightId?: string };
   Weight: { petId: string };
   Vaccines: { petId: string };
+  Medications: { petId: string };
   MedicalProfile: { petId: string };
   Emergency: { petId: string };
   Documents: { petId: string; kind?: DocumentKind };

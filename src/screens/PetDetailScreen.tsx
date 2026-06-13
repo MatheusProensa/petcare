@@ -262,6 +262,38 @@ export default function PetDetailScreen() {
         <View style={styles.headerActions}>
           <ThemeToggle size={20} />
           <TouchableOpacity
+            onPress={() => {
+              Alert.alert('Compartilhar prontuário', 'Escolha o formato:', [
+                {
+                  text: 'PDF',
+                  onPress: async () => {
+                    try {
+                      await sharePetPdf(pet!, records, weights);
+                    } catch {
+                      Alert.alert('Erro', 'Não foi possível gerar o PDF.');
+                    }
+                  },
+                },
+                {
+                  text: 'Texto',
+                  onPress: async () => {
+                    try {
+                      await sharePetSummary(pet!, records, weights);
+                    } catch {
+                      // usuário cancelou o compartilhamento
+                    }
+                  },
+                },
+                { text: 'Cancelar', style: 'cancel' },
+              ]);
+            }}
+            hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Compartilhar prontuário"
+          >
+            <Ionicons name="share-social-outline" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={() => navigation.navigate('AddPet', { petId })}
             hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
             accessibilityRole="button"
@@ -332,34 +364,10 @@ export default function PetDetailScreen() {
                 onPress={() => navigation.navigate('Stats', { petId })}
               />
               <QuickAction
-                icon="share-social"
-                label="Compartilhar"
-                color={colors.success}
-                onPress={() => {
-                  Alert.alert('Compartilhar prontuário', 'Escolha o formato:', [
-                    {
-                      text: 'PDF',
-                      onPress: async () => {
-                        try {
-                          await sharePetPdf(pet!, records, weights);
-                        } catch {
-                          Alert.alert('Erro', 'Não foi possível gerar o PDF.');
-                        }
-                      },
-                    },
-                    {
-                      text: 'Texto',
-                      onPress: async () => {
-                        try {
-                          await sharePetSummary(pet!, records, weights);
-                        } catch {
-                          // usuário cancelou o compartilhamento
-                        }
-                      },
-                    },
-                    { text: 'Cancelar', style: 'cancel' },
-                  ]);
-                }}
+                icon="medkit"
+                label="Remédios"
+                color={colors.warning}
+                onPress={() => navigation.navigate('Medications', { petId })}
               />
             </View>
 

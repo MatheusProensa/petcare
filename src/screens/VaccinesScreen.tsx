@@ -98,15 +98,15 @@ export default function VaccinesScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Vacinas</Text>
         <View style={styles.headerActions}>
-        <ThemeToggle size={20} />
-        <TouchableOpacity
-          onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'vaccine' })}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          accessibilityRole="button"
-          accessibilityLabel="Nova vacina"
-        >
-          <Ionicons name="add" size={26} color={colors.primaryLight} />
-        </TouchableOpacity>
+          <ThemeToggle size={20} />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'vaccine' })}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Nova vacina"
+          >
+            <Ionicons name="add" size={26} color={colors.primaryLight} />
+          </TouchableOpacity>
         </View>
       </View>
 

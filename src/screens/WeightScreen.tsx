@@ -73,15 +73,15 @@ export default function WeightScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Controle de Peso</Text>
         <View style={styles.headerActions}>
-        <ThemeToggle size={20} />
-        <TouchableOpacity
-          onPress={() => navigation.navigate('AddWeight', { petId })}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          accessibilityRole="button"
-          accessibilityLabel="Nova pesagem"
-        >
-          <Ionicons name="add" size={26} color={colors.primaryLight} />
-        </TouchableOpacity>
+          <ThemeToggle size={20} />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AddWeight', { petId })}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Nova pesagem"
+          >
+            <Ionicons name="add" size={26} color={colors.primaryLight} />
+          </TouchableOpacity>
         </View>
       </View>
 

@@ -23,6 +23,7 @@ import { ReminderCard } from '../components/ReminderCard';
 import { EmptyState } from '../components/EmptyState';
 import { Button } from '../components/Button';
 import { HealthStatusCard } from '../components/HealthStatusCard';
+import { PetCard } from '../components/PetCard';
 import { RECORD_TYPE_ICONS, RECORD_TYPE_LABELS, recordTypeColors } from '../labels';
 import { displayDate } from '../utils/date';
 import { Pet, MedicalRecord, WeightEntry, RootStackParamList } from '../types';
@@ -75,6 +76,16 @@ export default function DashboardScreen() {
   const petName = useCallback((petId: string): string => {
     return pets.find(p => p.id === petId)?.name ?? '';
   }, [pets]);
+
+  const activeMedsByPet: Record<string, number> = {};
+  records.forEach(r => {
+    if (isActiveMedication(r)) activeMedsByPet[r.petId] = (activeMedsByPet[r.petId] ?? 0) + 1;
+  });
+
+  const alertsByPet: Record<string, number> = {};
+  events.forEach(e => {
+    if (e.pending) alertsByPet[e.petId] = (alertsByPet[e.petId] ?? 0) + 1;
+  });
 
   const handleNewRecord = useCallback(() => {
     if (pets.length === 0) {
@@ -150,6 +161,29 @@ export default function DashboardScreen() {
 
         {hasPets ? (
           <>
+            <View style={styles.section}>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionTitle}>Seus Pets</Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Home')}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Ver todos os pets"
+                >
+                  <Text style={styles.seeAll}>Ver todos</Text>
+                </TouchableOpacity>
+              </View>
+              {pets.map(pet => (
+                <PetCard
+                  key={pet.id}
+                  pet={pet}
+                  activeMeds={activeMedsByPet[pet.id]}
+                  pendingAlerts={alertsByPet[pet.id]}
+                  onPress={() => navigation.navigate('PetDetail', { petId: pet.id })}
+                />
+              ))}
+            </View>
+
             <HealthStatusCard
               records={records}
               weights={weights}
@@ -269,20 +303,6 @@ export default function DashboardScreen() {
                 />
               </View>
             </View>
-
-            <TouchableOpacity
-              style={styles.petsBtn}
-              onPress={() => navigation.navigate('Home')}
-              activeOpacity={0.85}
-              accessibilityRole="button"
-              accessibilityLabel="Ver seus pets"
-            >
-              <Ionicons name="paw" size={18} color={colors.onPrimary} />
-              <Text style={styles.petsBtnText}>
-                Seus Pets ({pets.length})
-              </Text>
-              <Ionicons name="chevron-forward" size={16} color={colors.onPrimary} />
-            </TouchableOpacity>
           </>
         ) : (
           <View style={styles.emptyWrapper}>
@@ -341,6 +361,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   quickActionItem: { flex: 1 },
   section: { gap: spacing.sm, marginBottom: spacing.lg },
   sectionTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text, marginBottom: 2 },
+  sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  seeAll: { fontSize: 13, fontWeight: '600', color: colors.primaryLight },
   calmCard: {
     flexDirection: 'row',
     alignItems: 'center',

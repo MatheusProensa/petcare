@@ -85,8 +85,17 @@ export function calcAge(iso: string): string {
     years--;
     months += 12;
   }
-  if (years === 0 && months === 0) return 'recém-nascido';
-  if (years === 0) return `${months} ${months === 1 ? 'mês' : 'meses'}`;
+  if (years === 0) {
+    const anchor = new Date(birth);
+    anchor.setMonth(anchor.getMonth() + months);
+    const days = Math.max(0, Math.floor((now.getTime() - anchor.getTime()) / 86400000));
+    if (months === 0) {
+      if (days === 0) return 'recém-nascido';
+      return `${days} ${days === 1 ? 'dia' : 'dias'}`;
+    }
+    if (days === 0) return `${months} ${months === 1 ? 'mês' : 'meses'}`;
+    return `${months} ${months === 1 ? 'mês' : 'meses'} e ${days} ${days === 1 ? 'dia' : 'dias'}`;
+  }
   if (months === 0) return `${years} ${years === 1 ? 'ano' : 'anos'}`;
   return `${years} ${years === 1 ? 'ano' : 'anos'} e ${months} ${months === 1 ? 'mês' : 'meses'}`;
 }

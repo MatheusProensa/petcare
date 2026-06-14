@@ -96,9 +96,14 @@ const createStyles = (colors: Palette) =>
     primaryText: { color: colors.onPrimary },
 
     secondary: {
-      backgroundColor: colors.primary + '22',
+      backgroundColor: colors.primary,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.35,
+      shadowRadius: 12,
+      elevation: 6,
     },
-    secondaryText: { color: colors.primary },
+    secondaryText: { color: colors.onPrimary },
 
     destructive: {
       backgroundColor: 'transparent',

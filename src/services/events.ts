@@ -27,8 +27,13 @@ function normalizeTitle(title: string): string {
  * - Vacina/vermífugo: uma dose posterior com o mesmo nome quita o reforço.
  * - Consulta: qualquer consulta posterior à data do registro quita o retorno.
  */
-export function isEventFulfilled(record: MedicalRecord, all: MedicalRecord[]): boolean {
+export function isEventFulfilled(
+  record: MedicalRecord,
+  all: MedicalRecord[],
+  fulfilledIds?: Set<string>,
+): boolean {
   if (!record.nextDate) return false;
+  if (fulfilledIds) return fulfilledIds.has(record.id);
   if (record.type === 'vaccine' || record.type === 'deworming') {
     return all.some(
       other =>
@@ -51,13 +56,45 @@ export function isEventFulfilled(record: MedicalRecord, all: MedicalRecord[]): b
   return false;
 }
 
+/**
+ * Pré-computa quais registros já têm seu próximo evento (reforço/retorno/dose)
+ * cumprido por um registro posterior, evitando uma busca O(n) por registro
+ * em listas longas (anos de histórico).
+ */
+export function getFulfilledRecordIds(records: MedicalRecord[]): Set<string> {
+  const fulfilled = new Set<string>();
+  const groups = new Map<string, MedicalRecord[]>();
+  for (const record of records) {
+    let key: string | null = null;
+    if (record.type === 'vaccine' || record.type === 'deworming') {
+      key = `${record.petId}|${record.type}|${normalizeTitle(record.title)}`;
+    } else if (record.type === 'consultation') {
+      key = `${record.petId}|consultation`;
+    }
+    if (!key) continue;
+    const group = groups.get(key);
+    if (group) group.push(record);
+    else groups.set(key, [record]);
+  }
+  for (const group of groups.values()) {
+    for (const record of group) {
+      if (!record.nextDate) continue;
+      if (group.some(other => other.id !== record.id && other.date > record.date)) {
+        fulfilled.add(record.id);
+      }
+    }
+  }
+  return fulfilled;
+}
+
 export function getVaccineStatus(
   record: MedicalRecord,
   all: MedicalRecord[],
+  fulfilledIds?: Set<string>,
 ): VaccineStatus | null {
   if (record.type !== 'vaccine') return null;
   if (!record.nextDate) return 'ok';
-  if (isEventFulfilled(record, all)) return 'completed';
+  if (isEventFulfilled(record, all, fulfilledIds)) return 'completed';
   const days = daysUntilISO(record.nextDate);
   if (days < 0) return 'overdue';
   if (days <= VACCINE_DUE_SOON_DAYS) return 'due_soon';
@@ -95,6 +132,7 @@ export interface UpcomingEvent {
 
 export function getUpcomingEvents(pets: Pet[], records: MedicalRecord[]): UpcomingEvent[] {
   const petById = new Map(pets.map(p => [p.id, p]));
+  const fulfilledIds = getFulfilledRecordIds(records);
   const events: UpcomingEvent[] = [];
   for (const record of records) {
     const date = eventDateOf(record);
@@ -102,7 +140,7 @@ export function getUpcomingEvents(pets: Pet[], records: MedicalRecord[]): Upcomi
     const pet = petById.get(record.petId);
     if (!pet) continue;
     // Reforço/dose/retorno já cumprido em um registro mais novo: não gera alerta.
-    if (isEventFulfilled(record, records)) continue;
+    if (isEventFulfilled(record, records, fulfilledIds)) continue;
     // Tratamento que chegou ao fim não está "atrasado" — está concluído.
     if (record.type === 'medication' && daysUntilISO(date) < 0) continue;
     const daysUntil = daysUntilISO(date);

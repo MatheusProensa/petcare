@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 import {
   Pet,
   MedicalRecord,
@@ -280,6 +282,18 @@ export async function exportBackup(): Promise<string> {
  * existindo e as fotos/documentos seguem funcionando; em outro aparelho
  * essas referências ficam inválidas e a foto/documento some.
  */
+/** Arquivo local persistido (foto/documento) cuja referência pode não existir mais neste aparelho. */
+async function localFileExists(uri?: string): Promise<boolean> {
+  if (!uri) return false;
+  if (Platform.OS === 'web' || !uri.startsWith('file://')) return true;
+  try {
+    const info = await FileSystem.getInfoAsync(uri);
+    return info.exists;
+  } catch {
+    return false;
+  }
+}
+
 export async function importBackup(json: string): Promise<{ pets: number; records: number }> {
   const parsed = JSON.parse(json) as Backup;
   if (
@@ -293,10 +307,26 @@ export async function importBackup(json: string): Promise<{ pets: number; record
     throw new Error('Arquivo de backup inválido.');
   }
   const documents = Array.isArray(parsed.documents) ? parsed.documents : [];
-  await write(KEYS.PETS, PETS_VERSION, parsed.pets);
+
+  // Em outro aparelho (ou após reinstalar) as URIs de fotos/documentos deixam de existir;
+  // limpamos essas referências para não exibir imagens/arquivos quebrados.
+  const pets = await Promise.all(
+    parsed.pets.map(async pet => {
+      if (pet.photo && !(await localFileExists(pet.photo))) {
+        return { ...pet, photo: undefined };
+      }
+      return pet;
+    }),
+  );
+  const validDocuments: PetDocument[] = [];
+  for (const doc of documents) {
+    if (await localFileExists(doc.uri)) validDocuments.push(doc);
+  }
+
+  await write(KEYS.PETS, PETS_VERSION, pets);
   await write(KEYS.RECORDS, RECORDS_VERSION, parsed.records);
   await write(KEYS.WEIGHTS, WEIGHTS_VERSION, parsed.weights);
-  await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, documents);
+  await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, validDocuments);
   if (parsed.tutor) await saveTutorInfo(parsed.tutor);
   return { pets: parsed.pets.length, records: parsed.records.length };
 }

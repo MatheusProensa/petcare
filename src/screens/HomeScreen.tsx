@@ -29,13 +29,23 @@ export default function HomeScreen() {
         .then(([loadedPets, records]) => {
           setPets(loadedPets);
 
-          const meds: Record<string, number> = {};
-          const alerts: Record<string, number> = {};
-          loadedPets.forEach(pet => {
-            const petRecords = records.filter(r => r.petId === pet.id);
-            meds[pet.id] = petRecords.filter(isActiveMedication).length;
-            alerts[pet.id] = getUpcomingEvents([pet], records).filter(e => e.pending).length;
+          const recordsByPet = new Map<string, typeof records>();
+          records.forEach(r => {
+            const list = recordsByPet.get(r.petId);
+            if (list) list.push(r);
+            else recordsByPet.set(r.petId, [r]);
           });
+
+          const meds: Record<string, number> = {};
+          loadedPets.forEach(pet => {
+            meds[pet.id] = (recordsByPet.get(pet.id) ?? []).filter(isActiveMedication).length;
+          });
+
+          const alerts: Record<string, number> = {};
+          getUpcomingEvents(loadedPets, records).forEach(e => {
+            if (e.pending) alerts[e.petId] = (alerts[e.petId] ?? 0) + 1;
+          });
+
           setActiveMedsByPet(meds);
           setAlertsByPet(alerts);
         })

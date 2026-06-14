@@ -17,7 +17,8 @@ export function WeightCard({ weights }: Props) {
   const previous = weights[1];
   const oldest = weights[weights.length - 1];
   const diff = latest && previous ? latest.weightKg - previous.weightKg : null;
-  const totalDiff = latest && oldest && oldest !== latest ? latest.weightKg - oldest.weightKg : null;
+  const totalDiff =
+    latest && oldest && weights.length >= 3 ? latest.weightKg - oldest.weightKg : null;
 
   return (
     <View>

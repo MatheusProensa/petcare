@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords } from '../storage';
 import { displayDate, formatDaysUntil, daysUntilISO } from '../utils/date';
-import { getVaccineStatus, VaccineStatus } from '../services/events';
+import { getVaccineStatus, getFulfilledRecordIds, VaccineStatus } from '../services/events';
 import { EmptyState } from '../components/EmptyState';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { MedicalRecord, RootStackParamList } from '../types';
@@ -48,11 +48,16 @@ export default function VaccinesScreen() {
     completed: colors.info,
   };
 
-  const overdueCount = vaccines.filter(v => getVaccineStatus(v, allRecords) === 'overdue').length;
-  const dueSoonCount = vaccines.filter(v => getVaccineStatus(v, allRecords) === 'due_soon').length;
+  const fulfilledIds = useMemo(() => getFulfilledRecordIds(allRecords), [allRecords]);
+  const overdueCount = vaccines.filter(
+    v => getVaccineStatus(v, allRecords, fulfilledIds) === 'overdue',
+  ).length;
+  const dueSoonCount = vaccines.filter(
+    v => getVaccineStatus(v, allRecords, fulfilledIds) === 'due_soon',
+  ).length;
 
   function renderVaccine({ item }: { item: MedicalRecord }) {
-    const status = getVaccineStatus(item, allRecords) ?? 'ok';
+    const status = getVaccineStatus(item, allRecords, fulfilledIds) ?? 'ok';
     const details = [item.manufacturer, item.batch, item.clinic].filter(Boolean).join(' · ');
     const showCountdown =
       item.nextDate && (status === 'ok' || status === 'due_soon') && daysUntilISO(item.nextDate) >= 0;

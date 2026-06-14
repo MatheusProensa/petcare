@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -24,8 +24,11 @@ export default function AboutScreen() {
   const { colors, scheme } = useTheme();
   const styles = useThemedStyles(createStyles);
   const version = Constants.expoConfig?.version ?? '1.0.0';
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   async function handleExport() {
+    setExporting(true);
     try {
       const json = await exportBackup();
       const date = new Date().toISOString().slice(0, 10);
@@ -39,6 +42,8 @@ export default function AboutScreen() {
       }
     } catch {
       Alert.alert('Erro', 'Não foi possível gerar o backup.');
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -57,6 +62,7 @@ export default function AboutScreen() {
           text: 'Restaurar',
           style: 'destructive',
           onPress: async () => {
+            setImporting(true);
             try {
               const json = await FileSystem.readAsStringAsync(result.assets[0].uri);
               const { pets, records } = await importBackup(json);
@@ -66,6 +72,8 @@ export default function AboutScreen() {
               );
             } catch {
               Alert.alert('Erro', 'Arquivo de backup inválido ou corrompido.');
+            } finally {
+              setImporting(false);
             }
           },
         },
@@ -117,13 +125,35 @@ export default function AboutScreen() {
 
         <View style={styles.backupSection}>
           <Text style={styles.backupTitle}>Seus dados</Text>
-          <TouchableOpacity style={styles.backupBtn} onPress={handleExport} activeOpacity={0.8}>
-            <Ionicons name="download-outline" size={18} color={colors.primary} />
-            <Text style={styles.backupBtnText}>Exportar backup</Text>
+          <TouchableOpacity
+            style={styles.backupBtn}
+            onPress={handleExport}
+            activeOpacity={0.8}
+            disabled={exporting || importing}
+          >
+            {exporting ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Ionicons name="download-outline" size={18} color={colors.primary} />
+            )}
+            <Text style={styles.backupBtnText}>
+              {exporting ? 'Gerando backup...' : 'Exportar backup'}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.backupBtn} onPress={handleImport} activeOpacity={0.8}>
-            <Ionicons name="refresh-outline" size={18} color={colors.primary} />
-            <Text style={styles.backupBtnText}>Restaurar backup</Text>
+          <TouchableOpacity
+            style={styles.backupBtn}
+            onPress={handleImport}
+            activeOpacity={0.8}
+            disabled={exporting || importing}
+          >
+            {importing ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Ionicons name="refresh-outline" size={18} color={colors.primary} />
+            )}
+            <Text style={styles.backupBtnText}>
+              {importing ? 'Restaurando...' : 'Restaurar backup'}
+            </Text>
           </TouchableOpacity>
           <Text style={styles.backupHint}>
             O backup é um arquivo JSON com pets, registros, pesagens e documentos. Os arquivos de

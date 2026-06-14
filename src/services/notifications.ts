@@ -16,10 +16,12 @@ Notifications.setNotificationHandler({
 const REMINDER_HOUR = 9; // notificações sempre às 9h da manhã
 
 let permissionAsked = false;
+let lastSyncSignature: string | null = null;
 
 export async function ensureNotificationPermission(): Promise<boolean> {
   const settings = await Notifications.getPermissionsAsync();
   if (settings.granted) return true;
+  if (!settings.canAskAgain) return false;
   if (permissionAsked) return false;
   permissionAsked = true;
   const request = await Notifications.requestPermissionsAsync();
@@ -46,6 +48,16 @@ export async function syncEventNotifications(
   const granted = await ensureNotificationPermission();
   if (!granted) return;
 
+  const events = getUpcomingEvents(pets, records);
+  const recordById = new Map(records.map(r => [r.id, r]));
+
+  // Evita cancelar e reagendar tudo de novo se nada relevante mudou desde a última sincronização.
+  const signature = JSON.stringify(
+    events.map(e => [e.recordId, e.date, recordById.get(e.recordId)?.reminderDays ?? null]),
+  );
+  if (signature === lastSyncSignature) return;
+  lastSyncSignature = signature;
+
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('reminders', {
       name: 'Lembretes',
@@ -54,9 +66,6 @@ export async function syncEventNotifications(
   }
 
   await Notifications.cancelAllScheduledNotificationsAsync();
-
-  const events = getUpcomingEvents(pets, records);
-  const recordById = new Map(records.map(r => [r.id, r]));
 
   for (const event of events) {
     const record = recordById.get(event.recordId);

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import {
   RECORD_TYPE_ICONS,
   FREQUENCY_LABELS,
 } from '../labels';
-import { getVaccineStatus, eventDateOf, isEventFulfilled } from '../services/events';
+import { getVaccineStatus, eventDateOf, isEventFulfilled, getFulfilledRecordIds } from '../services/events';
 import { sharePetSummary } from '../services/share';
 import { sharePetPdf } from '../services/pdf';
 import { TimelineItem, TimelineBadge } from '../components/TimelineItem';
@@ -120,6 +120,7 @@ export default function PetDetailScreen() {
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const fulfilledIds = useMemo(() => getFulfilledRecordIds(records), [records]);
 
   useFocusEffect(
     useCallback(() => {
@@ -226,10 +227,10 @@ export default function PetDetailScreen() {
       );
     }
     const record = item.record!;
-    const status = getVaccineStatus(record, records);
+    const status = getVaccineStatus(record, records, fulfilledIds);
     const eventDate = eventDateOf(record);
     const lines = recordLines(record);
-    if (eventDate && daysUntilISO(eventDate) >= 0 && !isEventFulfilled(record, records)) {
+    if (eventDate && daysUntilISO(eventDate) >= 0 && !isEventFulfilled(record, records, fulfilledIds)) {
       lines.push(`⏰ ${formatDaysUntil(daysUntilISO(eventDate))}`);
     }
     return (

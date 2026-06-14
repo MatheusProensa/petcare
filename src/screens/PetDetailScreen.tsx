@@ -420,15 +420,23 @@ export default function PetDetailScreen() {
         ListHeaderComponent={
           <View style={styles.hero}>
             {pet.photo ? (
-              <ImageBackground
-                source={{ uri: pet.photo }}
+              <TouchableOpacity
                 style={styles.heroPhoto}
-                imageStyle={styles.heroPhotoImage}
+                activeOpacity={0.85}
+                onPress={() => navigation.navigate('DocumentViewer', { uri: pet.photo!, title: pet.name })}
+                accessibilityRole="button"
+                accessibilityLabel={`Ver foto de ${pet.name}`}
               >
-                <View style={styles.heroOverlay}>
-                  <Text style={styles.heroName}>{pet.name}</Text>
-                </View>
-              </ImageBackground>
+                <ImageBackground
+                  source={{ uri: pet.photo }}
+                  style={styles.heroPhotoBg}
+                  imageStyle={styles.heroPhotoImage}
+                >
+                  <View style={styles.heroOverlay}>
+                    <Text style={styles.heroName}>{pet.name}</Text>
+                  </View>
+                </ImageBackground>
+              </TouchableOpacity>
             ) : (
               <View style={styles.heroPlaceholder}>
                 <Ionicons name="paw" size={40} color={colors.primaryLight} />
@@ -583,8 +591,11 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     height: 220,
     borderRadius: radius.lg,
     overflow: 'hidden',
-    justifyContent: 'flex-end',
     marginBottom: spacing.sm,
+  },
+  heroPhotoBg: {
+    flex: 1,
+    justifyContent: 'flex-end',
   },
   heroPhotoImage: {
     borderRadius: radius.lg,

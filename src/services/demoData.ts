@@ -39,7 +39,7 @@ export function buildDemoData(): DemoData {
         vetName: 'Dra. Camila Souza',
         vetPhone: '(11) 98888-1234',
       },
-      createdAt: now,
+      createdAt: `${isoDaysFromNow(-360)}T12:00:00.000Z`,
     },
     {
       id: mimiId,
@@ -53,7 +53,7 @@ export function buildDemoData(): DemoData {
         vetName: 'Dr. André Lima',
         vetPhone: '(11) 97777-5678',
       },
-      createdAt: now,
+      createdAt: `${isoDaysFromNow(-400)}T12:00:00.000Z`,
     },
   ];
 
@@ -130,6 +130,33 @@ export function buildDemoData(): DemoData {
       date: isoDaysFromNow(-15),
       title: 'Observação',
       description: 'Apresentou menos apetite por 2 dias, voltou ao normal depois.',
+      createdAt: now,
+    },
+    {
+      id: 'demo-rec-8',
+      petId: pitocoId,
+      type: 'memory',
+      date: isoDaysFromNow(-360),
+      title: 'Chegou ao lar',
+      description: 'Primeiro dia em casa, um pouco assustado mas já fazendo bagunça.',
+      createdAt: now,
+    },
+    {
+      id: 'demo-rec-9',
+      petId: pitocoId,
+      type: 'memory',
+      date: isoDaysFromNow(-180),
+      title: 'Primeiro passeio no parque',
+      description: 'Adorou correr atrás dos pássaros e conhecer outros cães.',
+      createdAt: now,
+    },
+    {
+      id: 'demo-rec-10',
+      petId: mimiId,
+      type: 'memory',
+      date: isoDaysFromNow(-400),
+      title: 'Chegou ao lar',
+      description: 'Curiosa desde o primeiro momento, explorou cada cantinho da casa.',
       createdAt: now,
     },
   ];

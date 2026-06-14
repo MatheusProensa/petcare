@@ -8,16 +8,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Button } from '../components/Button';
 import { useToast } from '../hooks/useToast';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, saveRecord, deleteRecord } from '../storage';
+import { persistPhoto, deletePhoto } from '../storage/files';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
 import {
   RECORD_TYPE_LABELS,
@@ -29,7 +32,7 @@ import { MedicalRecord, RecordType, Frequency, RootStackParamList } from '../typ
 
 type Route = RouteProp<RootStackParamList, 'AddRecord'>;
 
-const RECORD_TYPES: RecordType[] = ['vaccine', 'consultation', 'medication', 'deworming', 'note'];
+const RECORD_TYPES: RecordType[] = ['vaccine', 'consultation', 'medication', 'deworming', 'note', 'memory'];
 const FREQUENCIES: Frequency[] = ['once_daily', 'twice_daily', 'every_8h', 'every_12h', 'continuous'];
 
 const TITLE_LABELS: Record<RecordType, string> = {
@@ -38,6 +41,7 @@ const TITLE_LABELS: Record<RecordType, string> = {
   medication: 'Nome do medicamento',
   deworming: 'Nome do vermífugo',
   note: 'Título',
+  memory: 'Título da memória',
 };
 
 const TITLE_PLACEHOLDERS: Record<RecordType, string> = {
@@ -46,6 +50,7 @@ const TITLE_PLACEHOLDERS: Record<RecordType, string> = {
   medication: 'Ex: Antibiótico 250mg',
   deworming: 'Ex: Vermífugo oral',
   note: 'Ex: Mudança de ração',
+  memory: 'Ex: Primeiro dia em casa',
 };
 
 const DATE_LABELS: Record<RecordType, string> = {
@@ -54,6 +59,7 @@ const DATE_LABELS: Record<RecordType, string> = {
   medication: 'Data de início',
   deworming: 'Data de aplicação',
   note: 'Data',
+  memory: 'Data da memória',
 };
 
 const NEXT_DATE_LABELS: Partial<Record<RecordType, string>> = {
@@ -92,6 +98,7 @@ export default function AddRecordScreen() {
   const [description, setDescription] = useState('');
   const [reminderDays, setReminderDays] = useState<number[]>([]);
   const [customReminder, setCustomReminder] = useState('');
+  const [photo, setPhoto] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -114,6 +121,7 @@ export default function AddRecordScreen() {
         setVet(record.vet ?? '');
         setDiagnosis(record.diagnosis ?? '');
         setDescription(record.description ?? '');
+        setPhoto(record.photo);
         const days = record.reminderDays ?? [];
         const presets = REMINDER_OPTIONS.map(o => o.days);
         setReminderDays(days.filter(d => presets.includes(d)));
@@ -124,14 +132,15 @@ export default function AddRecordScreen() {
   }, [petId, recordId]);
 
   const futureDate = type === 'medication' ? endDate : nextDate;
-  const showReminders = type !== 'note' && futureDate.length === 10;
+  const showReminders = type !== 'note' && type !== 'memory' && futureDate.length === 10;
 
   function handleTypeChange(t: RecordType) {
     setType(t);
-    if (t === 'note') {
+    if (t === 'note' || t === 'memory') {
       setNextDate('');
       setEndDate('');
       setFrequency(undefined);
+      setDosage('');
       setReminderDays([]);
       setCustomReminder('');
     } else if (t === 'medication') {
@@ -141,6 +150,45 @@ export default function AddRecordScreen() {
       setFrequency(undefined);
       setDosage('');
     }
+  }
+
+  const PHOTO_PICKER_OPTIONS = {
+    mediaTypes: ['images'],
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.8,
+  } satisfies ImagePicker.ImagePickerOptions;
+
+  async function pickPhotoFromGallery() {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permissão necessária', 'Precisamos de acesso à galeria para selecionar a foto.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync(PHOTO_PICKER_OPTIONS);
+    if (!result.canceled) setPhoto(result.assets[0].uri);
+  }
+
+  async function pickPhotoFromCamera() {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permissão necessária', 'Precisamos de acesso à câmera para tirar a foto.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync(PHOTO_PICKER_OPTIONS);
+    if (!result.canceled) setPhoto(result.assets[0].uri);
+  }
+
+  function pickPhoto() {
+    const options: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'destructive' }> = [
+      { text: 'Tirar foto', onPress: pickPhotoFromCamera },
+      { text: 'Galeria', onPress: pickPhotoFromGallery },
+    ];
+    if (photo) {
+      options.push({ text: 'Remover foto', onPress: () => setPhoto(undefined), style: 'destructive' });
+    }
+    options.push({ text: 'Cancelar', style: 'cancel' });
+    Alert.alert('Foto da memória', 'De onde vem a foto?', options);
   }
 
   function toggleReminder(days: number) {
@@ -210,6 +258,15 @@ export default function AddRecordScreen() {
       if (showReminders && allReminders.length > 0) {
         record.reminderDays = allReminders.sort((a, b) => a - b);
       }
+      if (type === 'memory') {
+        const storedPhoto = photo ? await persistPhoto(photo, record.id) : undefined;
+        if (original?.photo && original.photo !== storedPhoto) {
+          await deletePhoto(original.photo);
+        }
+        record.photo = storedPhoto;
+      } else if (original?.photo) {
+        await deletePhoto(original.photo);
+      }
       await saveRecord(record);
       navigation.goBack();
       showToast(recordId ? 'Registro atualizado' : 'Registro salvo com sucesso');
@@ -229,6 +286,7 @@ export default function AddRecordScreen() {
         onPress: async () => {
           try {
             await deleteRecord(original.id);
+            if (original.photo) await deletePhoto(original.photo);
             navigation.goBack();
             showToast('Registro excluído');
           } catch {
@@ -423,16 +481,34 @@ export default function AddRecordScreen() {
           )}
 
           <Input
-            label={type === 'note' ? 'Descrição' : 'Observações (opcional)'}
+            label={type === 'note' || type === 'memory' ? 'Descrição' : 'Observações (opcional)'}
             placeholder={
               type === 'note'
                 ? 'Ex: Vomitou durante a madrugada, mas comeu normalmente pela manhã'
+                : type === 'memory'
+                ? 'Ex: Hoje foi o primeiro dia em nossa casa, estava com muito medo no início, mas logo se acostumou'
                 : 'Anotações adicionais'
             }
             value={description}
             onChangeText={setDescription}
             multiline
           />
+
+          {type === 'memory' && (
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Foto (opcional)</Text>
+              <TouchableOpacity style={styles.photoPicker} onPress={pickPhoto} activeOpacity={0.8}>
+                {photo ? (
+                  <Image source={{ uri: photo }} style={styles.photoPreview} />
+                ) : (
+                  <View style={styles.photoPlaceholder}>
+                    <Ionicons name="image-outline" size={24} color={colors.textMuted} />
+                    <Text style={styles.photoPlaceholderText}>Adicionar foto</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
 
           {showReminders && (
             <View style={styles.field}>
@@ -522,6 +598,27 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     backgroundColor: colors.primary + '22',
     borderColor: colors.primaryLight,
   },
+  photoPicker: {
+    borderRadius: radius.md,
+    overflow: 'hidden',
+  },
+  photoPreview: {
+    width: '100%',
+    height: 160,
+    borderRadius: radius.md,
+  },
+  photoPlaceholder: {
+    height: 120,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: 'dashed',
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  photoPlaceholderText: { fontSize: 13, color: colors.textMuted },
   deleteBtn: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,7 +1,7 @@
 // Chaves estáveis persistidas no storage — a tradução para exibição
 // fica em src/labels.ts. Não renomear sem escrever migração.
 export type Species = 'dog' | 'cat' | 'bird' | 'other';
-export type RecordType = 'vaccine' | 'consultation' | 'medication' | 'deworming' | 'note';
+export type RecordType = 'vaccine' | 'consultation' | 'medication' | 'deworming' | 'note' | 'memory';
 export type Frequency = 'once_daily' | 'twice_daily' | 'every_8h' | 'every_12h' | 'continuous';
 export type DocumentKind = 'exam' | 'prescription' | 'vaccination_card' | 'other';
 
@@ -50,6 +50,8 @@ export interface MedicalRecord {
   diagnosis?: string;
   /** Dias de antecedência escolhidos para lembrar do próximo evento. */
   reminderDays?: number[];
+  /** Foto de uma memória (registro do tipo "memory"). */
+  photo?: string;
   createdAt: string;
 }
 
@@ -106,6 +108,9 @@ export type RootStackParamList = {
   Documents: { petId: string; kind?: DocumentKind };
   DocumentViewer: { uri: string; title: string; mimeType?: string };
   Stats: { petId: string };
+  Lifeline: { petId: string };
+  Growth: { petId: string };
+  Treatments: { petId: string };
   Search: undefined;
   About: undefined;
 };

@@ -96,6 +96,16 @@ export default function WeightScreen() {
             <View style={styles.summary}>
               <WeightCard weights={weights} />
               <WeightChart weights={weights} />
+              {weights.length >= 2 && (
+                <TouchableOpacity
+                  style={styles.growthLink}
+                  onPress={() => navigation.navigate('Growth', { petId })}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.growthLinkText}>Ver evolução completa</Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.primaryLight} />
+                </TouchableOpacity>
+              )}
               <Text style={styles.sectionTitle}>Histórico completo</Text>
             </View>
           ) : null
@@ -127,6 +137,14 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   summary: { gap: spacing.md, marginBottom: spacing.md },
+  growthLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: spacing.xs,
+  },
+  growthLinkText: { fontSize: 13, fontWeight: '600', color: colors.primaryLight },
   sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginTop: spacing.sm },
   emptyWrapper: { paddingTop: spacing.xxl },
   row: {

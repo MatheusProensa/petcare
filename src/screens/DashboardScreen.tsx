@@ -15,15 +15,17 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
 import { petsRepository } from '../repositories/petsRepository';
 import { recordsRepository } from '../repositories/recordsRepository';
+import { weightsRepository } from '../repositories/weightsRepository';
 import { getUpcomingEvents, isActiveMedication, UpcomingEvent } from '../services/events';
 import { syncEventNotifications } from '../services/notifications';
 import { StatCard } from '../components/StatCard';
 import { ReminderCard } from '../components/ReminderCard';
 import { EmptyState } from '../components/EmptyState';
 import { Button } from '../components/Button';
+import { HealthStatusCard } from '../components/HealthStatusCard';
 import { RECORD_TYPE_ICONS, RECORD_TYPE_LABELS, recordTypeColors } from '../labels';
 import { displayDate } from '../utils/date';
-import { Pet, MedicalRecord, RootStackParamList } from '../types';
+import { Pet, MedicalRecord, WeightEntry, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
 
@@ -41,16 +43,18 @@ export default function DashboardScreen() {
   const TYPE_COLORS = recordTypeColors(colors);
   const [pets, setPets] = useState<Pet[]>([]);
   const [records, setRecords] = useState<MedicalRecord[]>([]);
+  const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [activeMedsCount, setActiveMedsCount] = useState(0);
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      Promise.all([petsRepository.getAll(), recordsRepository.getAll()])
-        .then(([loadedPets, loadedRecords]) => {
+      Promise.all([petsRepository.getAll(), recordsRepository.getAll(), weightsRepository.getAll()])
+        .then(([loadedPets, loadedRecords, loadedWeights]) => {
           setPets(loadedPets);
           setRecords(loadedRecords);
+          setWeights(loadedWeights);
           setEvents(getUpcomingEvents(loadedPets, loadedRecords));
           setActiveMedsCount(loadedRecords.filter(isActiveMedication).length);
           // Mantém as notificações locais alinhadas com os eventos atuais.
@@ -146,22 +150,13 @@ export default function DashboardScreen() {
 
         {hasPets ? (
           <>
-            <View style={styles.statsRow}>
-              <StatCard icon="paw" label="Pets" value={pets.length} />
-              <StatCard
-                icon="notifications"
-                label="Alertas pendentes"
-                value={alerts.length}
-                color={alerts.length > 0 ? colors.warning : colors.success}
-              />
-              <StatCard
-                icon="medkit"
-                label="Remédios ativos"
-                value={activeMedsCount}
-                color={colors.accent}
-                onPress={() => navigation.navigate('Home')}
-              />
-            </View>
+            <HealthStatusCard
+              records={records}
+              weights={weights}
+              pets={pets}
+              events={events}
+              activeMedsCount={activeMedsCount}
+            />
 
             <View style={styles.quickActions}>
               <View style={styles.quickActionItem}>
@@ -254,6 +249,26 @@ export default function DashboardScreen() {
                 ))}
               </View>
             )}
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Estatísticas rápidas</Text>
+              <View style={styles.statsRow}>
+                <StatCard icon="paw" label="Pets" value={pets.length} />
+                <StatCard
+                  icon="notifications"
+                  label="Alertas pendentes"
+                  value={alerts.length}
+                  color={alerts.length > 0 ? colors.warning : colors.success}
+                />
+                <StatCard
+                  icon="medkit"
+                  label="Remédios ativos"
+                  value={activeMedsCount}
+                  color={colors.accent}
+                  onPress={() => navigation.navigate('Home')}
+                />
+              </View>
+            </View>
 
             <TouchableOpacity
               style={styles.petsBtn}

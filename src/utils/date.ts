@@ -52,6 +52,28 @@ export function formatDaysUntil(days: number): string {
   return `há ${-days} dias`;
 }
 
+/** "X anos e Y meses" / "X meses" / "X dias" entre uma data ISO e hoje. */
+export function formatDuration(iso: string): string {
+  if (!iso) return '';
+  const start = new Date(iso);
+  const now = new Date();
+  if (start > now) return '';
+  let years = now.getFullYear() - start.getFullYear();
+  let months = now.getMonth() - start.getMonth();
+  if (months < 0 || (months === 0 && now.getDate() < start.getDate())) {
+    years--;
+    months += 12;
+  }
+  if (years > 0) {
+    return months > 0
+      ? `${years} ${years === 1 ? 'ano' : 'anos'} e ${months} ${months === 1 ? 'mês' : 'meses'}`
+      : `${years} ${years === 1 ? 'ano' : 'anos'}`;
+  }
+  if (months > 0) return `${months} ${months === 1 ? 'mês' : 'meses'}`;
+  const days = Math.max(0, Math.round((now.getTime() - start.getTime()) / 86400000));
+  return `${days} ${days === 1 ? 'dia' : 'dias'}`;
+}
+
 export function calcAge(iso: string): string {
   if (!iso) return '';
   const birth = new Date(iso);

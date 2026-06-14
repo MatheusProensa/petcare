@@ -15,6 +15,7 @@ export const RECORD_TYPE_LABELS: Record<RecordType, string> = {
   medication: 'Remédio',
   deworming: 'Vermífugo',
   note: 'Observação',
+  memory: 'Memória',
 };
 
 export function recordTypeColors(colors: Palette): Record<RecordType, string> {
@@ -24,6 +25,7 @@ export function recordTypeColors(colors: Palette): Record<RecordType, string> {
     medication: colors.warning,
     deworming: colors.accent,
     note: colors.textSubtle,
+    memory: colors.accent,
   };
 }
 
@@ -33,6 +35,7 @@ export const RECORD_TYPE_ICONS: Record<RecordType, keyof typeof Ionicons.glyphMa
   medication: 'medkit',
   deworming: 'bug',
   note: 'document-text',
+  memory: 'heart',
 };
 
 export const FREQUENCY_LABELS: Record<Frequency, string> = {

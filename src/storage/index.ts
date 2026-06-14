@@ -216,6 +216,10 @@ export async function deleteRecord(recordId: string): Promise<void> {
 
 // ---------------------------------- Peso -----------------------------------
 
+export async function getAllWeights(): Promise<WeightEntry[]> {
+  return readWeights();
+}
+
 export async function getWeights(petId: string): Promise<WeightEntry[]> {
   const all = await readWeights();
   return all.filter(w => w.petId === petId).sort((a, b) => b.date.localeCompare(a.date));

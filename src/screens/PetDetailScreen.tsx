@@ -41,7 +41,7 @@ import { Pet, MedicalRecord, WeightEntry, PetDocument, RootStackParamList } from
 type Nav = NativeStackNavigationProp<RootStackParamList, 'PetDetail'>;
 type Route = RouteProp<RootStackParamList, 'PetDetail'>;
 
-type FilterKey = 'all' | 'vaccine' | 'consultation' | 'medication' | 'deworming' | 'note' | 'weight' | 'document';
+type FilterKey = 'all' | 'vaccine' | 'consultation' | 'medication' | 'deworming' | 'note' | 'memory' | 'weight' | 'document';
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'all', label: 'Todos' },
@@ -49,6 +49,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'consultation', label: 'Consultas' },
   { key: 'medication', label: 'Remédios' },
   { key: 'deworming', label: 'Vermífugos' },
+  { key: 'memory', label: 'Memórias' },
   { key: 'weight', label: 'Peso' },
   { key: 'document', label: 'Documentos' },
   { key: 'note', label: 'Observações' },
@@ -466,6 +467,18 @@ export default function PetDetailScreen() {
                 label="Remédios"
                 color={colors.warning}
                 onPress={() => navigation.navigate('Medications', { petId })}
+              />
+              <QuickAction
+                icon="time"
+                label="Linha da Vida"
+                color={colors.accent}
+                onPress={() => navigation.navigate('Lifeline', { petId })}
+              />
+              <QuickAction
+                icon="bandage"
+                label="Tratamentos"
+                color={colors.info}
+                onPress={() => navigation.navigate('Treatments', { petId })}
               />
             </View>
 

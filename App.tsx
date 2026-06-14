@@ -24,6 +24,9 @@ import DocumentViewerScreen from './src/screens/DocumentViewerScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import SearchScreen from './src/screens/SearchScreen';
 import AboutScreen from './src/screens/AboutScreen';
+import LifelineScreen from './src/screens/LifelineScreen';
+import GrowthScreen from './src/screens/GrowthScreen';
+import TreatmentsScreen from './src/screens/TreatmentsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -62,6 +65,9 @@ function Root({ initialRouteName }: { initialRouteName: keyof RootStackParamList
         <Stack.Screen name="Documents" component={DocumentsScreen} />
         <Stack.Screen name="DocumentViewer" component={DocumentViewerScreen} />
         <Stack.Screen name="Stats" component={StatsScreen} />
+        <Stack.Screen name="Lifeline" component={LifelineScreen} />
+        <Stack.Screen name="Growth" component={GrowthScreen} />
+        <Stack.Screen name="Treatments" component={TreatmentsScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
         <Stack.Screen name="About" component={AboutScreen} />
       </Stack.Navigator>

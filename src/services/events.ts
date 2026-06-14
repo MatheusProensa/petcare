@@ -104,7 +104,7 @@ export function getVaccineStatus(
 /** Data do próximo evento gerado por um registro (reforço, retorno, dose, fim). */
 export function eventDateOf(record: MedicalRecord): string | undefined {
   if (record.type === 'medication') return record.endDate;
-  if (record.type === 'note') return undefined;
+  if (record.type === 'note' || record.type === 'memory') return undefined;
   return record.nextDate;
 }
 

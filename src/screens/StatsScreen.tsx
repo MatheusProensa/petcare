@@ -5,15 +5,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, getWeights } from '../storage';
+import { petsRepository } from '../repositories/petsRepository';
+import { documentsRepository } from '../repositories/documentsRepository';
 import { RECORD_TYPE_LABELS, recordTypeColors, RECORD_TYPE_ICONS } from '../labels';
 import { WeightChart } from '../components/WeightChart';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { EmptyState } from '../components/EmptyState';
-import { MedicalRecord, WeightEntry, RecordType, RootStackParamList } from '../types';
+import { formatDuration } from '../utils/date';
+import { Pet, MedicalRecord, WeightEntry, PetDocument, RecordType, RootStackParamList } from '../types';
 
 type Route = RouteProp<RootStackParamList, 'Stats'>;
 
-const TYPES: RecordType[] = ['vaccine', 'consultation', 'medication', 'deworming', 'note'];
+const TYPES: RecordType[] = ['vaccine', 'consultation', 'medication', 'deworming', 'note', 'memory'];
 
 export default function StatsScreen() {
   const navigation = useNavigation();
@@ -21,14 +24,19 @@ export default function StatsScreen() {
   const styles = useThemedStyles(createStyles);
   const RECORD_TYPE_COLORS = recordTypeColors(colors);
   const { petId } = useRoute<Route>().params;
+  const [pet, setPet] = useState<Pet | null>(null);
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [weights, setWeights] = useState<WeightEntry[]>([]);
+  const [documents, setDocuments] = useState<PetDocument[]>([]);
 
   useFocusEffect(
     useCallback(() => {
-      Promise.all([getRecords(petId).then(setRecords), getWeights(petId).then(setWeights)]).catch(
-        () => Alert.alert('Erro', 'Não foi possível carregar as estatísticas.'),
-      );
+      Promise.all([
+        petsRepository.getAll().then(pets => setPet(pets.find(p => p.id === petId) ?? null)),
+        getRecords(petId).then(setRecords),
+        getWeights(petId).then(setWeights),
+        documentsRepository.getByPet(petId).then(setDocuments),
+      ]).catch(() => Alert.alert('Erro', 'Não foi possível carregar as estatísticas.'));
     }, [petId]),
   );
 
@@ -37,7 +45,17 @@ export default function StatsScreen() {
     count: records.filter(r => r.type === type).length,
   }));
   const maxCount = Math.max(1, ...counts.map(c => c.count));
-  const total = records.length + weights.length;
+  const total = records.length + weights.length + documents.length;
+
+  const earliestDate = [
+    pet?.createdAt?.slice(0, 10),
+    ...records.map(r => r.date),
+    ...weights.map(w => w.date),
+    ...documents.map(d => d.date),
+  ]
+    .filter((d): d is string => !!d)
+    .sort()[0];
+  const trackingDuration = earliestDate ? formatDuration(earliestDate) : null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -114,6 +132,19 @@ export default function StatsScreen() {
           </View>
         </View>
 
+        <View style={styles.cardsRow}>
+          <View style={styles.smallCard}>
+            <Text style={styles.smallCardLabel}>Total de documentos</Text>
+            <Text style={styles.smallCardValue}>{documents.length}</Text>
+          </View>
+          {trackingDuration && (
+            <View style={styles.smallCard}>
+              <Text style={styles.smallCardLabel}>Tempo de acompanhamento</Text>
+              <Text style={styles.smallCardValue}>{trackingDuration}</Text>
+            </View>
+          )}
+        </View>
+
         {weights.length >= 2 ? (
           <WeightChart weights={weights} title="Evolução de peso" />
         ) : (
@@ -177,4 +208,16 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   barFill: { height: '100%', borderRadius: 7 },
   barCount: { width: 24, fontSize: 13, fontWeight: '600', color: colors.text, textAlign: 'right' },
   hint: { fontSize: 13, color: colors.textMuted, lineHeight: 19 },
+  cardsRow: { flexDirection: 'row', gap: spacing.md },
+  smallCard: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    gap: 4,
+  },
+  smallCardLabel: { fontSize: 12, color: colors.textMuted },
+  smallCardValue: { fontSize: 18, fontWeight: '700', color: colors.text },
 });

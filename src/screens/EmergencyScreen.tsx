@@ -14,10 +14,12 @@ import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navig
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { Button } from '../components/Button';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { useToast } from '../hooks/useToast';
 import { getPets, getRecords, getTutorInfo, saveTutorInfo } from '../storage';
 import { isActiveMedication } from '../services/events';
+import { shareTravelKitPdf } from '../services/travelKit';
 import { FREQUENCY_LABELS } from '../labels';
 import { Pet, MedicalRecord, RootStackParamList } from '../types';
 
@@ -42,16 +44,21 @@ export default function EmergencyScreen() {
   const { petId } = useRoute<Route>().params;
 
   const [pet, setPet] = useState<Pet | null>(null);
+  const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [activeMeds, setActiveMeds] = useState<MedicalRecord[]>([]);
   const [tutorName, setTutorName] = useState('');
   const [tutorPhone, setTutorPhone] = useState('');
   const [editingTutor, setEditingTutor] = useState(false);
+  const [generatingKit, setGeneratingKit] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       Promise.all([
         getPets().then(pets => setPet(pets.find(p => p.id === petId) ?? null)),
-        getRecords(petId).then(records => setActiveMeds(records.filter(isActiveMedication))),
+        getRecords(petId).then(loaded => {
+          setRecords(loaded);
+          setActiveMeds(loaded.filter(isActiveMedication));
+        }),
         getTutorInfo().then(info => {
           setTutorName(info.name);
           setTutorPhone(info.phone);
@@ -59,6 +66,18 @@ export default function EmergencyScreen() {
       ]).catch(() => Alert.alert('Erro', 'Não foi possível carregar os dados de emergência.'));
     }, [petId]),
   );
+
+  const handleGenerateTravelKit = useCallback(async () => {
+    if (!pet) return;
+    setGeneratingKit(true);
+    try {
+      await shareTravelKitPdf(pet, { name: tutorName, phone: tutorPhone }, records);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível gerar o Kit Viagem.');
+    } finally {
+      setGeneratingKit(false);
+    }
+  }, [pet, tutorName, tutorPhone, records]);
 
   async function handleSaveTutor() {
     if (tutorPhone.trim() && !/\d/.test(tutorPhone)) {
@@ -219,6 +238,14 @@ export default function EmergencyScreen() {
             ))
           )}
         </View>
+
+        <Button
+          label="Gerar Kit Viagem"
+          icon="airplane-outline"
+          variant="secondary"
+          loading={generatingKit}
+          onPress={handleGenerateTravelKit}
+        />
       </ScrollView>
     </SafeAreaView>
   );

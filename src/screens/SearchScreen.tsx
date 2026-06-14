@@ -23,7 +23,7 @@ import { Pet, MedicalRecord, RecordType, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Search'>;
 
-const TYPES: RecordType[] = ['vaccine', 'consultation', 'medication', 'deworming', 'note'];
+const TYPES: RecordType[] = ['vaccine', 'consultation', 'medication', 'deworming', 'memory', 'note'];
 
 function matchesQuery(record: MedicalRecord, query: string): boolean {
   const q = query.toLowerCase();

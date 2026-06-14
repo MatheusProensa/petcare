@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, radius, useThemedStyles, Palette } from '../theme';
 
@@ -14,6 +14,7 @@ interface Props {
   dateLabel: string;
   title: string;
   lines?: string[];
+  photos?: string[];
   badge?: TimelineBadge;
   isLast?: boolean;
   onPress?: () => void;
@@ -26,6 +27,7 @@ export const TimelineItem = React.memo(function TimelineItem({
   dateLabel,
   title,
   lines,
+  photos,
   badge,
   isLast,
   onPress,
@@ -62,6 +64,13 @@ export const TimelineItem = React.memo(function TimelineItem({
             {line}
           </Text>
         ))}
+        {photos && photos.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoRow}>
+            {photos.map((uri, i) => (
+              <Image key={i} source={{ uri }} style={styles.photoThumb} />
+            ))}
+          </ScrollView>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -128,5 +137,14 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     fontSize: 13,
     color: colors.textSubtle,
     lineHeight: 19,
+  },
+  photoRow: {
+    marginTop: spacing.xs,
+  },
+  photoThumb: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.md,
+    marginRight: spacing.xs,
   },
 });

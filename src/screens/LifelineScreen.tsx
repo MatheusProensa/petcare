@@ -167,7 +167,7 @@ export default function LifelineScreen() {
     const record = item.record!;
     const lines: string[] = [];
     if (record.description) lines.push(record.description);
-    if (record.type === 'memory' && record.photo) lines.push('📷 Com foto');
+    const photos = record.type === 'memory' ? (record.photos ?? (record.photo ? [record.photo] : [])) : undefined;
 
     return (
       <TimelineItem
@@ -176,6 +176,7 @@ export default function LifelineScreen() {
         dateLabel={`${displayDate(record.date)} · ${RECORD_TYPE_LABELS[record.type]}`}
         title={`${EMOJI[record.type]} ${record.title}`}
         lines={lines}
+        photos={photos}
         isLast={isLast}
         onPress={() => navigation.navigate('AddRecord', { petId, recordId: record.id })}
       />

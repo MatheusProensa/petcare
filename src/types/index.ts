@@ -50,8 +50,10 @@ export interface MedicalRecord {
   diagnosis?: string;
   /** Dias de antecedência escolhidos para lembrar do próximo evento. */
   reminderDays?: number[];
-  /** Foto de uma memória (registro do tipo "memory"). */
+  /** @deprecated use `photos` — mantido para ler registros antigos. */
   photo?: string;
+  /** Fotos de uma memória (registro do tipo "memory"). */
+  photos?: string[];
   createdAt: string;
 }
 

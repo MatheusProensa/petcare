@@ -35,6 +35,20 @@ function triggerAt(dateISO: string, daysBefore: number): Date | null {
   return when.getTime() > Date.now() ? when : null;
 }
 
+/** Trigger anual recorrente no mesmo dia/mês da data informada. */
+function yearlyTriggerAt(dateISO: string): Notifications.CalendarTriggerInput | null {
+  const [, m, d] = dateISO.split('-').map(Number);
+  if (!m || !d) return null;
+  return {
+    type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+    month: m,
+    day: d,
+    hour: REMINDER_HOUR,
+    minute: 0,
+    repeats: true,
+  };
+}
+
 /**
  * Reagenda todas as notificações locais a partir dos eventos futuros
  * (reforço de vacina, retorno, fim de tratamento, próxima dose).
@@ -50,11 +64,14 @@ export async function syncEventNotifications(
 
   const events = getUpcomingEvents(pets, records);
   const recordById = new Map(records.map(r => [r.id, r]));
+  const memories = records.filter(r => r.type === 'memory');
 
   // Evita cancelar e reagendar tudo de novo se nada relevante mudou desde a última sincronização.
-  const signature = JSON.stringify(
+  const signature = JSON.stringify([
     events.map(e => [e.recordId, e.date, recordById.get(e.recordId)?.reminderDays ?? null]),
-  );
+    pets.map(p => [p.id, p.createdAt]),
+    memories.map(m => [m.id, m.date, m.title]),
+  ]);
   if (signature === lastSyncSignature) return;
   lastSyncSignature = signature;
 
@@ -89,5 +106,35 @@ export async function syncEventNotifications(
         },
       });
     }
+  }
+
+  // Aniversário de chegada ao lar (recorrente, todo ano).
+  for (const pet of pets) {
+    if (!pet.createdAt) continue;
+    const trigger = yearlyTriggerAt(pet.createdAt.slice(0, 10));
+    if (!trigger) continue;
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `🎉 Aniversário de chegada de ${pet.name}!`,
+        body: `Hoje é o dia em que ${pet.name} chegou na sua família. Que tal guardar essa memória no PetCare?`,
+        data: { petId: pet.id },
+      },
+      trigger,
+    });
+  }
+
+  // Memórias com data marcante (recorrente, todo ano).
+  for (const memory of memories) {
+    const trigger = yearlyTriggerAt(memory.date);
+    if (!trigger) continue;
+    const pet = pets.find(p => p.id === memory.petId);
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `❤️ Memória de ${pet?.name ?? 'seu pet'}`,
+        body: `Há algum tempo: "${memory.title}". Reviva esse momento na Linha da Vida!`,
+        data: { petId: memory.petId, recordId: memory.id },
+      },
+      trigger,
+    });
   }
 }

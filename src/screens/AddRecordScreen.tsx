@@ -98,7 +98,7 @@ export default function AddRecordScreen() {
   const [description, setDescription] = useState('');
   const [reminderDays, setReminderDays] = useState<number[]>([]);
   const [customReminder, setCustomReminder] = useState('');
-  const [photo, setPhoto] = useState<string | undefined>();
+  const [photos, setPhotos] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -121,7 +121,7 @@ export default function AddRecordScreen() {
         setVet(record.vet ?? '');
         setDiagnosis(record.diagnosis ?? '');
         setDescription(record.description ?? '');
-        setPhoto(record.photo);
+        setPhotos(record.photos ?? (record.photo ? [record.photo] : []));
         const days = record.reminderDays ?? [];
         const presets = REMINDER_OPTIONS.map(o => o.days);
         setReminderDays(days.filter(d => presets.includes(d)));
@@ -159,14 +159,20 @@ export default function AddRecordScreen() {
     quality: 0.8,
   } satisfies ImagePicker.ImagePickerOptions;
 
-  async function pickPhotoFromGallery() {
+  const GALLERY_PICKER_OPTIONS = {
+    mediaTypes: ['images'],
+    quality: 0.8,
+    allowsMultipleSelection: true,
+  } satisfies ImagePicker.ImagePickerOptions;
+
+  async function pickPhotosFromGallery() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Permissão necessária', 'Precisamos de acesso à galeria para selecionar a foto.');
+      Alert.alert('Permissão necessária', 'Precisamos de acesso à galeria para selecionar fotos.');
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync(PHOTO_PICKER_OPTIONS);
-    if (!result.canceled) setPhoto(result.assets[0].uri);
+    const result = await ImagePicker.launchImageLibraryAsync(GALLERY_PICKER_OPTIONS);
+    if (!result.canceled) setPhotos(prev => [...prev, ...result.assets.map(a => a.uri)]);
   }
 
   async function pickPhotoFromCamera() {
@@ -176,19 +182,22 @@ export default function AddRecordScreen() {
       return;
     }
     const result = await ImagePicker.launchCameraAsync(PHOTO_PICKER_OPTIONS);
-    if (!result.canceled) setPhoto(result.assets[0].uri);
+    if (!result.canceled) setPhotos(prev => [...prev, result.assets[0].uri]);
   }
 
-  function pickPhoto() {
-    const options: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'destructive' }> = [
+  function addPhoto() {
+    Alert.alert('Foto da memória', 'De onde vem a foto?', [
       { text: 'Tirar foto', onPress: pickPhotoFromCamera },
-      { text: 'Galeria', onPress: pickPhotoFromGallery },
-    ];
-    if (photo) {
-      options.push({ text: 'Remover foto', onPress: () => setPhoto(undefined), style: 'destructive' });
-    }
-    options.push({ text: 'Cancelar', style: 'cancel' });
-    Alert.alert('Foto da memória', 'De onde vem a foto?', options);
+      { text: 'Galeria', onPress: pickPhotosFromGallery },
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
+  }
+
+  function removePhoto(index: number) {
+    Alert.alert('Remover foto', 'Deseja remover esta foto da memória?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Remover', style: 'destructive', onPress: () => setPhotos(prev => prev.filter((_, i) => i !== index)) },
+    ]);
   }
 
   function toggleReminder(days: number) {
@@ -258,14 +267,17 @@ export default function AddRecordScreen() {
       if (showReminders && allReminders.length > 0) {
         record.reminderDays = allReminders.sort((a, b) => a - b);
       }
+      const originalPhotos = original?.photos ?? (original?.photo ? [original.photo] : []);
       if (type === 'memory') {
-        const storedPhoto = photo ? await persistPhoto(photo, record.id) : undefined;
-        if (original?.photo && original.photo !== storedPhoto) {
-          await deletePhoto(original.photo);
+        const storedPhotos = await Promise.all(
+          photos.map((uri, i) => persistPhoto(uri, `${record.id}-${i}`)),
+        );
+        for (const oldUri of originalPhotos) {
+          if (!storedPhotos.includes(oldUri)) await deletePhoto(oldUri);
         }
-        record.photo = storedPhoto;
-      } else if (original?.photo) {
-        await deletePhoto(original.photo);
+        record.photos = storedPhotos.length ? storedPhotos : undefined;
+      } else {
+        for (const oldUri of originalPhotos) await deletePhoto(oldUri);
       }
       await saveRecord(record);
       navigation.goBack();
@@ -286,7 +298,8 @@ export default function AddRecordScreen() {
         onPress: async () => {
           try {
             await deleteRecord(original.id);
-            if (original.photo) await deletePhoto(original.photo);
+            const photosToDelete = original.photos ?? (original.photo ? [original.photo] : []);
+            for (const uri of photosToDelete) await deletePhoto(uri);
             navigation.goBack();
             showToast('Registro excluído');
           } catch {
@@ -496,17 +509,28 @@ export default function AddRecordScreen() {
 
           {type === 'memory' && (
             <View style={styles.field}>
-              <Text style={styles.fieldLabel}>Foto (opcional)</Text>
-              <TouchableOpacity style={styles.photoPicker} onPress={pickPhoto} activeOpacity={0.8}>
-                {photo ? (
-                  <Image source={{ uri: photo }} style={styles.photoPreview} />
-                ) : (
-                  <View style={styles.photoPlaceholder}>
-                    <Ionicons name="image-outline" size={24} color={colors.textMuted} />
-                    <Text style={styles.photoPlaceholderText}>Adicionar foto</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
+              <Text style={styles.fieldLabel}>Fotos (opcional)</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoGallery}>
+                {photos.map((uri, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    style={styles.photoThumbWrapper}
+                    onPress={() => removePhoto(i)}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Remover foto"
+                  >
+                    <Image source={{ uri }} style={styles.photoThumb} />
+                    <View style={styles.photoRemoveBadge}>
+                      <Ionicons name="close" size={12} color="#fff" />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={styles.photoAddTile} onPress={addPhoto} activeOpacity={0.8}>
+                  <Ionicons name="image-outline" size={22} color={colors.textMuted} />
+                  <Text style={styles.photoPlaceholderText}>Adicionar</Text>
+                </TouchableOpacity>
+              </ScrollView>
             </View>
           )}
 
@@ -598,17 +622,31 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     backgroundColor: colors.primary + '22',
     borderColor: colors.primaryLight,
   },
-  photoPicker: {
-    borderRadius: radius.md,
-    overflow: 'hidden',
+  photoGallery: {
+    flexDirection: 'row',
   },
-  photoPreview: {
-    width: '100%',
-    height: 160,
+  photoThumbWrapper: {
+    marginRight: spacing.sm,
+  },
+  photoThumb: {
+    width: 88,
+    height: 88,
     borderRadius: radius.md,
   },
-  photoPlaceholder: {
-    height: 120,
+  photoRemoveBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 20,
+    height: 20,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoAddTile: {
+    width: 88,
+    height: 88,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,

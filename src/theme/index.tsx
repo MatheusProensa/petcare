@@ -62,9 +62,9 @@ export const palettes: Record<ThemeScheme, Palette> = {
     danger: '#DC2626',
     accent: '#7C3AED',
     text: '#1B2940',
-    textMuted: '#64748B',
+    textMuted: '#5B6B80',
     textSubtle: '#475569',
-    border: '#E2E8F0',
+    border: '#D9E1EB',
     onPrimary: '#FFFFFF',
   },
 };
@@ -107,13 +107,13 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  scheme: 'dark',
-  colors: palettes.dark,
+  scheme: 'light',
+  colors: palettes.light,
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [scheme, setScheme] = useState<ThemeScheme>('dark');
+  const [scheme, setScheme] = useState<ThemeScheme>('light');
 
   useEffect(() => {
     AsyncStorage.getItem(THEME_KEY)

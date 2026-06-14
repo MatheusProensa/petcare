@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  ImageBackground,
   Alert,
   ActivityIndicator,
 } from 'react-native';
@@ -418,20 +419,32 @@ export default function PetDetailScreen() {
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={
           <View style={styles.hero}>
-            <View style={styles.photoWrapper}>
-              {pet.photo ? (
-                <Image source={{ uri: pet.photo }} style={styles.photo} />
-              ) : (
-                <View style={styles.photoPlaceholder}>
-                  <Ionicons name="paw" size={32} color={colors.primaryLight} />
+            {pet.photo ? (
+              <ImageBackground
+                source={{ uri: pet.photo }}
+                style={styles.heroPhoto}
+                imageStyle={styles.heroPhotoImage}
+              >
+                <View style={styles.heroOverlay}>
+                  <Text style={styles.heroName}>{pet.name}</Text>
                 </View>
-              )}
-            </View>
+              </ImageBackground>
+            ) : (
+              <View style={styles.heroPlaceholder}>
+                <Ionicons name="paw" size={40} color={colors.primaryLight} />
+                <Text style={styles.heroNamePlaceholder}>{pet.name}</Text>
+              </View>
+            )}
 
-            <Text style={styles.petName}>{pet.name}</Text>
             <Text style={styles.petMeta}>
-              {[SPECIES_LABELS[pet.species], pet.breed, age].filter(Boolean).join(' · ')}
+              {[SPECIES_LABELS[pet.species], pet.breed].filter(Boolean).join(' · ')}
             </Text>
+            {!!age && (
+              <View style={styles.ageRow}>
+                <Ionicons name="paw" size={14} color={colors.primaryLight} />
+                <Text style={styles.ageText}>{age}</Text>
+              </View>
+            )}
 
             <View style={styles.quickActions}>
               <QuickAction
@@ -561,36 +574,60 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingBottom: 48 },
   hero: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
   },
-  photoWrapper: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+  heroPhoto: {
+    width: '100%',
+    height: 220,
+    borderRadius: radius.lg,
     overflow: 'hidden',
-    marginBottom: spacing.md,
+    justifyContent: 'flex-end',
+    marginBottom: spacing.sm,
   },
-  photo: { width: 84, height: 84 },
-  photoPlaceholder: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+  heroPhotoImage: {
+    borderRadius: radius.lg,
+  },
+  heroOverlay: {
+    width: '100%',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  heroName: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -0.5,
+  },
+  heroPlaceholder: {
+    width: '100%',
+    height: 220,
+    borderRadius: radius.lg,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
-  petName: {
+  heroNamePlaceholder: {
     fontSize: 26,
     fontWeight: '700',
     color: colors.text,
     letterSpacing: -0.5,
-    marginBottom: 4,
   },
-  petMeta: { fontSize: 14, color: colors.textMuted, marginBottom: spacing.lg },
+  petMeta: { fontSize: 14, color: colors.textMuted },
+  ageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+    marginBottom: spacing.lg,
+  },
+  ageText: { fontSize: 14, color: colors.textMuted },
   quickActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',

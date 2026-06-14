@@ -96,11 +96,11 @@ const createStyles = (colors: Palette) =>
     primaryText: { color: colors.onPrimary },
 
     secondary: {
-      backgroundColor: 'transparent',
-      borderWidth: 1,
-      borderColor: colors.border,
+      backgroundColor: colors.surfaceElevated,
+      borderWidth: 1.5,
+      borderColor: colors.primary,
     },
-    secondaryText: { color: colors.text },
+    secondaryText: { color: colors.primary },
 
     destructive: {
       backgroundColor: 'transparent',

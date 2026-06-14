@@ -20,6 +20,8 @@ import {
 import { TimelineItem } from '../components/TimelineItem';
 import { EmptyState } from '../components/EmptyState';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { useToast } from '../hooks/useToast';
+import { shareLifelinePdf } from '../services/lifelinePdf';
 import { Pet, MedicalRecord, WeightEntry, PetDocument, RecordType, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Lifeline'>;
@@ -75,6 +77,8 @@ export default function LifelineScreen() {
   const [documents, setDocuments] = useState<PetDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [exporting, setExporting] = useState(false);
+  const { showToast } = useToast();
 
   useFocusEffect(
     useCallback(() => {
@@ -182,6 +186,18 @@ export default function LifelineScreen() {
     <Text style={styles.yearHeader}>{section.title}</Text>
   ), [styles]);
 
+  const handleExportPdf = useCallback(async () => {
+    if (!pet) return;
+    setExporting(true);
+    try {
+      await shareLifelinePdf(pet, records, weights, documents);
+    } catch {
+      showToast('Não foi possível exportar a linha da vida.', 'error');
+    } finally {
+      setExporting(false);
+    }
+  }, [pet, records, weights, documents, showToast]);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -194,7 +210,22 @@ export default function LifelineScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Linha da Vida{pet ? ` · ${pet.name}` : ''}</Text>
-        <ThemeToggle size={20} />
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={handleExportPdf}
+            disabled={exporting || !pet}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Exportar linha da vida em PDF"
+          >
+            {exporting ? (
+              <ActivityIndicator color={colors.text} size="small" />
+            ) : (
+              <Ionicons name="share-outline" size={20} color={colors.text} />
+            )}
+          </TouchableOpacity>
+          <ThemeToggle size={20} />
+        </View>
       </View>
 
       {loading ? (
@@ -263,6 +294,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: spacing.md,
   },
   headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingBottom: 48 },
   intro: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
   introText: { fontSize: 13, color: colors.textMuted, lineHeight: 19, marginBottom: spacing.md },

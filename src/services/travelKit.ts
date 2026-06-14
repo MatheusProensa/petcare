@@ -70,7 +70,7 @@ export function buildTravelKitHtml(
       m => `
         <tr>
           <td><strong>${esc(m.title)}</strong></td>
-          <td>${[m.dosage, m.frequency ? FREQUENCY_LABELS[m.frequency] : undefined].filter(Boolean).map(esc).join(' · ')}</td>
+          <td>${[m.dosage, m.frequency ? FREQUENCY_LABELS[m.frequency] : undefined].filter((v): v is string => !!v).map(esc).join(' · ')}</td>
         </tr>`,
     )
     .join('');

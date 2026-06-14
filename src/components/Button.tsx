@@ -96,9 +96,7 @@ const createStyles = (colors: Palette) =>
     primaryText: { color: colors.onPrimary },
 
     secondary: {
-      backgroundColor: colors.surfaceElevated,
-      borderWidth: 1.5,
-      borderColor: colors.primary,
+      backgroundColor: colors.primary + '22',
     },
     secondaryText: { color: colors.primary },
 

@@ -234,38 +234,6 @@ export default function PetDetailScreen() {
     );
   }
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color={colors.primary} size="large" />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (!pet) {
-    return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            accessibilityRole="button"
-            accessibilityLabel="Voltar"
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Pet não encontrado.</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const age = calcAge(pet.birthDate);
-
   const timeline: TimelineEntry[] = [
     ...records.map(r => ({ id: r.id, date: r.date, createdAt: r.createdAt, kind: r.type as FilterKey, record: r })),
     ...weights.map(w => ({ id: w.id, date: w.date, createdAt: w.createdAt, kind: 'weight' as FilterKey, weight: w })),
@@ -343,6 +311,38 @@ export default function PetDetailScreen() {
   const renderSectionHeader = useCallback(({ section }: { section: { title: string } }) => (
     <Text style={styles.monthHeader}>{section.title}</Text>
   ), [styles]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator color={colors.primary} size="large" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!pet) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>Pet não encontrado.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const age = calcAge(pet.birthDate);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

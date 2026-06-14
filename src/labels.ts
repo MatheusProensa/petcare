@@ -50,6 +50,13 @@ export const DOCUMENT_KIND_LABELS: Record<DocumentKind, string> = {
   other: 'Outro',
 };
 
+export const DOCUMENT_KIND_ICONS: Record<DocumentKind, keyof typeof Ionicons.glyphMap> = {
+  exam: 'document-text',
+  prescription: 'receipt',
+  vaccination_card: 'shield-checkmark',
+  other: 'document',
+};
+
 /** Opções de antecedência para lembretes (em dias antes do evento). */
 export const REMINDER_OPTIONS: { days: number; label: string }[] = [
   { days: 0, label: 'No dia' },

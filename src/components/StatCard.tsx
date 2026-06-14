@@ -11,7 +11,7 @@ interface Props {
   onPress?: () => void;
 }
 
-export function StatCard({ icon, label, value, color, onPress }: Props) {
+export const StatCard = React.memo(function StatCard({ icon, label, value, color, onPress }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const tint = color ?? colors.primaryLight;
@@ -27,7 +27,7 @@ export function StatCard({ icon, label, value, color, onPress }: Props) {
       </Text>
     </Wrapper>
   );
-}
+});
 
 const createStyles = (colors: Palette) => StyleSheet.create({
   card: {

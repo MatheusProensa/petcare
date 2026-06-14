@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { useToast } from '../hooks/useToast';
 import { getPets, getRecords, getTutorInfo, saveTutorInfo } from '../storage';
 import { isActiveMedication } from '../services/events';
 import { FREQUENCY_LABELS } from '../labels';
@@ -37,6 +38,7 @@ export default function EmergencyScreen() {
   const navigation = useNavigation<Nav>();
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const { showToast } = useToast();
   const { petId } = useRoute<Route>().params;
 
   const [pet, setPet] = useState<Pet | null>(null);
@@ -66,6 +68,7 @@ export default function EmergencyScreen() {
     try {
       await saveTutorInfo({ name: tutorName.trim(), phone: tutorPhone.trim() });
       setEditingTutor(false);
+      showToast('Dados do tutor salvos');
     } catch {
       Alert.alert('Erro', 'Não foi possível salvar os dados do tutor.');
     }

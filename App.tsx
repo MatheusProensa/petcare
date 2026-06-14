@@ -1,8 +1,13 @@
+import { useEffect, useState } from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider, useTheme } from './src/theme';
+import { ToastProvider } from './src/hooks/useToast';
+import { onboardingRepository } from './src/repositories/onboardingRepository';
 import { RootStackParamList } from './src/types';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import AddPetScreen from './src/screens/AddPetScreen';
@@ -22,7 +27,7 @@ import AboutScreen from './src/screens/AboutScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function Root() {
+function Root({ initialRouteName }: { initialRouteName: keyof RootStackParamList }) {
   const { colors, scheme } = useTheme();
 
   const navTheme = {
@@ -41,7 +46,8 @@ function Root() {
   return (
     <NavigationContainer theme={navTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <Stack.Navigator initialRouteName="Dashboard" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="AddPet" component={AddPetScreen} />
@@ -63,10 +69,43 @@ function Root() {
   );
 }
 
+function LoadingScreen() {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.loading, { backgroundColor: colors.background }]}>
+      <ActivityIndicator color={colors.primary} size="large" />
+    </View>
+  );
+}
+
+function AppContent() {
+  const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    onboardingRepository.getSeen()
+      .then(setOnboardingSeen)
+      .catch(() => setOnboardingSeen(true));
+  }, []);
+
+  if (onboardingSeen === null) return <LoadingScreen />;
+
+  return <Root initialRouteName={onboardingSeen ? 'Dashboard' : 'Onboarding'} />;
+}
+
 export default function App() {
   return (
     <ThemeProvider>
-      <Root />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

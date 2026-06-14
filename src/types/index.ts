@@ -77,7 +77,16 @@ export interface TutorInfo {
   phone: string;
 }
 
+export interface MedicationDose {
+  id: string;
+  recordId: string;
+  petId: string;
+  date: string;
+  createdAt: string;
+}
+
 export type RootStackParamList = {
+  Onboarding: undefined;
   Dashboard: undefined;
   Home: undefined;
   AddPet: { petId?: string };

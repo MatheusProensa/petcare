@@ -11,7 +11,7 @@ interface Props {
   onPress: () => void;
 }
 
-export function ReminderCard({ event, onPress }: Props) {
+export const ReminderCard = React.memo(function ReminderCard({ event, onPress }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const color = event.overdue
@@ -39,7 +39,7 @@ export function ReminderCard({ event, onPress }: Props) {
       </View>
     </TouchableOpacity>
   );
-}
+});
 
 const createStyles = (colors: Palette) => StyleSheet.create({
   card: {

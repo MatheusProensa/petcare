@@ -2,7 +2,8 @@ import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  SectionList,
+  ScrollView,
   TouchableOpacity,
   StyleSheet,
   Image,
@@ -13,8 +14,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
-import { getPets, getRecords, getWeights, deletePet, deleteRecord } from '../storage';
+import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { petsRepository } from '../repositories/petsRepository';
+import { recordsRepository } from '../repositories/recordsRepository';
+import { weightsRepository } from '../repositories/weightsRepository';
+import { documentsRepository } from '../repositories/documentsRepository';
 import { calcAge, displayDate, formatDaysUntil, daysUntilISO } from '../utils/date';
 import {
   SPECIES_LABELS,
@@ -22,6 +26,8 @@ import {
   recordTypeColors,
   RECORD_TYPE_ICONS,
   FREQUENCY_LABELS,
+  DOCUMENT_KIND_LABELS,
+  DOCUMENT_KIND_ICONS,
 } from '../labels';
 import { getVaccineStatus, eventDateOf, isEventFulfilled, getFulfilledRecordIds } from '../services/events';
 import { sharePetSummary } from '../services/share';
@@ -30,17 +36,42 @@ import { TimelineItem, TimelineBadge } from '../components/TimelineItem';
 import { EmptyState } from '../components/EmptyState';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { MedicalProfileCard } from '../components/MedicalProfileCard';
-import { Pet, MedicalRecord, WeightEntry, RootStackParamList } from '../types';
+import { Pet, MedicalRecord, WeightEntry, PetDocument, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'PetDetail'>;
 type Route = RouteProp<RootStackParamList, 'PetDetail'>;
+
+type FilterKey = 'all' | 'vaccine' | 'consultation' | 'medication' | 'deworming' | 'note' | 'weight' | 'document';
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: 'all', label: 'Todos' },
+  { key: 'vaccine', label: 'Vacinas' },
+  { key: 'consultation', label: 'Consultas' },
+  { key: 'medication', label: 'Remédios' },
+  { key: 'deworming', label: 'Vermífugos' },
+  { key: 'weight', label: 'Peso' },
+  { key: 'document', label: 'Documentos' },
+  { key: 'note', label: 'Observações' },
+];
+
+const MONTH_NAMES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
+
+function monthLabel(isoDate: string): string {
+  const [year, month] = isoDate.split('-').map(Number);
+  return `${MONTH_NAMES[month - 1]} ${year}`;
+}
 
 interface TimelineEntry {
   id: string;
   date: string;
   createdAt: string;
+  kind: FilterKey;
   record?: MedicalRecord;
   weight?: WeightEntry;
+  document?: PetDocument;
 }
 
 function QuickAction({
@@ -82,6 +113,30 @@ function vaccineStatusBadges(colors: Palette): Record<string, TimelineBadge> {
   };
 }
 
+/** Badge de status para consultas, vermífugos e remédios (vacinas usam vaccineStatusBadges). */
+function extendedStatusBadge(
+  record: MedicalRecord,
+  all: MedicalRecord[],
+  fulfilledIds: Set<string>,
+  colors: Palette,
+): TimelineBadge | undefined {
+  const eventDate = eventDateOf(record);
+  if (!eventDate) return undefined;
+
+  if (record.type === 'medication') {
+    if (daysUntilISO(eventDate) < 0) return { label: 'Tratamento concluído', color: colors.info };
+    return undefined;
+  }
+
+  if (isEventFulfilled(record, all, fulfilledIds)) {
+    return { label: record.type === 'consultation' ? 'Retorno realizado' : 'Dose aplicada', color: colors.info };
+  }
+  const days = daysUntilISO(eventDate);
+  if (days < 0) return { label: 'Atrasado', color: colors.danger };
+  if (days <= 15) return { label: 'Próximo', color: colors.warning };
+  return undefined;
+}
+
 function recordLines(record: MedicalRecord): string[] {
   const lines: string[] = [];
   if (record.type === 'vaccine') {
@@ -119,16 +174,19 @@ export default function PetDetailScreen() {
   const [pet, setPet] = useState<Pet | null>(null);
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [weights, setWeights] = useState<WeightEntry[]>([]);
+  const [documents, setDocuments] = useState<PetDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterKey>('all');
   const fulfilledIds = useMemo(() => getFulfilledRecordIds(records), [records]);
 
   useFocusEffect(
     useCallback(() => {
       setLoading(true);
       Promise.all([
-        getPets().then(pets => setPet(pets.find(p => p.id === petId) ?? null)),
-        getRecords(petId).then(setRecords),
-        getWeights(petId).then(setWeights),
+        petsRepository.getAll().then(pets => setPet(pets.find(p => p.id === petId) ?? null)),
+        recordsRepository.getByPet(petId).then(setRecords),
+        weightsRepository.getByPet(petId).then(setWeights),
+        documentsRepository.getByPet(petId).then(setDocuments),
       ])
         .catch(() => Alert.alert('Erro', 'Não foi possível carregar os dados do pet.'))
         .finally(() => setLoading(false));
@@ -143,7 +201,7 @@ export default function PetDetailScreen() {
         style: 'destructive',
         onPress: async () => {
           try {
-            await deleteRecord(id);
+            await recordsRepository.remove(id);
             setRecords(prev => prev.filter(r => r.id !== id));
           } catch {
             Alert.alert('Erro', 'Não foi possível excluir o registro.');
@@ -164,7 +222,7 @@ export default function PetDetailScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deletePet(petId);
+              await petsRepository.remove(petId);
               navigation.goBack();
             } catch {
               Alert.alert('Erro', 'Não foi possível excluir o pet.');
@@ -208,12 +266,29 @@ export default function PetDetailScreen() {
   const age = calcAge(pet.birthDate);
 
   const timeline: TimelineEntry[] = [
-    ...records.map(r => ({ id: r.id, date: r.date, createdAt: r.createdAt, record: r })),
-    ...weights.map(w => ({ id: w.id, date: w.date, createdAt: w.createdAt, weight: w })),
+    ...records.map(r => ({ id: r.id, date: r.date, createdAt: r.createdAt, kind: r.type as FilterKey, record: r })),
+    ...weights.map(w => ({ id: w.id, date: w.date, createdAt: w.createdAt, kind: 'weight' as FilterKey, weight: w })),
+    ...documents.map(d => ({ id: d.id, date: d.date, createdAt: d.createdAt, kind: 'document' as FilterKey, document: d })),
   ].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
 
-  function renderEntry({ item, index }: { item: TimelineEntry; index: number }) {
-    const isLast = index === timeline.length - 1;
+  const filteredTimeline = filter === 'all' ? timeline : timeline.filter(e => e.kind === filter);
+
+  const sections = useMemo(() => {
+    const groups = new Map<string, TimelineEntry[]>();
+    for (const entry of filteredTimeline) {
+      const key = entry.date.slice(0, 7);
+      const group = groups.get(key);
+      if (group) group.push(entry);
+      else groups.set(key, [entry]);
+    }
+    return Array.from(groups.entries()).map(([key, data]) => ({
+      title: monthLabel(`${key}-01`),
+      data,
+    }));
+  }, [filteredTimeline]);
+
+  const renderEntry = useCallback(({ item, index, section }: { item: TimelineEntry; index: number; section: { data: TimelineEntry[] } }) => {
+    const isLast = index === section.data.length - 1;
     if (item.weight) {
       return (
         <TimelineItem
@@ -226,13 +301,29 @@ export default function PetDetailScreen() {
         />
       );
     }
+    if (item.document) {
+      const doc = item.document;
+      return (
+        <TimelineItem
+          icon={DOCUMENT_KIND_ICONS[doc.kind]}
+          color={colors.info}
+          dateLabel={`${displayDate(doc.date)} · ${DOCUMENT_KIND_LABELS[doc.kind]}`}
+          title={doc.title}
+          isLast={isLast}
+          onPress={() => navigation.navigate('DocumentViewer', { uri: doc.uri, title: doc.title, mimeType: doc.mimeType })}
+        />
+      );
+    }
     const record = item.record!;
-    const status = getVaccineStatus(record, records, fulfilledIds);
+    const vaccineStatus = getVaccineStatus(record, records, fulfilledIds);
     const eventDate = eventDateOf(record);
     const lines = recordLines(record);
     if (eventDate && daysUntilISO(eventDate) >= 0 && !isEventFulfilled(record, records, fulfilledIds)) {
       lines.push(`⏰ ${formatDaysUntil(daysUntilISO(eventDate))}`);
     }
+    const badge = record.type === 'vaccine'
+      ? (vaccineStatus ? VACCINE_STATUS_BADGES[vaccineStatus] : undefined)
+      : extendedStatusBadge(record, records, fulfilledIds, colors);
     return (
       <TimelineItem
         icon={RECORD_TYPE_ICONS[record.type]}
@@ -240,13 +331,17 @@ export default function PetDetailScreen() {
         dateLabel={`${displayDate(record.date)} · ${RECORD_TYPE_LABELS[record.type]}`}
         title={record.title}
         lines={lines}
-        badge={record.type === 'vaccine' && status ? VACCINE_STATUS_BADGES[status] : undefined}
+        badge={badge}
         isLast={isLast}
         onPress={() => navigation.navigate('AddRecord', { petId, recordId: record.id })}
         onLongPress={() => confirmDeleteRecord(record.id)}
       />
     );
-  }
+  }, [records, fulfilledIds, colors, navigation, petId]);
+
+  const renderSectionHeader = useCallback(({ section }: { section: { title: string } }) => (
+    <Text style={styles.monthHeader}>{section.title}</Text>
+  ), [styles]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -313,11 +408,13 @@ export default function PetDetailScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={timeline}
+      <SectionList
+        sections={sections}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
+        stickySectionHeadersEnabled={false}
+        renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={
           <View style={styles.hero}>
             <View style={styles.photoWrapper}>
@@ -390,18 +487,45 @@ export default function PetDetailScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Novo registro"
               >
-                <Ionicons name="add" size={16} color="#fff" />
+                <Ionicons name="add" size={16} color={colors.onPrimary} />
                 <Text style={styles.addBtnText}>Novo</Text>
               </TouchableOpacity>
             </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
+              contentContainerStyle={styles.filterRow}
+            >
+              {FILTERS.map(f => (
+                <TouchableOpacity
+                  key={f.key}
+                  style={[styles.filterChip, filter === f.key && styles.filterChipActive]}
+                  onPress={() => setFilter(f.key)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Filtrar por ${f.label}`}
+                  accessibilityState={{ selected: filter === f.key }}
+                >
+                  <Text style={[styles.filterChipText, filter === f.key && styles.filterChipTextActive]}>
+                    {f.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         }
         renderItem={renderEntry}
         ListEmptyComponent={
           <EmptyState
             image={require('../../assets/icons/document.png')}
-            title="Nenhum registro ainda"
-            text='Toque em "Novo" para registrar vacinas, consultas, remédios, vermífugos ou observações.'
+            title={filter === 'all' ? 'Nenhum registro ainda' : 'Nada por aqui'}
+            text={
+              filter === 'all'
+                ? 'Toque em "Novo" para registrar vacinas, consultas, remédios, vermífugos ou observações.'
+                : 'Nenhum item encontrado para este filtro.'
+            }
           />
         }
       />
@@ -420,7 +544,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingBottom: 48 },
   hero: {
@@ -488,7 +612,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     width: '100%',
     marginBottom: spacing.md,
   },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
+  sectionTitle: { fontSize: typography.h3.fontSize, fontWeight: typography.h3.fontWeight, color: colors.text },
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -498,5 +622,31 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: spacing.xs + 2,
     borderRadius: radius.full,
   },
-  addBtnText: { fontSize: 13, fontWeight: '600', color: '#fff' },
+  addBtnText: { fontSize: 13, fontWeight: '600', color: colors.onPrimary },
+  filterScroll: { width: '100%', marginBottom: spacing.md },
+  filterRow: { gap: spacing.sm, paddingRight: spacing.lg },
+  filterChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.full,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  filterChipActive: {
+    backgroundColor: colors.primary + '22',
+    borderColor: colors.primaryLight,
+  },
+  filterChipText: { fontSize: 13, fontWeight: '500', color: colors.textMuted },
+  filterChipTextActive: { color: colors.primaryLight, fontWeight: '600' },
+  monthHeader: {
+    fontSize: typography.label.fontSize,
+    fontWeight: typography.label.fontWeight,
+    color: colors.textSubtle,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    paddingHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+  },
 });

@@ -12,35 +12,49 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
-import { getPets, getAllRecords } from '../storage';
+import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { petsRepository } from '../repositories/petsRepository';
+import { recordsRepository } from '../repositories/recordsRepository';
 import { getUpcomingEvents, isActiveMedication, UpcomingEvent } from '../services/events';
 import { syncEventNotifications } from '../services/notifications';
 import { StatCard } from '../components/StatCard';
 import { ReminderCard } from '../components/ReminderCard';
 import { EmptyState } from '../components/EmptyState';
-import { Pet, RootStackParamList } from '../types';
+import { Button } from '../components/Button';
+import { RECORD_TYPE_ICONS, RECORD_TYPE_LABELS, recordTypeColors } from '../labels';
+import { displayDate } from '../utils/date';
+import { Pet, MedicalRecord, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Bom dia';
+  if (hour < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
 
 export default function DashboardScreen() {
   const navigation = useNavigation<Nav>();
   const { colors, scheme, toggleTheme } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const TYPE_COLORS = recordTypeColors(colors);
   const [pets, setPets] = useState<Pet[]>([]);
+  const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [activeMedsCount, setActiveMedsCount] = useState(0);
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      Promise.all([getPets(), getAllRecords()])
-        .then(([loadedPets, records]) => {
+      Promise.all([petsRepository.getAll(), recordsRepository.getAll()])
+        .then(([loadedPets, loadedRecords]) => {
           setPets(loadedPets);
-          setEvents(getUpcomingEvents(loadedPets, records));
-          setActiveMedsCount(records.filter(isActiveMedication).length);
+          setRecords(loadedRecords);
+          setEvents(getUpcomingEvents(loadedPets, loadedRecords));
+          setActiveMedsCount(loadedRecords.filter(isActiveMedication).length);
           // Mantém as notificações locais alinhadas com os eventos atuais.
-          syncEventNotifications(loadedPets, records).catch(() => {});
+          syncEventNotifications(loadedPets, loadedRecords).catch(() => {});
         })
         .catch(() => Alert.alert('Erro', 'Não foi possível carregar a visão geral.'));
     }, []),
@@ -50,6 +64,35 @@ export default function DashboardScreen() {
   const allUpcoming = events.filter(e => !e.pending && e.daysUntil >= 0);
   const upcoming = showAllUpcoming ? allUpcoming : allUpcoming.slice(0, 5);
   const hasPets = pets.length > 0;
+  const recentRecords = [...records]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 3);
+
+  const petName = useCallback((petId: string): string => {
+    return pets.find(p => p.id === petId)?.name ?? '';
+  }, [pets]);
+
+  const handleNewRecord = useCallback(() => {
+    if (pets.length === 0) {
+      navigation.navigate('AddPet', {});
+      return;
+    }
+    if (pets.length === 1) {
+      navigation.navigate('AddRecord', { petId: pets[0].id });
+      return;
+    }
+    Alert.alert(
+      'Novo registro',
+      'Para qual pet?',
+      [
+        ...pets.map(p => ({
+          text: p.name,
+          onPress: () => navigation.navigate('AddRecord', { petId: p.id }),
+        })),
+        { text: 'Cancelar', style: 'cancel' as const },
+      ],
+    );
+  }, [pets, navigation]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -96,7 +139,10 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        <Text style={styles.title}>Visão Geral</Text>
+        <Text style={styles.title}>{getGreeting()}!</Text>
+        <Text style={styles.subtitle}>
+          {hasPets ? 'Aqui está o resumo de hoje' : 'Vamos cadastrar seu primeiro pet?'}
+        </Text>
 
         {hasPets ? (
           <>
@@ -115,6 +161,25 @@ export default function DashboardScreen() {
                 color={colors.accent}
                 onPress={() => navigation.navigate('Home')}
               />
+            </View>
+
+            <View style={styles.quickActions}>
+              <View style={styles.quickActionItem}>
+                <Button
+                  label="Adicionar pet"
+                  icon="add-circle-outline"
+                  variant="secondary"
+                  onPress={() => navigation.navigate('AddPet', {})}
+                />
+              </View>
+              <View style={styles.quickActionItem}>
+                <Button
+                  label="Novo registro"
+                  icon="create-outline"
+                  variant="secondary"
+                  onPress={handleNewRecord}
+                />
+              </View>
             </View>
 
             {alerts.length > 0 && (
@@ -151,11 +216,44 @@ export default function DashboardScreen() {
                 ))
               )}
               {!showAllUpcoming && allUpcoming.length > 5 && (
-                <TouchableOpacity onPress={() => setShowAllUpcoming(true)} activeOpacity={0.7}>
+                <TouchableOpacity
+                  onPress={() => setShowAllUpcoming(true)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ver mais ${allUpcoming.length - 5} eventos`}
+                >
                   <Text style={styles.seeMore}>Ver mais {allUpcoming.length - 5}</Text>
                 </TouchableOpacity>
               )}
             </View>
+
+            {recentRecords.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Últimos registros</Text>
+                {recentRecords.map(record => (
+                  <TouchableOpacity
+                    key={record.id}
+                    style={styles.recordRow}
+                    onPress={() => navigation.navigate('PetDetail', { petId: record.petId })}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${RECORD_TYPE_LABELS[record.type]}: ${record.title}, ${petName(record.petId)}`}
+                  >
+                    <View style={[styles.recordIcon, { backgroundColor: TYPE_COLORS[record.type] + '22' }]}>
+                      <Ionicons name={RECORD_TYPE_ICONS[record.type]} size={16} color={TYPE_COLORS[record.type]} />
+                    </View>
+                    <View style={styles.recordInfo}>
+                      <Text style={styles.recordTitle} numberOfLines={1}>{record.title}</Text>
+                      <Text style={styles.recordMeta} numberOfLines={1}>
+                        {petName(record.petId)} · {RECORD_TYPE_LABELS[record.type]} · {displayDate(record.date)}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
 
             <TouchableOpacity
               style={styles.petsBtn}
@@ -164,11 +262,11 @@ export default function DashboardScreen() {
               accessibilityRole="button"
               accessibilityLabel="Ver seus pets"
             >
-              <Ionicons name="paw" size={18} color="#fff" />
+              <Ionicons name="paw" size={18} color={colors.onPrimary} />
               <Text style={styles.petsBtnText}>
                 Seus Pets ({pets.length})
               </Text>
-              <Ionicons name="chevron-forward" size={16} color="#fff" />
+              <Ionicons name="chevron-forward" size={16} color={colors.onPrimary} />
             </TouchableOpacity>
           </>
         ) : (
@@ -182,8 +280,10 @@ export default function DashboardScreen() {
               style={styles.petsBtn}
               onPress={() => navigation.navigate('AddPet', {})}
               activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Adicionar pet"
             >
-              <Ionicons name="add" size={18} color="#fff" />
+              <Ionicons name="add" size={18} color={colors.onPrimary} />
               <Text style={styles.petsBtnText}>Adicionar Pet</Text>
             </TouchableOpacity>
           </View>
@@ -209,16 +309,23 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     height: 50,
   },
   title: {
-    fontSize: 34,
-    fontWeight: '700',
+    fontSize: typography.h1.fontSize,
+    fontWeight: typography.h1.fontWeight,
     color: colors.text,
     letterSpacing: -0.5,
     marginTop: spacing.sm,
+  },
+  subtitle: {
+    fontSize: typography.body.fontSize,
+    color: colors.textMuted,
+    marginTop: 2,
     marginBottom: spacing.lg,
   },
-  statsRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
+  statsRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
+  quickActions: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
+  quickActionItem: { flex: 1 },
   section: { gap: spacing.sm, marginBottom: spacing.lg },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 2 },
+  sectionTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text, marginBottom: 2 },
   calmCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -238,6 +345,26 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     textAlign: 'center',
     paddingVertical: spacing.xs,
   },
+  recordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.sm + 2,
+  },
+  recordIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recordInfo: { flex: 1, gap: 1 },
+  recordTitle: { fontSize: 14, fontWeight: '600', color: colors.text },
+  recordMeta: { fontSize: 12, color: colors.textSubtle },
   petsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -248,6 +375,6 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: spacing.md,
     marginTop: spacing.sm,
   },
-  petsBtnText: { fontSize: 15, fontWeight: '600', color: '#fff' },
+  petsBtnText: { fontSize: 15, fontWeight: '600', color: colors.onPrimary },
   emptyWrapper: { marginTop: spacing.xxl, gap: spacing.lg },
 });

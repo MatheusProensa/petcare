@@ -20,7 +20,7 @@ interface Props {
   onLongPress?: () => void;
 }
 
-export function TimelineItem({
+export const TimelineItem = React.memo(function TimelineItem({
   icon,
   color,
   dateLabel,
@@ -65,7 +65,7 @@ export function TimelineItem({
       </TouchableOpacity>
     </View>
   );
-}
+});
 
 const createStyles = (colors: Palette) => StyleSheet.create({
   row: {

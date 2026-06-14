@@ -16,6 +16,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { Button } from '../components/Button';
+import { useToast } from '../hooks/useToast';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, savePet } from '../storage';
 import { persistPhoto, deletePhoto } from '../storage/files';
@@ -29,6 +31,7 @@ export default function AddPetScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const { showToast } = useToast();
   const { petId } = useRoute<RouteProp<RootStackParamList, 'AddPet'>>().params;
   const [original, setOriginal] = useState<Pet | null>(null);
   const [name, setName] = useState('');
@@ -123,6 +126,7 @@ export default function AddPetScreen() {
         createdAt: original?.createdAt ?? new Date().toISOString(),
       });
       navigation.goBack();
+      showToast(petId ? 'Pet atualizado com sucesso' : 'Pet adicionado com sucesso');
     } catch {
       setSaving(false);
       Alert.alert('Erro', 'Não foi possível salvar o pet. Tente novamente.');
@@ -215,16 +219,11 @@ export default function AddPetScreen() {
             />
           </View>
 
-          <TouchableOpacity
-            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+          <Button
+            label={petId ? 'Salvar Alterações' : 'Salvar Pet'}
             onPress={handleSave}
-            disabled={saving}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.saveBtnText}>
-              {saving ? 'Salvando...' : petId ? 'Salvar Alterações' : 'Salvar Pet'}
-            </Text>
-          </TouchableOpacity>
+            loading={saving}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -294,18 +293,4 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontSize: 14, color: colors.textMuted, fontWeight: '500' },
   chipTextActive: { color: '#fff' },
-  saveBtn: {
-    width: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md + 2,
-    alignItems: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
 });

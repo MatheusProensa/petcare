@@ -14,7 +14,7 @@ interface Props {
   onPress: () => void;
 }
 
-export function PetCard({ pet, subtitle, activeMeds, pendingAlerts, onPress }: Props) {
+export const PetCard = React.memo(function PetCard({ pet, subtitle, activeMeds, pendingAlerts, onPress }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   return (
@@ -59,7 +59,7 @@ export function PetCard({ pet, subtitle, activeMeds, pendingAlerts, onPress }: P
       <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
     </TouchableOpacity>
   );
-}
+});
 
 const createStyles = (colors: Palette) => StyleSheet.create({
   card: {

@@ -7,10 +7,12 @@ import {
   WeightEntry,
   PetDocument,
   TutorInfo,
+  MedicationDose,
   Species,
   RecordType,
 } from '../types';
 import { deletePhoto, deleteDocumentFile } from './files';
+import { buildDemoData } from '../services/demoData';
 
 const KEYS = {
   PETS: '@petcare:pets',
@@ -18,12 +20,16 @@ const KEYS = {
   WEIGHTS: '@petcare:weights',
   DOCUMENTS: '@petcare:documents',
   TUTOR: '@petcare:tutor',
+  MEDICATION_DOSES: '@petcare:medication_doses',
+  ONBOARDING_SEEN: '@petcare:onboarding_seen',
+  LAST_BACKUP: '@petcare:last_backup',
 };
 
 const PETS_VERSION = 1;
 const RECORDS_VERSION = 2;
 const WEIGHTS_VERSION = 1;
 const DOCUMENTS_VERSION = 1;
+const MEDICATION_DOSES_VERSION = 1;
 
 interface Envelope<T> {
   version: number;
@@ -141,6 +147,12 @@ async function readDocuments(): Promise<PetDocument[]> {
   return parseRaw<PetDocument>(raw).data;
 }
 
+async function readMedicationDoses(): Promise<MedicationDose[]> {
+  const raw = await AsyncStorage.getItem(KEYS.MEDICATION_DOSES);
+  if (!raw) return [];
+  return parseRaw<MedicationDose>(raw).data;
+}
+
 function upsert<T extends { id: string }>(list: T[], item: T): T[] {
   const idx = list.findIndex(x => x.id === item.id);
   if (idx >= 0) {
@@ -237,6 +249,33 @@ export async function deleteDocument(documentId: string): Promise<void> {
   await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, documents.filter(d => d.id !== documentId));
 }
 
+// ----------------------------- Doses de remédio -----------------------------
+
+export async function getMedicationDoses(petId: string): Promise<MedicationDose[]> {
+  const all = await readMedicationDoses();
+  return all.filter(d => d.petId === petId).sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export async function saveMedicationDose(dose: MedicationDose): Promise<void> {
+  const doses = await readMedicationDoses();
+  await write(KEYS.MEDICATION_DOSES, MEDICATION_DOSES_VERSION, upsert(doses, dose));
+}
+
+export async function deleteMedicationDose(doseId: string): Promise<void> {
+  const doses = await readMedicationDoses();
+  await write(KEYS.MEDICATION_DOSES, MEDICATION_DOSES_VERSION, doses.filter(d => d.id !== doseId));
+}
+
+// -------------------------------- Onboarding --------------------------------
+
+export async function getOnboardingSeen(): Promise<boolean> {
+  return (await AsyncStorage.getItem(KEYS.ONBOARDING_SEEN)) === 'true';
+}
+
+export async function setOnboardingSeen(): Promise<void> {
+  await AsyncStorage.setItem(KEYS.ONBOARDING_SEEN, 'true');
+}
+
 // ---------------------------------- Tutor ----------------------------------
 
 export async function getTutorInfo(): Promise<TutorInfo> {
@@ -259,20 +298,46 @@ export interface Backup {
   records: MedicalRecord[];
   weights: WeightEntry[];
   documents: PetDocument[];
+  medicationDoses?: MedicationDose[];
   tutor: TutorInfo;
 }
 
+export async function getLastBackupDate(): Promise<string | null> {
+  return AsyncStorage.getItem(KEYS.LAST_BACKUP);
+}
+
+export async function setLastBackupDate(isoDate: string): Promise<void> {
+  await AsyncStorage.setItem(KEYS.LAST_BACKUP, isoDate);
+}
+
 export async function exportBackup(): Promise<string> {
+  const exportedAt = new Date().toISOString();
   const backup: Backup = {
     backupVersion: BACKUP_VERSION,
-    exportedAt: new Date().toISOString(),
+    exportedAt,
     pets: await readPets(),
     records: await readRecords(),
     weights: await readWeights(),
     documents: await readDocuments(),
+    medicationDoses: await readMedicationDoses(),
     tutor: await getTutorInfo(),
   };
+  await setLastBackupDate(exportedAt);
   return JSON.stringify(backup, null, 2);
+}
+
+/** Lê o resumo de um backup (contagens + data de exportação) sem aplicar nada. */
+export function peekBackupSummary(json: string): {
+  pets: number;
+  records: number;
+  exportedAt?: string;
+} {
+  const parsed = JSON.parse(json) as Backup;
+  return {
+    pets: Array.isArray(parsed.pets) ? parsed.pets.length : 0,
+    records: Array.isArray(parsed.records) ? parsed.records.length : 0,
+    exportedAt: parsed.exportedAt,
+  };
 }
 
 /**
@@ -327,6 +392,24 @@ export async function importBackup(json: string): Promise<{ pets: number; record
   await write(KEYS.RECORDS, RECORDS_VERSION, parsed.records);
   await write(KEYS.WEIGHTS, WEIGHTS_VERSION, parsed.weights);
   await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, validDocuments);
+  await write(
+    KEYS.MEDICATION_DOSES,
+    MEDICATION_DOSES_VERSION,
+    Array.isArray(parsed.medicationDoses) ? parsed.medicationDoses : [],
+  );
   if (parsed.tutor) await saveTutorInfo(parsed.tutor);
   return { pets: parsed.pets.length, records: parsed.records.length };
+}
+
+// ----------------------------------- Demo -----------------------------------
+
+/** Substitui todos os dados pelo conjunto fictício de demonstração. */
+export async function loadDemoData(): Promise<void> {
+  const demo = buildDemoData();
+  await write(KEYS.PETS, PETS_VERSION, demo.pets);
+  await write(KEYS.RECORDS, RECORDS_VERSION, demo.records);
+  await write(KEYS.WEIGHTS, WEIGHTS_VERSION, demo.weights);
+  await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, demo.documents);
+  await write(KEYS.MEDICATION_DOSES, MEDICATION_DOSES_VERSION, []);
+  await saveTutorInfo(demo.tutor);
 }

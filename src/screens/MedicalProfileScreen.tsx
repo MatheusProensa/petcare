@@ -15,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { Button } from '../components/Button';
+import { useToast } from '../hooks/useToast';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, savePet } from '../storage';
 import { Pet, RootStackParamList } from '../types';
@@ -30,6 +32,7 @@ export default function MedicalProfileScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const { showToast } = useToast();
   const { petId } = useRoute<Route>().params;
 
   const [pet, setPet] = useState<Pet | null>(null);
@@ -78,6 +81,7 @@ export default function MedicalProfileScreen() {
         },
       });
       navigation.goBack();
+      showToast('Perfil médico salvo');
     } catch {
       setSaving(false);
       Alert.alert('Erro', 'Não foi possível salvar o perfil médico.');
@@ -155,14 +159,7 @@ export default function MedicalProfileScreen() {
             multiline
           />
 
-          <TouchableOpacity
-            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
-            onPress={handleSave}
-            disabled={saving || !pet}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.saveBtnText}>{saving ? 'Salvando...' : 'Salvar Perfil'}</Text>
-          </TouchableOpacity>
+          <Button label="Salvar Perfil" onPress={handleSave} loading={saving} disabled={!pet} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -193,13 +190,4 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   switchLabel: { fontSize: 15, fontWeight: '500', color: colors.text },
   switchHint: { fontSize: 12, color: colors.textMuted },
-  saveBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md + 2,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
 });

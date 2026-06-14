@@ -20,6 +20,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { EmptyState } from '../components/EmptyState';
+import { Button } from '../components/Button';
+import { useToast } from '../hooks/useToast';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getDocuments, saveDocument, deleteDocument } from '../storage';
 import { persistDocumentFile } from '../storage/files';
@@ -66,6 +68,7 @@ export default function DocumentsScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const KIND_COLORS = kindColors(colors);
+  const { showToast } = useToast();
   const { petId, kind } = useRoute<Route>().params;
 
   const [documents, setDocuments] = useState<PetDocument[]>([]);
@@ -163,11 +166,13 @@ export default function DocumentsScreen() {
           createdAt: new Date().toISOString(),
         });
       }
+      const wasEditing = !!editingDoc;
       setPending(null);
       setEditingDoc(null);
       setTitle('');
       setDate('');
       load();
+      showToast(wasEditing ? 'Documento atualizado' : 'Documento salvo');
     } catch {
       Alert.alert('Erro', 'Não foi possível salvar o documento.');
     } finally {
@@ -253,6 +258,7 @@ export default function DocumentsScreen() {
                 try {
                   await deleteDocument(doc.id);
                   load();
+                  showToast('Documento excluído');
                 } catch {
                   Alert.alert('Erro', 'Não foi possível excluir o documento.');
                 }
@@ -375,16 +381,13 @@ export default function DocumentsScreen() {
                 <Text style={styles.cancelBtnText}>Cancelar</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              style={[styles.saveBtn, { flex: 1 }, saving && { opacity: 0.6 }]}
-              onPress={handleSave}
-              disabled={saving}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.saveBtnText}>
-                {saving ? 'Salvando...' : editingDoc ? 'Salvar Alterações' : 'Salvar Documento'}
-              </Text>
-            </TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <Button
+                label={editingDoc ? 'Salvar Alterações' : 'Salvar Documento'}
+                onPress={handleSave}
+                loading={saving}
+              />
+            </View>
           </View>
         </View>
       ) : (
@@ -496,13 +499,6 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     justifyContent: 'center',
   },
   cancelBtnText: { fontSize: 16, fontWeight: '600', color: colors.textMuted },
-  saveBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md + 2,
-    alignItems: 'center',
-  },
-  saveBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   docRow: {
     flexDirection: 'row',
     alignItems: 'center',

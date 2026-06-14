@@ -14,7 +14,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { Button } from '../components/Button';
+import { useToast } from '../hooks/useToast';
+import { spacing, useTheme, useThemedStyles, Palette } from '../theme';
 import { getWeights, saveWeight, deleteWeight } from '../storage';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
 import { WeightEntry, RootStackParamList } from '../types';
@@ -39,6 +41,7 @@ export default function AddWeightScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const { showToast } = useToast();
   const { petId, weightId } = useRoute<Route>().params;
 
   const [original, setOriginal] = useState<WeightEntry | null>(null);
@@ -83,6 +86,7 @@ export default function AddWeightScreen() {
         createdAt: original?.createdAt ?? new Date().toISOString(),
       });
       navigation.goBack();
+      showToast(weightId ? 'Pesagem atualizada' : 'Pesagem registrada');
     } catch {
       setSaving(false);
       Alert.alert('Erro', 'Não foi possível salvar o peso. Tente novamente.');
@@ -100,6 +104,7 @@ export default function AddWeightScreen() {
           try {
             await deleteWeight(original.id);
             navigation.goBack();
+            showToast('Pesagem excluída');
           } catch {
             Alert.alert('Erro', 'Não foi possível excluir a pesagem.');
           }
@@ -145,16 +150,11 @@ export default function AddWeightScreen() {
             returnKeyType="done"
           />
 
-          <TouchableOpacity
-            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+          <Button
+            label={weightId ? 'Salvar Alterações' : 'Salvar Pesagem'}
             onPress={handleSave}
-            disabled={saving}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.saveBtnText}>
-              {saving ? 'Salvando...' : weightId ? 'Salvar Alterações' : 'Salvar Pesagem'}
-            </Text>
-          </TouchableOpacity>
+            loading={saving}
+          />
 
           {original && (
             <TouchableOpacity style={styles.deleteBtn} onPress={confirmDelete} activeOpacity={0.7}>
@@ -179,15 +179,6 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
   scroll: { padding: spacing.lg, gap: spacing.lg, paddingBottom: 48 },
-  saveBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md + 2,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   deleteBtn: {
     flexDirection: 'row',
     alignItems: 'center',

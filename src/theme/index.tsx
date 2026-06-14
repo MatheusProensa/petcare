@@ -26,6 +26,8 @@ export interface Palette {
   textMuted: string;
   textSubtle: string;
   border: string;
+  /** Cor do texto/ícone sobre fundo `primary` (botões, badges sólidos). */
+  onPrimary: string;
 }
 
 export const palettes: Record<ThemeScheme, Palette> = {
@@ -46,6 +48,7 @@ export const palettes: Record<ThemeScheme, Palette> = {
     textMuted: '#64748B',
     textSubtle: '#94A3B8',
     border: '#2A3B55',
+    onPrimary: '#FFFFFF',
   },
   light: {
     background: '#F8FAFC',
@@ -62,6 +65,7 @@ export const palettes: Record<ThemeScheme, Palette> = {
     textMuted: '#64748B',
     textSubtle: '#475569',
     border: '#E2E8F0',
+    onPrimary: '#FFFFFF',
   },
 };
 
@@ -80,6 +84,18 @@ export const radius = {
   lg: 16,
   xl: 24,
   full: 9999,
+} as const;
+
+/** Escala tipográfica única — tamanhos e pesos padrão para títulos e textos. */
+export const typography = {
+  h1: { fontSize: 28, fontWeight: '700' as const },
+  h2: { fontSize: 22, fontWeight: '700' as const },
+  h3: { fontSize: 18, fontWeight: '600' as const },
+  h4: { fontSize: 16, fontWeight: '600' as const },
+  body: { fontSize: 15, fontWeight: '400' as const },
+  label: { fontSize: 13, fontWeight: '600' as const },
+  caption: { fontSize: 12, fontWeight: '400' as const },
+  tiny: { fontSize: 11, fontWeight: '400' as const },
 } as const;
 
 const THEME_KEY = '@petcare:theme';

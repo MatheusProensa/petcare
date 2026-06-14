@@ -14,6 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { Button } from '../components/Button';
+import { useToast } from '../hooks/useToast';
 import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, saveRecord, deleteRecord } from '../storage';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
@@ -70,6 +72,7 @@ export default function AddRecordScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const RECORD_TYPE_COLORS = recordTypeColors(colors);
+  const { showToast } = useToast();
   const route = useRoute<Route>();
   const { petId, recordId, initialType, prefill } = route.params;
 
@@ -209,6 +212,7 @@ export default function AddRecordScreen() {
       }
       await saveRecord(record);
       navigation.goBack();
+      showToast(recordId ? 'Registro atualizado' : 'Registro salvo com sucesso');
     } catch {
       setSaving(false);
       Alert.alert('Erro', 'Não foi possível salvar o registro. Tente novamente.');
@@ -226,6 +230,7 @@ export default function AddRecordScreen() {
           try {
             await deleteRecord(original.id);
             navigation.goBack();
+            showToast('Registro excluído');
           } catch {
             Alert.alert('Erro', 'Não foi possível excluir o registro.');
           }
@@ -463,16 +468,11 @@ export default function AddRecordScreen() {
             </View>
           )}
 
-          <TouchableOpacity
-            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+          <Button
+            label={recordId ? 'Salvar Alterações' : 'Salvar Registro'}
             onPress={handleSave}
-            disabled={saving}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.saveBtnText}>
-              {saving ? 'Salvando...' : recordId ? 'Salvar Alterações' : 'Salvar Registro'}
-            </Text>
-          </TouchableOpacity>
+            loading={saving}
+          />
 
           {original && (
             <TouchableOpacity style={styles.deleteBtn} onPress={confirmDelete} activeOpacity={0.7}>
@@ -522,20 +522,6 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     backgroundColor: colors.primary + '22',
     borderColor: colors.primaryLight,
   },
-  saveBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md + 2,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   deleteBtn: {
     flexDirection: 'row',
     alignItems: 'center',

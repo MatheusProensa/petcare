@@ -180,6 +180,11 @@ export async function deletePet(petId: string): Promise<void> {
   await write(KEYS.PETS, PETS_VERSION, pets.filter(p => p.id !== petId));
 
   const records = await readRecords();
+  for (const record of records) {
+    if (record.petId === petId && record.photos) {
+      for (const uri of record.photos) await deletePhoto(uri);
+    }
+  }
   await write(KEYS.RECORDS, RECORDS_VERSION, records.filter(r => r.petId !== petId));
 
   const weights = await readWeights();

@@ -55,7 +55,8 @@ export function formatDaysUntil(days: number): string {
 /** "X anos e Y meses" / "X meses" / "X dias" entre uma data ISO e hoje. */
 export function formatDuration(iso: string): string {
   if (!iso) return '';
-  const start = new Date(iso);
+  const [y, m, d] = iso.split('-').map(Number);
+  const start = new Date(y, m - 1, d);
   const now = new Date();
   if (start > now) return '';
   let years = now.getFullYear() - start.getFullYear();
@@ -76,7 +77,8 @@ export function formatDuration(iso: string): string {
 
 export function calcAge(iso: string): string {
   if (!iso) return '';
-  const birth = new Date(iso);
+  const [y, m, d] = iso.split('-').map(Number);
+  const birth = new Date(y, m - 1, d);
   const now = new Date();
   if (birth > now) return '';
   let years = now.getFullYear() - birth.getFullYear();

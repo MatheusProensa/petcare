@@ -217,6 +217,13 @@ export async function saveRecord(record: MedicalRecord): Promise<void> {
 export async function deleteRecord(recordId: string): Promise<void> {
   const records = await readRecords();
   await write(KEYS.RECORDS, RECORDS_VERSION, records.filter(r => r.id !== recordId));
+
+  const doses = await readMedicationDoses();
+  await write(
+    KEYS.MEDICATION_DOSES,
+    MEDICATION_DOSES_VERSION,
+    doses.filter(d => d.recordId !== recordId),
+  );
 }
 
 // ---------------------------------- Peso -----------------------------------
@@ -397,8 +404,25 @@ export async function importBackup(json: string): Promise<{ pets: number; record
     if (await localFileExists(doc.uri)) validDocuments.push(doc);
   }
 
+  const records = await Promise.all(
+    parsed.records.map(async record => {
+      let result = record;
+      if (result.photo && !(await localFileExists(result.photo))) {
+        result = { ...result, photo: undefined };
+      }
+      if (result.photos?.length) {
+        const validPhotos: string[] = [];
+        for (const uri of result.photos) {
+          if (await localFileExists(uri)) validPhotos.push(uri);
+        }
+        result = { ...result, photos: validPhotos.length ? validPhotos : undefined };
+      }
+      return result;
+    }),
+  );
+
   await write(KEYS.PETS, PETS_VERSION, pets);
-  await write(KEYS.RECORDS, RECORDS_VERSION, parsed.records);
+  await write(KEYS.RECORDS, RECORDS_VERSION, records);
   await write(KEYS.WEIGHTS, WEIGHTS_VERSION, parsed.weights);
   await write(KEYS.DOCUMENTS, DOCUMENTS_VERSION, validDocuments);
   await write(

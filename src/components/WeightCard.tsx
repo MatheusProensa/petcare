@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { displayDate } from '../utils/date';
 import { WeightEntry } from '../types';
 
@@ -72,19 +72,20 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.md,
+    ...shadows.sm,
   },
   iconWrapper: {
     width: 44,
     height: 44,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  label: { fontSize: 12, color: colors.textMuted },
-  value: { fontSize: 20, fontWeight: '700', color: colors.text },
-  date: { fontSize: 12, color: colors.textMuted },
+  label: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
+  value: { fontSize: 20, fontWeight: '700', fontFamily: fonts.display, color: colors.text },
+  date: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
   diffWrapper: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  diff: { fontSize: 14, fontWeight: '600' },
-  totalDiff: { fontSize: 12, color: colors.textMuted, marginTop: spacing.xs, marginLeft: spacing.xs },
+  diff: { fontSize: 14, fontFamily: fonts.textBold, fontWeight: '700' },
+  totalDiff: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted, marginTop: spacing.xs, marginLeft: spacing.xs },
 });

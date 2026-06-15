@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { SPECIES_LABELS } from '../labels';
 import { calcAge } from '../utils/date';
 import { Pet } from '../types';
@@ -44,13 +44,13 @@ export const PetCard = React.memo(function PetCard({ pet, subtitle, activeMeds, 
       </View>
 
       {!!pendingAlerts && (
-        <View style={[styles.badge, { backgroundColor: colors.warning + '22' }]}>
+        <View style={[styles.badge, { backgroundColor: colors.warningSoft }]}>
           <Ionicons name="notifications" size={12} color={colors.warning} />
           <Text style={[styles.badgeText, { color: colors.warning }]}>{pendingAlerts}</Text>
         </View>
       )}
       {!!activeMeds && (
-        <View style={[styles.badge, { backgroundColor: colors.accent + '22' }]}>
+        <View style={[styles.badge, { backgroundColor: colors.accentSoft }]}>
           <Ionicons name="medkit" size={12} color={colors.accent} />
           <Text style={[styles.badgeText, { color: colors.accent }]}>{activeMeds}</Text>
         </View>
@@ -71,6 +71,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     gap: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
+    ...shadows.sm,
   },
   photoWrapper: {
     width: 64,
@@ -99,8 +100,10 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     gap: 3,
   },
   petName: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
+    fontFamily: fonts.display,
+    letterSpacing: -0.4,
     color: colors.text,
   },
   petSubtitle: {

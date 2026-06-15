@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, typography, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { displayDate } from '../utils/date';
 import { UpcomingEvent } from '../services/events';
 import { MedicalRecord, WeightEntry, Pet } from '../types';
@@ -79,7 +79,7 @@ export function HealthStatusCard({ records, weights, pets, events, activeMedsCou
     <View style={styles.card}>
       <View style={styles.titleRow}>
         <Text style={styles.title}>Saúde Hoje</Text>
-        <View style={[styles.semaphore, { backgroundColor: semaphoreColor + '1a' }]}>
+        <View style={[styles.semaphore, { backgroundColor: hasOverdue ? colors.dangerSoft : pendingAlerts.length > 0 ? colors.warningSoft : colors.successSoft }]}>
           <Text style={styles.semaphoreEmoji}>{semaphore}</Text>
           <Text style={[styles.semaphoreLabel, { color: semaphoreColor }]}>{semaphoreLabel}</Text>
         </View>
@@ -106,9 +106,10 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     padding: spacing.md,
     gap: spacing.sm,
     marginBottom: spacing.md,
+    ...shadows.sm,
   },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 },
-  title: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text },
+  title: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, fontFamily: typography.h4.fontFamily, color: colors.text },
   semaphore: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -118,16 +119,16 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderRadius: radius.full,
   },
   semaphoreEmoji: { fontSize: 12 },
-  semaphoreLabel: { fontSize: 11, fontWeight: '600' },
+  semaphoreLabel: { fontSize: 11, fontFamily: fonts.textBold, fontWeight: '700' },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   iconWrapper: {
     width: 28,
     height: 28,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rowLabel: { fontSize: 12, color: colors.textMuted, width: 110 },
-  rowValue: { flex: 1, fontSize: 13, fontWeight: '600', color: colors.text },
+  rowLabel: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted, width: 110 },
+  rowValue: { flex: 1, fontSize: 13, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
 });

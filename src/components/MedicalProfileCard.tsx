@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { MedicalProfile } from '../types';
 
 interface Props {
@@ -58,15 +58,16 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.md,
+    ...shadows.sm,
   },
   iconWrapper: {
     width: 40,
     height: 40,
     borderRadius: radius.full,
-    backgroundColor: colors.danger + '22',
+    backgroundColor: colors.dangerSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: { fontSize: 14, fontWeight: '600', color: colors.text },
-  subtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  title: { fontSize: 14, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
+  subtitle: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted, marginTop: 2 },
 });

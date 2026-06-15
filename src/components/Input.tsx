@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, TextInputProps, StyleSheet } from 'react-native';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 
 interface Props extends TextInputProps {
   label: string;
@@ -26,6 +26,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   wrapper: { gap: spacing.xs },
   label: {
     fontSize: 13,
+    fontFamily: fonts.textMedium,
     fontWeight: '500',
     color: colors.textSubtle,
     letterSpacing: 0.3,
@@ -39,6 +40,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: spacing.sm + 4,
     color: colors.text,
     fontSize: 15,
+    fontFamily: fonts.text,
   },
   multiline: {
     minHeight: 100,

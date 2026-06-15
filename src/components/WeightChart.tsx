@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { displayDate } from '../utils/date';
 import { WeightEntry } from '../types';
 
@@ -88,8 +88,9 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.sm,
+    ...shadows.sm,
   },
-  title: { fontSize: 13, fontWeight: '600', color: colors.textSubtle },
+  title: { fontSize: 13, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.textSubtle },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -98,8 +99,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderBottomColor: colors.border,
   },
   statItem: { alignItems: 'center', gap: 2 },
-  statLabel: { fontSize: 10, color: colors.textMuted },
-  statValue: { fontSize: 13, fontWeight: '700', color: colors.text },
+  statLabel: { fontSize: 10, fontFamily: fonts.text, color: colors.textMuted },
+  statValue: { fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700', color: colors.text },
   bars: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
   barColumn: { alignItems: 'center', gap: 4, width: 44 },
   bar: {
@@ -107,8 +108,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderRadius: 6,
     backgroundColor: colors.primary,
   },
-  barValue: { fontSize: 11, color: colors.textSubtle, fontWeight: '600' },
-  barLabel: { fontSize: 10, color: colors.textMuted },
+  barValue: { fontSize: 11, fontFamily: fonts.textSemibold, color: colors.textSubtle, fontWeight: '600' },
+  barLabel: { fontSize: 10, fontFamily: fonts.text, color: colors.textMuted },
   deltaRow: { flexDirection: 'row', alignItems: 'center', gap: 2, height: 12 },
-  deltaText: { fontSize: 10, fontWeight: '600' },
+  deltaText: { fontSize: 10, fontFamily: fonts.textSemibold, fontWeight: '600' },
 });

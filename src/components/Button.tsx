@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { radius, spacing, typography, useThemedStyles, Palette } from '../theme';
+import { radius, shadows, spacing, typography, fonts, useThemedStyles, Palette } from '../theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'ghost';
 
@@ -67,11 +67,11 @@ const createStyles = (colors: Palette) =>
   StyleSheet.create({
     base: {
       width: '100%',
-      borderRadius: radius.md,
+      borderRadius: radius.lg,
       paddingVertical: spacing.md - 2,
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: 48,
+      minHeight: 52,
     },
     content: {
       flexDirection: 'row',
@@ -82,38 +82,39 @@ const createStyles = (colors: Palette) =>
     label: {
       fontSize: typography.h4.fontSize,
       fontWeight: typography.h4.fontWeight,
+      fontFamily: fonts.textBold,
     },
     disabled: { opacity: 0.6 },
 
     primary: {
       backgroundColor: colors.primary,
       shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 4 },
+      ...shadows.md,
       shadowOpacity: 0.35,
-      shadowRadius: 12,
-      elevation: 6,
     },
     primaryText: { color: colors.onPrimary },
 
     secondary: {
       backgroundColor: colors.primary,
       shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 4 },
+      ...shadows.md,
       shadowOpacity: 0.35,
-      shadowRadius: 12,
-      elevation: 6,
     },
     secondaryText: { color: colors.onPrimary },
 
     destructive: {
-      backgroundColor: 'transparent',
-      borderWidth: 1,
-      borderColor: colors.danger,
+      backgroundColor: colors.danger,
+      shadowColor: colors.danger,
+      ...shadows.md,
+      shadowOpacity: 0.3,
     },
-    destructiveText: { color: colors.danger },
+    destructiveText: { color: '#FFFFFF' },
 
     ghost: {
       backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...shadows.sm,
     },
-    ghostText: { color: colors.primaryLight },
+    ghostText: { color: colors.textMuted },
   });

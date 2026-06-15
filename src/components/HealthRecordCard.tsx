@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { RECORD_TYPE_LABELS, recordTypeColors, RECORD_TYPE_ICONS } from '../labels';
 import { displayDate } from '../utils/date';
 import { MedicalRecord } from '../types';
@@ -44,6 +44,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     gap: 4,
+    ...shadows.sm,
   },
   top: {
     flexDirection: 'row',
@@ -58,9 +59,9 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: 3,
     borderRadius: radius.full,
   },
-  badgeText: { fontSize: 11, fontWeight: '600' },
-  date: { fontSize: 12, color: colors.textMuted },
-  title: { fontSize: 15, fontWeight: '600', color: colors.text },
-  petName: { fontSize: 12, color: colors.textSubtle },
-  description: { fontSize: 13, color: colors.textSubtle, lineHeight: 19 },
+  badgeText: { fontSize: 11, fontFamily: fonts.textSemibold, fontWeight: '600' },
+  date: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
+  title: { fontSize: 15, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
+  petName: { fontSize: 12, fontFamily: fonts.text, color: colors.textSubtle },
+  description: { fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle, lineHeight: 19 },
 });

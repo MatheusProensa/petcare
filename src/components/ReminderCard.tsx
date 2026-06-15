@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { RECORD_TYPE_ICONS } from '../labels';
 import { displayDate, formatDaysUntil } from '../utils/date';
 import { UpcomingEvent } from '../services/events';
@@ -47,10 +47,11 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.md,
+    ...shadows.sm,
   },
   iconWrapper: {
     width: 36,
@@ -59,9 +60,9 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  petName: { fontSize: 12, color: colors.textMuted },
-  title: { fontSize: 14, fontWeight: '600', color: colors.text, marginTop: 1 },
+  petName: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
+  title: { fontSize: 14, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text, marginTop: 1 },
   right: { alignItems: 'flex-end', gap: 2 },
-  when: { fontSize: 12, fontWeight: '600' },
-  date: { fontSize: 11, color: colors.textMuted },
+  when: { fontSize: 12, fontFamily: fonts.textBold, fontWeight: '700' },
+  date: { fontSize: 11, fontFamily: fonts.text, color: colors.textMuted },
 });

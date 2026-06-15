@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, ImageSourcePropType } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 
 interface Props {
   icon?: keyof typeof Ionicons.glyphMap;
@@ -51,13 +51,15 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   title: {
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
+    fontFamily: fonts.display,
     color: colors.text,
     marginBottom: spacing.xs,
     textAlign: 'center',
   },
   text: {
     fontSize: 13,
+    fontFamily: fonts.text,
     color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 20,

@@ -3,6 +3,17 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
+import {
+  BricolageGrotesque_700Bold,
+  BricolageGrotesque_800ExtraBold,
+} from '@expo-google-fonts/bricolage-grotesque';
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+} from '@expo-google-fonts/plus-jakarta-sans';
 import { ThemeProvider, useTheme } from './src/theme';
 import { ToastProvider } from './src/hooks/useToast';
 import { onboardingRepository } from './src/repositories/onboardingRepository';
@@ -99,6 +110,23 @@ function AppContent() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    BricolageGrotesque_700Bold,
+    BricolageGrotesque_800ExtraBold,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={[styles.loading, { backgroundColor: '#FBF5EF' }]}>
+        <ActivityIndicator color="#E66A3A" size="large" />
+      </View>
+    );
+  }
+
   return (
     <ThemeProvider>
       <ToastProvider>

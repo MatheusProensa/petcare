@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, typography, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { petsRepository } from '../repositories/petsRepository';
 import { recordsRepository } from '../repositories/recordsRepository';
 import { weightsRepository } from '../repositories/weightsRepository';
@@ -269,7 +269,7 @@ export default function DashboardScreen() {
                     accessibilityRole="button"
                     accessibilityLabel={`${RECORD_TYPE_LABELS[record.type]}: ${record.title}, ${petName(record.petId)}`}
                   >
-                    <View style={[styles.recordIcon, { backgroundColor: TYPE_COLORS[record.type] + '22' }]}>
+                    <View style={[styles.recordIcon, { backgroundColor: TYPE_COLORS[record.type] + '1F' }]}>
                       <Ionicons name={RECORD_TYPE_ICONS[record.type]} size={16} color={TYPE_COLORS[record.type]} />
                     </View>
                     <View style={styles.recordInfo}>
@@ -346,12 +346,14 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   title: {
     fontSize: typography.h1.fontSize,
     fontWeight: typography.h1.fontWeight,
+    fontFamily: typography.h1.fontFamily,
     color: colors.text,
-    letterSpacing: -0.5,
+    letterSpacing: typography.h1.letterSpacing,
     marginTop: spacing.sm,
   },
   subtitle: {
     fontSize: typography.body.fontSize,
+    fontFamily: typography.body.fontFamily,
     color: colors.textMuted,
     marginTop: 2,
     marginBottom: spacing.lg,
@@ -360,24 +362,25 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   quickActions: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
   quickActionItem: { flex: 1 },
   section: { gap: spacing.sm, marginBottom: spacing.lg },
-  sectionTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text, marginBottom: 2 },
+  sectionTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, fontFamily: typography.h4.fontFamily, color: colors.text, marginBottom: 2 },
   sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  seeAll: { fontSize: 13, fontWeight: '600', color: colors.primaryLight },
+  seeAll: { fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700', color: colors.primaryLight },
   calmCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.success + '12',
-    borderRadius: radius.md,
+    backgroundColor: colors.successSoft,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.success + '33',
     padding: spacing.md,
   },
-  calmText: { flex: 1, fontSize: 13, color: colors.textSubtle, lineHeight: 19 },
-  emptyHint: { fontSize: 13, color: colors.textMuted },
+  calmText: { flex: 1, fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle, lineHeight: 19 },
+  emptyHint: { fontSize: 13, fontFamily: fonts.text, color: colors.textMuted },
   seeMore: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.textBold,
+    fontWeight: '700',
     color: colors.primaryLight,
     textAlign: 'center',
     paddingVertical: spacing.xs,
@@ -387,10 +390,11 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.sm + 2,
+    ...shadows.sm,
   },
   recordIcon: {
     width: 32,
@@ -400,18 +404,21 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     justifyContent: 'center',
   },
   recordInfo: { flex: 1, gap: 1 },
-  recordTitle: { fontSize: 14, fontWeight: '600', color: colors.text },
-  recordMeta: { fontSize: 12, color: colors.textSubtle },
+  recordTitle: { fontSize: 14, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
+  recordMeta: { fontSize: 12, fontFamily: fonts.text, color: colors.textSubtle },
   petsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
     backgroundColor: colors.primary,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     paddingVertical: spacing.md,
     marginTop: spacing.sm,
+    shadowColor: colors.primary,
+    ...shadows.md,
+    shadowOpacity: 0.35,
   },
-  petsBtnText: { fontSize: 15, fontWeight: '600', color: colors.onPrimary },
+  petsBtnText: { fontSize: 15, fontFamily: fonts.textBold, fontWeight: '700', color: colors.onPrimary },
   emptyWrapper: { marginTop: spacing.xxl, gap: spacing.lg },
 });

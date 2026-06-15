@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, typography, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { petsRepository } from '../repositories/petsRepository';
 import { recordsRepository } from '../repositories/recordsRepository';
 import { weightsRepository } from '../repositories/weightsRepository';
@@ -578,7 +578,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text },
+  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, fontFamily: fonts.display, color: colors.text },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingBottom: 48 },
   hero: {
@@ -608,7 +608,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   heroName: {
     fontSize: 26,
-    fontWeight: '700',
+    fontWeight: '800',
+    fontFamily: fonts.displayExtra,
     color: '#FFFFFF',
     letterSpacing: -0.5,
   },
@@ -623,14 +624,16 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     marginBottom: spacing.sm,
+    ...shadows.sm,
   },
   heroNamePlaceholder: {
     fontSize: 26,
-    fontWeight: '700',
+    fontWeight: '800',
+    fontFamily: fonts.displayExtra,
     color: colors.text,
     letterSpacing: -0.5,
   },
-  petMeta: { fontSize: 14, color: colors.textMuted },
+  petMeta: { fontSize: 14, fontFamily: fonts.text, color: colors.textMuted },
   ageRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -638,7 +641,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     marginTop: 2,
     marginBottom: spacing.lg,
   },
-  ageText: { fontSize: 14, color: colors.textMuted },
+  ageText: { fontSize: 14, fontFamily: fonts.text, color: colors.textMuted },
   quickActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -656,6 +659,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     paddingVertical: spacing.md,
+    ...shadows.sm,
   },
   quickActionIcon: {
     width: 36,
@@ -664,7 +668,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quickActionLabel: { fontSize: 12, fontWeight: '500', color: colors.textSubtle },
+  quickActionLabel: { fontSize: 12, fontFamily: fonts.textMedium, fontWeight: '500', color: colors.textSubtle },
   divider: { width: '100%', height: 1, backgroundColor: colors.border, marginBottom: spacing.lg },
   sectionRow: {
     flexDirection: 'row',
@@ -673,7 +677,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     width: '100%',
     marginBottom: spacing.md,
   },
-  sectionTitle: { fontSize: typography.h3.fontSize, fontWeight: typography.h3.fontWeight, color: colors.text },
+  sectionTitle: { fontSize: typography.h3.fontSize, fontWeight: typography.h3.fontWeight, fontFamily: typography.h3.fontFamily, letterSpacing: typography.h3.letterSpacing, color: colors.text },
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -682,8 +686,10 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
     borderRadius: radius.full,
+    shadowColor: colors.primary,
+    ...shadows.sm,
   },
-  addBtnText: { fontSize: 13, fontWeight: '600', color: colors.onPrimary },
+  addBtnText: { fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700', color: colors.onPrimary },
   filterScroll: { width: '100%', marginBottom: spacing.md },
   filterRow: { gap: spacing.sm, paddingRight: spacing.lg },
   filterChip: {
@@ -695,14 +701,15 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
   },
   filterChipActive: {
-    backgroundColor: colors.primary + '22',
-    borderColor: colors.primaryLight,
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
   },
-  filterChipText: { fontSize: 13, fontWeight: '500', color: colors.textMuted },
-  filterChipTextActive: { color: colors.primaryLight, fontWeight: '600' },
+  filterChipText: { fontSize: 13, fontFamily: fonts.textMedium, fontWeight: '500', color: colors.textMuted },
+  filterChipTextActive: { color: colors.primaryStrong, fontFamily: fonts.textBold, fontWeight: '700' },
   monthHeader: {
     fontSize: typography.label.fontSize,
     fontWeight: typography.label.fontWeight,
+    fontFamily: typography.label.fontFamily,
     color: colors.textSubtle,
     textTransform: 'uppercase',
     letterSpacing: 0.6,

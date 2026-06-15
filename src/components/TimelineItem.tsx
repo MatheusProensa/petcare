@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { spacing, radius, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, shadows, fonts, useThemedStyles, Palette } from '../theme';
 
 export interface TimelineBadge {
   label: string;
@@ -109,6 +109,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     marginLeft: spacing.sm,
     marginBottom: spacing.sm,
     gap: 3,
+    ...shadows.sm,
   },
   cardTop: {
     flexDirection: 'row',
@@ -117,6 +118,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   date: {
     fontSize: 12,
+    fontFamily: fonts.text,
     color: colors.textMuted,
   },
   badge: {
@@ -126,15 +128,18 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   badgeText: {
     fontSize: 11,
+    fontFamily: fonts.textSemibold,
     fontWeight: '600',
   },
   title: {
     fontSize: 15,
+    fontFamily: fonts.textSemibold,
     fontWeight: '600',
     color: colors.text,
   },
   line2: {
     fontSize: 13,
+    fontFamily: fonts.text,
     color: colors.textSubtle,
     lineHeight: 19,
   },

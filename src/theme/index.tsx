@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ThemeScheme = 'dark' | 'light';
@@ -14,58 +14,95 @@ export interface Palette {
   background: string;
   surface: string;
   surfaceElevated: string;
+  /** Superfície quente levemente elevada (cards secundários). */
+  surface2: string;
+  /** Superfície "afundada" (trilhas de progresso, thumbs). */
+  surfaceSunken: string;
   primary: string;
+  /** Laranja mais escuro para gradientes/realces de CTA. */
+  primaryStrong: string;
+  /** Fundo tonal suave do primário (botão secundário, chips). */
+  primarySoft: string;
   /** Cor de destaque para ícones e links sobre o fundo. */
   primaryLight: string;
+  /** Cor do texto/ícone sobre fundo `primary` (botões, badges sólidos). */
+  onPrimary: string;
   info: string;
+  infoSoft: string;
   success: string;
+  successSoft: string;
   warning: string;
+  warningSoft: string;
   danger: string;
+  dangerSoft: string;
   accent: string;
+  accentSoft: string;
   text: string;
   textMuted: string;
   textSubtle: string;
   border: string;
-  /** Cor do texto/ícone sobre fundo `primary` (botões, badges sólidos). */
-  onPrimary: string;
+  borderStrong: string;
+  /** Vidro fosco para elementos flutuantes (tab bar, overlays). */
+  glass: string;
 }
 
 export const palettes: Record<ThemeScheme, Palette> = {
-  // Paleta oficial da marca PetCare:
-  // laranja #E66A3A / #F59E0B / #FFB27A · navy #1B2940 / #0B1120 · off-white #F8FAFC
-  dark: {
-    background: '#0B1120',
-    surface: '#1B2940',
-    surfaceElevated: '#26364E',
-    primary: '#E66A3A',
-    primaryLight: '#FFB27A',
-    info: '#38BDF8',
-    success: '#10B981',
-    warning: '#F59E0B',
-    danger: '#EF4444',
-    accent: '#A78BFA',
-    text: '#F8FAFC',
-    textMuted: '#64748B',
-    textSubtle: '#94A3B8',
-    border: '#2A3B55',
-    onPrimary: '#FFFFFF',
-  },
+  // Paleta oficial PetCare (redesign): laranja #E66A3A · navy #1B2940 · creme #FBF5EF
   light: {
-    background: '#F8FAFC',
+    background: '#FBF5EF',
     surface: '#FFFFFF',
-    surfaceElevated: '#EEF2F7',
+    surfaceElevated: '#FFF8F2',
+    surface2: '#FFF8F2',
+    surfaceSunken: '#F4EDE6',
     primary: '#E66A3A',
+    primaryStrong: '#D2562A',
+    primarySoft: '#FBE6DA',
     primaryLight: '#C2410C',
-    info: '#0369A1',
-    success: '#0E9F6E',
-    warning: '#B45309',
-    danger: '#DC2626',
-    accent: '#7C3AED',
-    text: '#1B2940',
-    textMuted: '#5B6B80',
-    textSubtle: '#475569',
-    border: '#D9E1EB',
     onPrimary: '#FFFFFF',
+    info: '#2C72B8',
+    infoSoft: '#DEEAF6',
+    success: '#0E9F6E',
+    successSoft: '#DEF3EA',
+    warning: '#C9760F',
+    warningSoft: '#FBEBD3',
+    danger: '#D6493B',
+    dangerSoft: '#FBE3DF',
+    accent: '#7C3AED',
+    accentSoft: '#ECE3FB',
+    text: '#1B2940',
+    textMuted: '#6A788C',
+    textSubtle: '#4A586E',
+    border: '#EEE2D8',
+    borderStrong: '#E3D4C7',
+    glass: 'rgba(255,255,255,0.82)',
+  },
+  dark: {
+    background: '#0A0F1C',
+    surface: '#161F33',
+    surfaceElevated: '#1C273F',
+    surface2: '#1C273F',
+    surfaceSunken: '#111A2C',
+    primary: '#F4793F',
+    primaryStrong: '#E2602A',
+    primarySoft: '#3A2519',
+    primaryLight: '#FFB27A',
+    onPrimary: '#FFFFFF',
+    info: '#54A8F0',
+    infoSoft: '#122336',
+    success: '#2DD49A',
+    successSoft: '#122A24',
+    warning: '#F5A623',
+    warningSoft: '#2E2310',
+    danger: '#F4685A',
+    dangerSoft: '#2E1916',
+    accent: '#A78BFA',
+    accentSoft: '#221C3A',
+    text: '#F4F7FB',
+    textMuted: '#8C99AE',
+    textSubtle: '#5E6B82',
+    border: '#25324B',
+    borderStrong: '#303E59',
+    glass: 'rgba(22,31,51,0.78)',
   },
 };
 
@@ -78,24 +115,59 @@ export const spacing = {
   xxl: 48,
 } as const;
 
+/** Raios do redesign — cards mais arredondados (18-26) + pílulas (999). */
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
+  sm: 11,
+  md: 14,
+  lg: 18,
+  xl: 22,
+  xxl: 26,
   full: 9999,
 } as const;
 
-/** Escala tipográfica única — tamanhos e pesos padrão para títulos e textos. */
+/** Famílias do redesign. Carregadas via useFonts no App.tsx. */
+export const fonts = {
+  display: 'BricolageGrotesque_700Bold',
+  displayExtra: 'BricolageGrotesque_800ExtraBold',
+  text: 'PlusJakartaSans_400Regular',
+  textMedium: 'PlusJakartaSans_500Medium',
+  textSemibold: 'PlusJakartaSans_600SemiBold',
+  textBold: 'PlusJakartaSans_700Bold',
+} as const;
+
+/**
+ * Escala tipográfica. `display`/`h1-h3` usam Bricolage Grotesque (títulos,
+ * nomes de pets, números); o resto usa Plus Jakarta Sans.
+ */
 export const typography = {
-  h1: { fontSize: 28, fontWeight: '700' as const },
-  h2: { fontSize: 22, fontWeight: '700' as const },
-  h3: { fontSize: 18, fontWeight: '600' as const },
-  h4: { fontSize: 16, fontWeight: '600' as const },
-  body: { fontSize: 15, fontWeight: '400' as const },
-  label: { fontSize: 13, fontWeight: '600' as const },
-  caption: { fontSize: 12, fontWeight: '400' as const },
-  tiny: { fontSize: 11, fontWeight: '400' as const },
+  display: { fontSize: 34, fontWeight: '800' as const, fontFamily: fonts.displayExtra, letterSpacing: -1 },
+  h1: { fontSize: 28, fontWeight: '700' as const, fontFamily: fonts.display, letterSpacing: -0.5 },
+  h2: { fontSize: 22, fontWeight: '700' as const, fontFamily: fonts.display, letterSpacing: -0.4 },
+  h3: { fontSize: 18, fontWeight: '700' as const, fontFamily: fonts.display, letterSpacing: -0.4 },
+  h4: { fontSize: 16, fontWeight: '700' as const, fontFamily: fonts.textBold },
+  body: { fontSize: 15, fontWeight: '400' as const, fontFamily: fonts.text },
+  label: { fontSize: 13, fontWeight: '600' as const, fontFamily: fonts.textSemibold },
+  caption: { fontSize: 12, fontWeight: '400' as const, fontFamily: fonts.text },
+  tiny: { fontSize: 11, fontWeight: '400' as const, fontFamily: fonts.text },
+} as const;
+
+/** Sombras quentes em 3 níveis (iOS shadow* / Android elevation). */
+export const shadows = {
+  sm: Platform.select({
+    ios: { shadowColor: '#3A2A1E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
+    android: { elevation: 2 },
+    default: {},
+  }),
+  md: Platform.select({
+    ios: { shadowColor: '#3A2A1E', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 18 },
+    android: { elevation: 6 },
+    default: {},
+  }),
+  lg: Platform.select({
+    ios: { shadowColor: '#1B2940', shadowOffset: { width: 0, height: 18 }, shadowOpacity: 0.18, shadowRadius: 34 },
+    android: { elevation: 12 },
+    default: {},
+  }),
 } as const;
 
 const THEME_KEY = '@petcare:theme';

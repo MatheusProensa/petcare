@@ -17,7 +17,12 @@ import { petsRepository } from '../repositories/petsRepository';
 import { recordsRepository } from '../repositories/recordsRepository';
 import { weightsRepository } from '../repositories/weightsRepository';
 import { getUpcomingEvents, isActiveMedication, UpcomingEvent } from '../services/events';
-import { syncEventNotifications } from '../services/notifications';
+import {
+  syncEventNotifications,
+  getNotificationPermissionStatus,
+  requestNotificationPermission,
+} from '../services/notifications';
+import { getNotifBannerDismissed, setNotifBannerDismissed } from '../storage';
 import { StatCard } from '../components/StatCard';
 import { ReminderCard } from '../components/ReminderCard';
 import { EmptyState } from '../components/EmptyState';
@@ -48,6 +53,22 @@ export default function DashboardScreen() {
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [activeMedsCount, setActiveMedsCount] = useState(0);
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+  const [notifStatus, setNotifStatus] = useState<'granted' | 'denied' | 'undecided' | null>(null);
+  const [notifBannerVisible, setNotifBannerVisible] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      getNotificationPermissionStatus().then(async status => {
+        setNotifStatus(status);
+        if (status !== 'granted') {
+          const dismissed = await getNotifBannerDismissed();
+          setNotifBannerVisible(!dismissed);
+        } else {
+          setNotifBannerVisible(false);
+        }
+      });
+    }, []),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -109,6 +130,21 @@ export default function DashboardScreen() {
     );
   }, [pets, navigation]);
 
+  const handleEnableNotifications = useCallback(async () => {
+    const granted = await requestNotificationPermission();
+    if (granted) {
+      setNotifBannerVisible(false);
+      await setNotifBannerDismissed();
+    } else {
+      setNotifStatus('denied');
+    }
+  }, []);
+
+  const handleDismissNotifBanner = useCallback(async () => {
+    setNotifBannerVisible(false);
+    await setNotifBannerDismissed();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -158,6 +194,40 @@ export default function DashboardScreen() {
         <Text style={styles.subtitle}>
           {hasPets ? 'Aqui está o resumo de hoje' : 'Vamos cadastrar seu primeiro pet?'}
         </Text>
+
+        {notifBannerVisible && (
+          <View style={styles.notifBanner}>
+            <View style={styles.notifBannerIcon}>
+              <Ionicons name="notifications" size={20} color={colors.primary} />
+            </View>
+            <View style={styles.notifBannerContent}>
+              <Text style={styles.notifBannerTitle}>Ative os lembretes</Text>
+              <Text style={styles.notifBannerBody}>
+                {notifStatus === 'denied'
+                  ? 'Ative nas configurações do celular para receber alertas de vacinas e remédios.'
+                  : 'Receba alertas de vacinas, remédios e consultas no horário certo.'}
+              </Text>
+              {notifStatus !== 'denied' && (
+                <TouchableOpacity
+                  onPress={handleEnableNotifications}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Ativar notificações"
+                >
+                  <Text style={styles.notifBannerAction}>Ativar agora</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <TouchableOpacity
+              onPress={handleDismissNotifBanner}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar aviso de notificações"
+            >
+              <Ionicons name="close" size={18} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {hasPets ? (
           <>
@@ -407,6 +477,29 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   recordInfo: { flex: 1, gap: 1 },
   recordTitle: { fontSize: 14, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
   recordMeta: { fontSize: 12, fontFamily: fonts.text, color: colors.textSubtle },
+  notifBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.primary + '33',
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  notifBannerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    backgroundColor: colors.primary + '22',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  notifBannerContent: { flex: 1, gap: 2 },
+  notifBannerTitle: { fontSize: 14, fontFamily: fonts.textBold, fontWeight: '700', color: colors.text },
+  notifBannerBody: { fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle, lineHeight: 18 },
+  notifBannerAction: { fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700', color: colors.primaryLight, marginTop: spacing.xs },
   petsBtn: {
     flexDirection: 'row',
     alignItems: 'center',

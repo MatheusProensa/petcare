@@ -23,6 +23,7 @@ const KEYS = {
   MEDICATION_DOSES: '@petcare:medication_doses',
   ONBOARDING_SEEN: '@petcare:onboarding_seen',
   LAST_BACKUP: '@petcare:last_backup',
+  NOTIF_BANNER_DISMISSED: '@petcare:notif_banner_dismissed',
 };
 
 const PETS_VERSION = 1;
@@ -290,6 +291,16 @@ export async function getOnboardingSeen(): Promise<boolean> {
 
 export async function setOnboardingSeen(): Promise<void> {
   await AsyncStorage.setItem(KEYS.ONBOARDING_SEEN, 'true');
+}
+
+// ------------------------- Notification banner -----------------------------
+
+export async function getNotifBannerDismissed(): Promise<boolean> {
+  return (await AsyncStorage.getItem(KEYS.NOTIF_BANNER_DISMISSED)) === 'true';
+}
+
+export async function setNotifBannerDismissed(): Promise<void> {
+  await AsyncStorage.setItem(KEYS.NOTIF_BANNER_DISMISSED, 'true');
 }
 
 // ---------------------------------- Tutor ----------------------------------

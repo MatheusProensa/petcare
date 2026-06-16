@@ -92,6 +92,16 @@ export const VACCINE_TYPE_SHORT_LABELS: Record<VaccineType, string> = {
   other: 'Outra',
 };
 
+/** Título do formulário de criação por tipo, com gênero correto. */
+export const NEW_RECORD_LABELS: Record<RecordType, string> = {
+  vaccine:      'Nova Vacina',
+  consultation: 'Nova Consulta',
+  medication:   'Novo Remédio',
+  deworming:    'Novo Vermífugo',
+  note:         'Nova Observação',
+  memory:       'Nova Memória',
+};
+
 /** Opções de antecedência para lembretes (em dias antes do evento). */
 export const REMINDER_OPTIONS: { days: number; label: string }[] = [
   { days: 0, label: 'No dia' },

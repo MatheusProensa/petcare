@@ -24,6 +24,7 @@ import { persistPhoto, deletePhoto } from '../storage/files';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
 import {
   RECORD_TYPE_LABELS,
+  NEW_RECORD_LABELS,
   recordTypeColors,
   FREQUENCY_LABELS,
   REMINDER_OPTIONS,
@@ -331,7 +332,7 @@ export default function AddRecordScreen() {
           {recordId
             ? `Editar ${RECORD_TYPE_LABELS[type]}`
             : lockType
-              ? `Novo(a) ${RECORD_TYPE_LABELS[type]}`
+              ? NEW_RECORD_LABELS[type]
               : 'Novo Registro'}
         </Text>
         <ThemeToggle />

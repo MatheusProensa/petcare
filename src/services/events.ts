@@ -34,12 +34,24 @@ export function isEventFulfilled(
 ): boolean {
   if (!record.nextDate) return false;
   if (fulfilledIds) return fulfilledIds.has(record.id);
-  if (record.type === 'vaccine' || record.type === 'deworming') {
+  if (record.type === 'vaccine') {
     return all.some(
       other =>
         other.id !== record.id &&
         other.petId === record.petId &&
-        other.type === record.type &&
+        other.type === 'vaccine' &&
+        (record.vaccineType
+          ? other.vaccineType === record.vaccineType
+          : normalizeTitle(other.title) === normalizeTitle(record.title)) &&
+        other.date > record.date,
+    );
+  }
+  if (record.type === 'deworming') {
+    return all.some(
+      other =>
+        other.id !== record.id &&
+        other.petId === record.petId &&
+        other.type === 'deworming' &&
         normalizeTitle(other.title) === normalizeTitle(record.title) &&
         other.date > record.date,
     );
@@ -66,8 +78,12 @@ export function getFulfilledRecordIds(records: MedicalRecord[]): Set<string> {
   const groups = new Map<string, MedicalRecord[]>();
   for (const record of records) {
     let key: string | null = null;
-    if (record.type === 'vaccine' || record.type === 'deworming') {
-      key = `${record.petId}|${record.type}|${normalizeTitle(record.title)}`;
+    if (record.type === 'vaccine') {
+      key = record.vaccineType
+        ? `${record.petId}|vaccine|type:${record.vaccineType}`
+        : `${record.petId}|vaccine|title:${normalizeTitle(record.title)}`;
+    } else if (record.type === 'deworming') {
+      key = `${record.petId}|deworming|${normalizeTitle(record.title)}`;
     } else if (record.type === 'consultation') {
       key = `${record.petId}|consultation`;
     }

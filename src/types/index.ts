@@ -5,6 +5,19 @@ export type RecordType = 'vaccine' | 'consultation' | 'medication' | 'deworming'
 export type Frequency = 'once_daily' | 'twice_daily' | 'every_8h' | 'every_12h' | 'continuous';
 export type DocumentKind = 'exam' | 'prescription' | 'vaccination_card' | 'other';
 
+/** Categoria de proteção da vacina — agrupa marcas diferentes que cobrem as mesmas doenças. */
+export type VaccineType =
+  | 'v8'
+  | 'v10'
+  | 'rabies'
+  | 'leishmania'
+  | 'giardia'
+  | 'bordetella'
+  | 'feline_triple'
+  | 'feline_quadruple'
+  | 'feline_leukemia'
+  | 'other';
+
 export interface MedicalProfile {
   neutered?: boolean;
   allergies?: string;
@@ -54,6 +67,11 @@ export interface MedicalRecord {
   photo?: string;
   /** Fotos de uma memória (registro do tipo "memory"). */
   photos?: string[];
+  /**
+   * Categoria de proteção da vacina — permite reconhecer marcas diferentes
+   * (ex: Nobivac DHPPI e Vanguard Plus) como equivalentes para reforço.
+   */
+  vaccineType?: VaccineType;
   createdAt: string;
 }
 
@@ -99,7 +117,7 @@ export type RootStackParamList = {
     petId: string;
     recordId?: string;
     initialType?: RecordType;
-    prefill?: { title?: string; manufacturer?: string; batch?: string; clinic?: string };
+    prefill?: { title?: string; manufacturer?: string; batch?: string; clinic?: string; vaccineType?: VaccineType };
   };
   AddWeight: { petId: string; weightId?: string };
   Weight: { petId: string };

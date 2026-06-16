@@ -27,12 +27,14 @@ import {
   recordTypeColors,
   FREQUENCY_LABELS,
   REMINDER_OPTIONS,
+  VACCINE_TYPE_LABELS,
 } from '../labels';
-import { MedicalRecord, RecordType, Frequency, RootStackParamList } from '../types';
+import { MedicalRecord, RecordType, Frequency, VaccineType, RootStackParamList } from '../types';
 
 type Route = RouteProp<RootStackParamList, 'AddRecord'>;
 
 const RECORD_TYPES: RecordType[] = ['vaccine', 'consultation', 'medication', 'deworming', 'note', 'memory'];
+const VACCINE_TYPES: VaccineType[] = ['v8', 'v10', 'rabies', 'leishmania', 'giardia', 'bordetella', 'feline_triple', 'feline_quadruple', 'feline_leukemia', 'other'];
 const FREQUENCIES: Frequency[] = ['once_daily', 'twice_daily', 'every_8h', 'every_12h', 'continuous'];
 
 const TITLE_LABELS: Record<RecordType, string> = {
@@ -84,6 +86,7 @@ export default function AddRecordScreen() {
 
   const [original, setOriginal] = useState<MedicalRecord | null>(null);
   const [type, setType] = useState<RecordType>(initialType ?? 'vaccine');
+  const [vaccineType, setVaccineType] = useState<VaccineType | undefined>(prefill?.vaccineType);
   const [title, setTitle] = useState(prefill?.title ?? '');
   const [date, setDate] = useState('');
   const [nextDate, setNextDate] = useState('');
@@ -121,6 +124,7 @@ export default function AddRecordScreen() {
         setVet(record.vet ?? '');
         setDiagnosis(record.diagnosis ?? '');
         setDescription(record.description ?? '');
+        setVaccineType(record.vaccineType);
         setPhotos(record.photos ?? (record.photo ? [record.photo] : []));
         const days = record.reminderDays ?? [];
         const presets = REMINDER_OPTIONS.map(o => o.days);
@@ -255,6 +259,7 @@ export default function AddRecordScreen() {
         record.dosage = trimOrUndefined(dosage);
       }
       if (type === 'vaccine') {
+        record.vaccineType = vaccineType;
         record.manufacturer = trimOrUndefined(manufacturer);
         record.batch = trimOrUndefined(batch);
         record.clinic = trimOrUndefined(clinic);
@@ -372,6 +377,34 @@ export default function AddRecordScreen() {
             maxLength={10}
             returnKeyType="next"
           />
+
+          {type === 'vaccine' && (
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Tipo de proteção (opcional)</Text>
+              <Text style={styles.fieldHint}>
+                Selecione a categoria — permite reconhecer marcas diferentes que cobrem as mesmas doenças como reforço da mesma vacina.
+              </Text>
+              <View style={styles.typeRow}>
+                {VACCINE_TYPES.map(vt => {
+                  const active = vaccineType === vt;
+                  return (
+                    <TouchableOpacity
+                      key={vt}
+                      style={[styles.freqChip, active && styles.freqChipActive]}
+                      onPress={() => setVaccineType(prev => prev === vt ? undefined : vt)}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
+                    >
+                      <Text style={[styles.typeChipText, active && { color: colors.primary }]}>
+                        {VACCINE_TYPE_LABELS[vt]}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          )}
 
           {type === 'vaccine' && (
             <>

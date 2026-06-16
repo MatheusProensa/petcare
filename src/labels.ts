@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Species, RecordType, Frequency, DocumentKind } from './types';
+import { Species, RecordType, Frequency, DocumentKind, VaccineType } from './types';
 import { Palette } from './theme';
 
 export const SPECIES_LABELS: Record<Species, string> = {
@@ -58,6 +58,23 @@ export const DOCUMENT_KIND_ICONS: Record<DocumentKind, keyof typeof Ionicons.gly
   prescription: 'receipt',
   vaccination_card: 'shield-checkmark',
   other: 'document',
+};
+
+/**
+ * Rótulos das categorias de proteção de vacinas.
+ * Marcas diferentes da mesma categoria cobrem as mesmas doenças.
+ */
+export const VACCINE_TYPE_LABELS: Record<VaccineType, string> = {
+  v8: 'V8 — DHPPI + Lepto',
+  v10: 'V10 — DHPPI + Lepto + Corona',
+  rabies: 'Antirrábica',
+  leishmania: 'Leishmaniose',
+  giardia: 'Giardia',
+  bordetella: 'Bordetella (Tosse dos Canis)',
+  feline_triple: 'Tríplice Felina (HCV)',
+  feline_quadruple: 'Quádrupla Felina (HCV + Raiva)',
+  feline_leukemia: 'Leucemia Felina (FeLV)',
+  other: 'Outra',
 };
 
 /** Opções de antecedência para lembretes (em dias antes do evento). */

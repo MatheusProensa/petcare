@@ -8,6 +8,7 @@ import { spacing, radius, fonts, shadows, useTheme, useThemedStyles, Palette } f
 import { getRecords } from '../storage';
 import { displayDate, formatDaysUntil, daysUntilISO } from '../utils/date';
 import { getVaccineStatus, getFulfilledRecordIds, VaccineStatus } from '../services/events';
+import { VACCINE_TYPE_LABELS } from '../labels';
 import { EmptyState } from '../components/EmptyState';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { MedicalRecord, RootStackParamList } from '../types';
@@ -77,6 +78,14 @@ export default function VaccinesScreen() {
               </Text>
             </View>
           </View>
+          {item.vaccineType && (
+            <View style={[styles.typeBadge, { backgroundColor: colors.primarySoft }]}>
+              <Ionicons name="shield-checkmark-outline" size={11} color={colors.primaryStrong} />
+              <Text style={[styles.typeBadgeText, { color: colors.primaryStrong }]}>
+                {VACCINE_TYPE_LABELS[item.vaccineType]}
+              </Text>
+            </View>
+          )}
           <Text style={styles.line}>Aplicada em {displayDate(item.date)}</Text>
           {item.nextDate ? (
             <Text style={styles.line}>
@@ -97,6 +106,7 @@ export default function VaccinesScreen() {
                     manufacturer: item.manufacturer,
                     batch: item.batch,
                     clinic: item.clinic,
+                    vaccineType: item.vaccineType,
                   },
                 })
               }
@@ -229,6 +239,17 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   badgeText: { fontSize: 11, fontFamily: fonts.textBold, fontWeight: '700' },
   line: { fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle },
   details: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
+  typeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radius.full,
+    marginBottom: 2,
+  },
+  typeBadgeText: { fontSize: 11, fontFamily: fonts.textBold, fontWeight: '700' },
   doseBtn: {
     flexDirection: 'row',
     alignItems: 'center',

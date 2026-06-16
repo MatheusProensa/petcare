@@ -1,17 +1,23 @@
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { Animated, Platform, StyleSheet, Text } from 'react-native';
+import { Animated, Platform, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { radius, spacing, typography, useTheme, Palette } from '../theme';
 
 export type ToastVariant = 'success' | 'error';
 
+interface ToastAction {
+  label: string;
+  onPress: () => void;
+}
+
 interface ToastState {
   message: string;
   variant: ToastVariant;
+  action?: ToastAction;
 }
 
 interface ToastContextValue {
-  showToast: (message: string, variant?: ToastVariant) => void;
+  showToast: (message: string, variant?: ToastVariant, action?: ToastAction) => void;
 }
 
 const ToastContext = createContext<ToastContextValue>({ showToast: () => {} });
@@ -27,10 +33,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const translateY = useRef(new Animated.Value(20)).current;
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const hide = useCallback(() => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }).start(
+      () => setToast(null),
+    );
+  }, [opacity]);
+
   const showToast = useCallback(
-    (message: string, variant: ToastVariant = 'success') => {
+    (message: string, variant: ToastVariant = 'success', action?: ToastAction) => {
       if (hideTimer.current) clearTimeout(hideTimer.current);
-      setToast({ message, variant });
+      setToast({ message, variant, action });
       opacity.setValue(0);
       translateY.setValue(20);
       Animated.parallel([
@@ -38,13 +51,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         Animated.timing(translateY, { toValue: 0, duration: 200, useNativeDriver: true }),
       ]).start();
 
-      hideTimer.current = setTimeout(() => {
-        Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }).start(
-          () => setToast(null),
-        );
-      }, 2400);
+      const duration = action ? 5000 : 2400;
+      hideTimer.current = setTimeout(hide, duration);
     },
-    [opacity, translateY],
+    [opacity, translateY, hide],
   );
 
   const styles = createStyles(colors);
@@ -68,6 +78,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             color={isSuccess ? colors.success : colors.danger}
           />
           <Text style={styles.text}>{toast.message}</Text>
+          {toast.action ? (
+            <TouchableOpacity
+              onPress={() => {
+                toast.action!.onPress();
+                hide();
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.actionLabel}>{toast.action.label}</Text>
+            </TouchableOpacity>
+          ) : null}
         </Animated.View>
       ) : null}
     </ToastContext.Provider>
@@ -99,5 +120,10 @@ const createStyles = (colors: Palette) =>
       flex: 1,
       fontSize: typography.body.fontSize,
       color: colors.text,
+    },
+    actionLabel: {
+      fontSize: typography.body.fontSize,
+      fontWeight: '700',
+      color: colors.primary,
     },
   });

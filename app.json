@@ -45,8 +45,6 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-firebase/app",
-      "@react-native-google-signin/google-signin",
       "expo-asset",
       [
         "expo-notifications",

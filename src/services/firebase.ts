@@ -1,51 +1,48 @@
-import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, signInWithCredential, signOut as fbSignOut, onAuthStateChanged as fbOnAuthStateChanged } from 'firebase/auth';
+import { getDatabase, ref, set, get } from 'firebase/database';
 
-// Web client ID from google-services.json (client_type: 3)
-const WEB_CLIENT_ID = '33584582520-9vcp6efel05f73neav4080ij3776r9re.apps.googleusercontent.com';
+const firebaseConfig = {
+  apiKey: 'AIzaSyCyQKL3Bgy5alVD5J_Elk_QISKyyuQ_1yw',
+  authDomain: 'petcare-d09ea.firebaseapp.com',
+  projectId: 'petcare-d09ea',
+  storageBucket: 'petcare-d09ea.firebasestorage.app',
+  messagingSenderId: '33584582520',
+  appId: '1:33584582520:android:aa2ea631a77fe607e0428d',
+  databaseURL: 'https://petcare-d09ea-default-rtdb.firebaseio.com',
+};
 
-export function initFirebase() {
-  GoogleSignin.configure({ webClientId: WEB_CLIENT_ID });
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
 }
 
-export async function signInWithGoogle() {
-  await GoogleSignin.hasPlayServices();
-  const { data } = await GoogleSignin.signIn();
-  const credential = auth.GoogleAuthProvider.credential(data!.idToken);
-  return auth().signInWithCredential(credential);
-}
-
-export async function signOut() {
-  await GoogleSignin.signOut();
-  await auth().signOut();
-}
+export const auth = getAuth();
+export const db = getDatabase();
 
 export function getCurrentUser() {
-  return auth().currentUser;
+  return auth.currentUser;
 }
 
 export function onAuthStateChanged(callback: (user: any) => void) {
-  return auth().onAuthStateChanged(callback);
+  return fbOnAuthStateChanged(auth, callback);
 }
 
-// ─── Realtime Database helpers ────────────────────────────────────────────────
-
-function userRef(uid: string) {
-  return database().ref(`users/${uid}`);
+export async function signInWithGoogleCredential(idToken: string, accessToken?: string) {
+  const credential = GoogleAuthProvider.credential(idToken, accessToken);
+  return signInWithCredential(auth, credential);
 }
 
-export async function pushToCloud(uid: string, allData: object) {
-  await userRef(uid).set(allData);
+export async function signOut() {
+  return fbSignOut(auth);
+}
+
+// ─── Realtime Database ────────────────────────────────────────────────────────
+
+export async function pushToCloud(uid: string, data: object) {
+  await set(ref(db, `users/${uid}`), { backup: data, syncedAt: new Date().toISOString() });
 }
 
 export async function pullFromCloud(uid: string): Promise<object | null> {
-  const snap = await userRef(uid).once('value');
+  const snap = await get(ref(db, `users/${uid}`));
   return snap.val();
-}
-
-export function onCloudDataChanged(uid: string, callback: (data: object | null) => void) {
-  const ref = userRef(uid);
-  ref.on('value', snap => callback(snap.val()));
-  return () => ref.off('value');
 }

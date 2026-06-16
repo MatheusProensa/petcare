@@ -10,7 +10,7 @@ export async function syncUp(uid: string): Promise<void> {
   lastSyncAt = now;
   const json = await exportBackup();
   const data = JSON.parse(json);
-  await pushToCloud(uid, { backup: data, syncedAt: new Date().toISOString() });
+  await pushToCloud(uid, data);
 }
 
 export async function syncDown(uid: string): Promise<boolean> {

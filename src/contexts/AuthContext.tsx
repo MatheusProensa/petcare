@@ -1,23 +1,27 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { initFirebase, onAuthStateChanged } from '../services/firebase';
+import { onAuthStateChanged } from '../services/firebase';
 
-initFirebase();
+interface User {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
 
 interface AuthContextValue {
-  user: FirebaseAuthTypes.User | null;
+  user: User | null;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue>({ user: null, loading: true });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(u => {
-      setUser(u);
+      setUser(u ? { uid: u.uid, email: u.email, displayName: u.displayName, photoURL: u.photoURL } : null);
       setLoading(false);
     });
     return unsub;

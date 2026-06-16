@@ -107,6 +107,18 @@ export interface MedicationDose {
   createdAt: string;
 }
 
+export interface FeedingSchedule {
+  id: string;
+  petId: string;
+  label: string;
+  hour: number;
+  minute: number;
+  food?: string;
+  amount?: string;
+  enabled: boolean;
+  createdAt: string;
+}
+
 export type RootStackParamList = {
   Onboarding: undefined;
   Dashboard: undefined;
@@ -133,6 +145,7 @@ export type RootStackParamList = {
   Lifeline: { petId: string };
   Growth: { petId: string };
   Treatments: { petId: string };
+  Feeding: { petId: string };
   Search: undefined;
   About: undefined;
 };

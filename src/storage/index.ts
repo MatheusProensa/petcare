@@ -8,6 +8,7 @@ import {
   PetDocument,
   TutorInfo,
   MedicationDose,
+  FeedingSchedule,
   Species,
   RecordType,
 } from '../types';
@@ -24,6 +25,7 @@ const KEYS = {
   ONBOARDING_SEEN: '@petcare:onboarding_seen',
   LAST_BACKUP: '@petcare:last_backup',
   NOTIF_BANNER_DISMISSED: '@petcare:notif_banner_dismissed',
+  FEEDING_SCHEDULES: '@petcare:feeding_schedules',
 };
 
 const PETS_VERSION = 1;
@@ -301,6 +303,29 @@ export async function getNotifBannerDismissed(): Promise<boolean> {
 
 export async function setNotifBannerDismissed(): Promise<void> {
   await AsyncStorage.setItem(KEYS.NOTIF_BANNER_DISMISSED, 'true');
+}
+
+// --------------------------- Feeding schedules -----------------------------
+
+export async function getFeedingSchedules(petId: string): Promise<FeedingSchedule[]> {
+  const raw = await AsyncStorage.getItem(KEYS.FEEDING_SCHEDULES);
+  const all: FeedingSchedule[] = raw ? JSON.parse(raw) : [];
+  return all.filter(s => s.petId === petId).sort((a, b) => a.hour - b.hour || a.minute - b.minute);
+}
+
+export async function saveFeedingSchedule(schedule: FeedingSchedule): Promise<void> {
+  const raw = await AsyncStorage.getItem(KEYS.FEEDING_SCHEDULES);
+  const all: FeedingSchedule[] = raw ? JSON.parse(raw) : [];
+  const idx = all.findIndex(s => s.id === schedule.id);
+  if (idx >= 0) all[idx] = schedule;
+  else all.push(schedule);
+  await AsyncStorage.setItem(KEYS.FEEDING_SCHEDULES, JSON.stringify(all));
+}
+
+export async function deleteFeedingSchedule(id: string): Promise<void> {
+  const raw = await AsyncStorage.getItem(KEYS.FEEDING_SCHEDULES);
+  const all: FeedingSchedule[] = raw ? JSON.parse(raw) : [];
+  await AsyncStorage.setItem(KEYS.FEEDING_SCHEDULES, JSON.stringify(all.filter(s => s.id !== id)));
 }
 
 // ---------------------------------- Tutor ----------------------------------

@@ -38,6 +38,7 @@ import AboutScreen from './src/screens/AboutScreen';
 import LifelineScreen from './src/screens/LifelineScreen';
 import GrowthScreen from './src/screens/GrowthScreen';
 import TreatmentsScreen from './src/screens/TreatmentsScreen';
+import FeedingScreen from './src/screens/FeedingScreen';
 
 // Mantém a splash nativa visível até as fontes estarem prontas.
 SplashScreen.preventAutoHideAsync();
@@ -82,6 +83,7 @@ function Root({ initialRouteName }: { initialRouteName: keyof RootStackParamList
         <Stack.Screen name="Lifeline" component={LifelineScreen} />
         <Stack.Screen name="Growth" component={GrowthScreen} />
         <Stack.Screen name="Treatments" component={TreatmentsScreen} />
+        <Stack.Screen name="Feeding" component={FeedingScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
         <Stack.Screen name="About" component={AboutScreen} />
       </Stack.Navigator>

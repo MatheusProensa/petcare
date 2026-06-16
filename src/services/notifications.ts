@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import { Pet, MedicalRecord, Frequency } from '../types';
+import { Pet, MedicalRecord, Frequency, FeedingSchedule } from '../types';
 import { getUpcomingEvents, isActiveMedication } from './events';
 
 // Lembretes são exibidos mesmo com o app aberto.
@@ -81,6 +81,38 @@ function addDays(iso: string, n: number): string {
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+export async function scheduleFeedingNotification(schedule: FeedingSchedule, petName: string): Promise<void> {
+  if (Platform.OS === 'web') return;
+  const granted = await ensureNotificationPermission();
+  if (!granted) return;
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('feeding', {
+      name: 'Alimentação',
+      importance: Notifications.AndroidImportance.HIGH,
+    });
+  }
+  await Notifications.scheduleNotificationAsync({
+    identifier: `feeding-${schedule.id}`,
+    content: {
+      title: `🍖 Hora de alimentar ${petName}!`,
+      body: [schedule.food, schedule.amount].filter(Boolean).join(' · ') || `${schedule.label} — não esqueça da ração!`,
+      data: { petId: schedule.petId, scheduleId: schedule.id },
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+      hour: schedule.hour,
+      minute: schedule.minute,
+      repeats: true,
+      channelId: 'feeding',
+    },
+  });
+}
+
+export async function cancelFeedingNotification(scheduleId: string): Promise<void> {
+  if (Platform.OS === 'web') return;
+  await Notifications.cancelScheduledNotificationAsync(`feeding-${scheduleId}`).catch(() => {});
 }
 
 /**

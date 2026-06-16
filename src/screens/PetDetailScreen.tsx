@@ -491,7 +491,7 @@ export default function PetDetailScreen() {
               />
               <QuickAction
                 icon="time"
-                label="Linha da Vida"
+                label="Histórico"
                 color={colors.accent}
                 onPress={() => navigation.navigate('Lifeline', { petId })}
               />
@@ -507,6 +507,15 @@ export default function PetDetailScreen() {
                 color={colors.accent}
                 onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'memory', lockType: true })}
               />
+              <QuickAction
+                icon="restaurant"
+                label="Alimentação"
+                color={colors.success}
+                onPress={() => navigation.navigate('Feeding', { petId })}
+              />
+              {/* spacers para completar a grade 4×3 */}
+              <View style={[styles.quickAction, { opacity: 0 }]} pointerEvents="none" />
+              <View style={[styles.quickAction, { opacity: 0 }]} pointerEvents="none" />
             </View>
 
             <View style={{ width: '100%', marginBottom: spacing.lg }}>

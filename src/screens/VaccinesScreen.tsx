@@ -5,12 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spacing, radius, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
-import { getRecords } from '../storage';
+import { getRecords, saveRecord, deleteRecord } from '../storage';
 import { displayDate, formatDaysUntil, daysUntilISO } from '../utils/date';
 import { getVaccineStatus, getFulfilledRecordIds, VaccineStatus } from '../services/events';
 import { VACCINE_TYPE_LABELS } from '../labels';
 import { EmptyState } from '../components/EmptyState';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { useToast } from '../hooks/useToast';
 import { MedicalRecord, RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Vaccines'>;
@@ -49,7 +50,42 @@ export default function VaccinesScreen() {
     completed: colors.info,
   };
 
+  const { showToast } = useToast();
   const fulfilledIds = useMemo(() => getFulfilledRecordIds(allRecords), [allRecords]);
+
+  const handleQuickDose = useCallback(async (item: MedicalRecord) => {
+    const newRecord: MedicalRecord = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      petId,
+      type: 'vaccine',
+      date: new Date().toISOString().slice(0, 10),
+      title: item.title,
+      manufacturer: item.manufacturer,
+      batch: item.batch,
+      clinic: item.clinic,
+      vaccineType: item.vaccineType,
+      createdAt: new Date().toISOString(),
+    };
+    try {
+      await saveRecord(newRecord);
+      setVaccines(prev => [newRecord, ...prev]);
+      setAllRecords(prev => [newRecord, ...prev]);
+      showToast('Dose registrada', 'success', {
+        label: 'Desfazer',
+        onPress: async () => {
+          try {
+            await deleteRecord(newRecord.id);
+            setVaccines(prev => prev.filter(v => v.id !== newRecord.id));
+            setAllRecords(prev => prev.filter(r => r.id !== newRecord.id));
+          } catch {
+            Alert.alert('Erro', 'Não foi possível desfazer.');
+          }
+        },
+      });
+    } catch {
+      Alert.alert('Erro', 'Não foi possível registrar a dose.');
+    }
+  }, [petId, showToast]);
   const overdueCount = vaccines.filter(
     v => getVaccineStatus(v, allRecords, fulfilledIds) === 'overdue',
   ).length;
@@ -98,20 +134,7 @@ export default function VaccinesScreen() {
           {(status === 'due_soon' || status === 'overdue') && (
             <TouchableOpacity
               style={styles.doseBtn}
-              onPress={() =>
-                navigation.navigate('AddRecord', {
-                  petId,
-                  initialType: 'vaccine',
-                  lockType: true,
-                  prefill: {
-                    title: item.title,
-                    manufacturer: item.manufacturer,
-                    batch: item.batch,
-                    clinic: item.clinic,
-                    vaccineType: item.vaccineType,
-                  },
-                })
-              }
+              onPress={() => handleQuickDose(item)}
               activeOpacity={0.7}
             >
               <Ionicons name="add-circle-outline" size={14} color={colors.primaryLight} />

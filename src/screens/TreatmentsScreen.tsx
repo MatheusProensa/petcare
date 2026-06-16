@@ -186,6 +186,6 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   badgeText: { fontSize: 11, fontFamily: fonts.textBold, fontWeight: '700' },
   line: { fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle },
   details: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
-  typeLabel: { fontSize: 11, fontFamily: fonts.text, color: colors.textMuted, marginTop: 2, textTransform: 'uppercase' },
+  typeLabel: { fontSize: 11, fontFamily: fonts.text, color: colors.textMuted, marginTop: 2 },
   emptyWrapper: { paddingTop: spacing.xxl },
 });

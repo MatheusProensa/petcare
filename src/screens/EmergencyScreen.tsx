@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Button } from '../components/Button';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { useToast } from '../hooks/useToast';
 import { getPets, getRecords, getTutorInfo, saveTutorInfo } from '../storage';
 import { isActiveMedication } from '../services/events';
@@ -260,19 +260,19 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerTitle: { fontSize: 16, fontWeight: '700', fontFamily: fonts.display, color: colors.text },
   scroll: { padding: spacing.lg, gap: spacing.md, paddingBottom: 48 },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.warning + '15',
-    borderRadius: radius.md,
+    backgroundColor: colors.warningSoft,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.warning + '44',
     padding: spacing.md,
   },
-  bannerText: { flex: 1, fontSize: 13, color: colors.textSubtle, lineHeight: 19 },
+  bannerText: { flex: 1, fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle, lineHeight: 19 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -280,20 +280,21 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.sm,
+    ...shadows.sm,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  cardTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  cardTitle: { fontSize: 15, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
   cardHeaderActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
-  cardAction: { fontSize: 13, fontWeight: '600', color: colors.primaryLight },
-  cardActionMuted: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
+  cardAction: { fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700', color: colors.primaryLight },
+  cardActionMuted: { fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700', color: colors.textMuted },
   infoBlock: { gap: 2, flex: 1 },
-  infoLabel: { fontSize: 11, color: colors.textMuted, letterSpacing: 0.4 },
-  infoValue: { fontSize: 14, color: colors.text, lineHeight: 20 },
-  infoEmpty: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic' },
+  infoLabel: { fontSize: 11, fontFamily: fonts.text, color: colors.textMuted, letterSpacing: 0.4 },
+  infoValue: { fontSize: 14, fontFamily: fonts.text, color: colors.text, lineHeight: 20 },
+  infoEmpty: { fontSize: 14, fontFamily: fonts.text, color: colors.textMuted, fontStyle: 'italic' },
   phoneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   callBtn: {
     width: 36,
@@ -304,5 +305,5 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     justifyContent: 'center',
   },
   medRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  medText: { fontSize: 14, color: colors.textSubtle, flex: 1 },
+  medText: { fontSize: 14, fontFamily: fonts.text, color: colors.textSubtle, flex: 1 },
 });

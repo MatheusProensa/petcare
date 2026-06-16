@@ -18,7 +18,7 @@ import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Button } from '../components/Button';
 import { useToast } from '../hooks/useToast';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, saveRecord, deleteRecord } from '../storage';
 import { persistPhoto, deletePhoto } from '../storage/files';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
@@ -595,21 +595,21 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerTitle: { fontSize: 16, fontWeight: '700', fontFamily: fonts.display, color: colors.text },
   scroll: { padding: spacing.lg, gap: spacing.lg, paddingBottom: 48 },
   field: { gap: spacing.xs },
-  fieldLabel: { fontSize: 13, fontWeight: '500', color: colors.textSubtle, letterSpacing: 0.3 },
-  fieldHint: { fontSize: 12, color: colors.textMuted, marginBottom: spacing.xs },
+  fieldLabel: { fontSize: 13, fontFamily: fonts.textMedium, fontWeight: '500', color: colors.textSubtle, letterSpacing: 0.3 },
+  fieldHint: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted, marginBottom: spacing.xs },
   typeRow: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
   typeChip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  typeChipText: { fontSize: 13, fontWeight: '500', color: colors.textMuted },
+  typeChipText: { fontSize: 13, fontFamily: fonts.textMedium, fontWeight: '500', color: colors.textMuted },
   freqChip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -619,8 +619,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
   },
   freqChipActive: {
-    backgroundColor: colors.primary + '22',
-    borderColor: colors.primaryLight,
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
   },
   photoGallery: {
     flexDirection: 'row',

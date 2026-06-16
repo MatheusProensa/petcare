@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, typography, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { recordsRepository } from '../repositories/recordsRepository';
 import { medicationsRepository } from '../repositories/medicationsRepository';
 import { displayDate, daysUntilISO, formatDaysUntil } from '../utils/date';
@@ -223,13 +223,14 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text },
+  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, fontFamily: fonts.display, color: colors.text },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   section: { marginBottom: spacing.md },
   sectionTitle: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.textBold,
+    fontWeight: '700',
     color: colors.textMuted,
     marginBottom: spacing.sm,
     textTransform: 'uppercase',
@@ -242,26 +243,27 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     marginBottom: spacing.sm,
     overflow: 'hidden',
+    ...shadows.sm,
   },
   statusStripe: { width: 4 },
   cardBody: { flex: 1, padding: spacing.md, gap: spacing.sm },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  title: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
+  title: { flex: 1, fontSize: 15, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
   badge: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radius.full },
-  badgeText: { fontSize: 11, fontWeight: '600' },
-  line: { fontSize: 13, color: colors.textSubtle },
-  details: { fontSize: 12, color: colors.textMuted },
+  badgeText: { fontSize: 11, fontFamily: fonts.textBold, fontWeight: '700' },
+  line: { fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle },
+  details: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
   progressWrap: { gap: 4 },
   progressTrack: {
     height: 6,
     borderRadius: radius.full,
-    backgroundColor: colors.border,
+    backgroundColor: colors.surfaceSunken,
     overflow: 'hidden',
   },
   progressFill: { height: '100%', borderRadius: radius.full },
-  progressLabel: { fontSize: 12, color: colors.textSubtle },
+  progressLabel: { fontSize: 12, fontFamily: fonts.text, color: colors.textSubtle },
   alertRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  alertText: { fontSize: 12, fontWeight: '600', color: colors.warning },
-  lastDose: { fontSize: 12, color: colors.textMuted },
+  alertText: { fontSize: 12, fontFamily: fonts.textBold, fontWeight: '700', color: colors.warning },
+  lastDose: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
   emptyWrapper: { paddingTop: spacing.xxl },
 });

@@ -18,7 +18,7 @@ import { Input } from '../components/Input';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Button } from '../components/Button';
 import { useToast } from '../hooks/useToast';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, savePet } from '../storage';
 import { persistPhoto, deletePhoto } from '../storage/files';
 import { maskDate, isValidDate, isFuture, toISO, displayDate } from '../utils/date';
@@ -239,7 +239,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerTitle: { fontSize: 16, fontWeight: '700', fontFamily: fonts.display, color: colors.text },
   scroll: {
     paddingHorizontal: spacing.lg,
     paddingBottom: 48,
@@ -277,10 +277,10 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.background,
   },
-  photoHint: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.xl },
+  photoHint: { fontSize: 13, fontFamily: fonts.text, color: colors.textMuted, marginBottom: spacing.xl },
   form: { width: '100%', gap: spacing.lg, marginBottom: spacing.xl },
   field: { gap: spacing.xs },
-  fieldLabel: { fontSize: 13, fontWeight: '500', color: colors.textSubtle, letterSpacing: 0.3 },
+  fieldLabel: { fontSize: 13, fontFamily: fonts.textMedium, fontWeight: '500', color: colors.textSubtle, letterSpacing: 0.3 },
   chips: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
   chip: {
     paddingHorizontal: spacing.md,
@@ -291,6 +291,6 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
   },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { fontSize: 14, color: colors.textMuted, fontWeight: '500' },
-  chipTextActive: { color: '#fff' },
+  chipText: { fontSize: 14, fontFamily: fonts.textMedium, color: colors.textMuted, fontWeight: '500' },
+  chipTextActive: { color: '#fff', fontFamily: fonts.textBold },
 });

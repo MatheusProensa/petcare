@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { getWeights } from '../storage';
 import { displayDate } from '../utils/date';
 import { WeightCard } from '../components/WeightCard';
@@ -133,7 +133,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerTitle: { fontSize: 16, fontWeight: '700', fontFamily: fonts.display, color: colors.text },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   summary: { gap: spacing.md, marginBottom: spacing.md },
@@ -144,21 +144,22 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     gap: 4,
     paddingVertical: spacing.xs,
   },
-  growthLinkText: { fontSize: 13, fontWeight: '600', color: colors.primaryLight },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginTop: spacing.sm },
+  growthLinkText: { fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700', color: colors.primaryLight },
+  sectionTitle: { fontSize: 16, fontFamily: fonts.display, fontWeight: '700', color: colors.text, marginTop: spacing.sm },
   emptyWrapper: { paddingTop: spacing.xxl },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.md,
     marginBottom: spacing.sm,
+    ...shadows.sm,
   },
-  rowWeight: { fontSize: 16, fontWeight: '600', color: colors.text },
-  rowDate: { fontSize: 12, color: colors.textMuted },
-  rowDiff: { fontSize: 13, fontWeight: '600' },
+  rowWeight: { fontSize: 16, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
+  rowDate: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
+  rowDiff: { fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700' },
 });

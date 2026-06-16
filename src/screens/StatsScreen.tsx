@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords, getWeights } from '../storage';
 import { petsRepository } from '../repositories/petsRepository';
 import { documentsRepository } from '../repositories/documentsRepository';
@@ -169,7 +169,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerTitle: { fontSize: 16, fontWeight: '700', fontFamily: fonts.display, color: colors.text },
   scroll: { padding: spacing.lg, gap: spacing.md, paddingBottom: 48 },
   totalCard: {
     alignItems: 'center',
@@ -178,9 +178,10 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.lg,
+    ...shadows.sm,
   },
-  totalValue: { fontSize: 40, fontWeight: '700', color: colors.primaryLight },
-  totalLabel: { fontSize: 13, color: colors.textMuted },
+  totalValue: { fontSize: 40, fontWeight: '800', fontFamily: fonts.displayExtra, color: colors.primary },
+  totalLabel: { fontSize: 13, fontFamily: fonts.text, color: colors.textMuted },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -188,8 +189,9 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.sm,
+    ...shadows.sm,
   },
-  cardTitle: { fontSize: 13, fontWeight: '600', color: colors.textSubtle, marginBottom: spacing.xs },
+  cardTitle: { fontSize: 13, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.textSubtle, marginBottom: spacing.xs },
   barRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   barLabelWrapper: {
     flexDirection: 'row',
@@ -197,17 +199,17 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     gap: spacing.xs,
     width: 104,
   },
-  barLabel: { fontSize: 12, color: colors.textSubtle },
+  barLabel: { fontSize: 12, fontFamily: fonts.text, color: colors.textSubtle },
   barTrack: {
     flex: 1,
     height: 14,
     borderRadius: 7,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceSunken,
     overflow: 'hidden',
   },
   barFill: { height: '100%', borderRadius: 7 },
-  barCount: { width: 24, fontSize: 13, fontWeight: '600', color: colors.text, textAlign: 'right' },
-  hint: { fontSize: 13, color: colors.textMuted, lineHeight: 19 },
+  barCount: { width: 24, fontSize: 13, fontFamily: fonts.textBold, fontWeight: '700', color: colors.text, textAlign: 'right' },
+  hint: { fontSize: 13, fontFamily: fonts.text, color: colors.textMuted, lineHeight: 19 },
   cardsRow: { flexDirection: 'row', gap: spacing.md },
   smallCard: {
     flex: 1,
@@ -217,7 +219,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     gap: 4,
+    ...shadows.sm,
   },
-  smallCardLabel: { fontSize: 12, color: colors.textMuted },
-  smallCardValue: { fontSize: 18, fontWeight: '700', color: colors.text },
+  smallCardLabel: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
+  smallCardValue: { fontSize: 18, fontWeight: '800', fontFamily: fonts.displayExtra, color: colors.text },
 });

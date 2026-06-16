@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { getPets, getAllRecords } from '../storage';
 import { isActiveMedication } from '../services/events';
 import { maskDate, isValidDate, toISO } from '../utils/date';
@@ -211,8 +211,9 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    ...shadows.sm,
   },
-  searchInput: { flex: 1, fontSize: 14, color: colors.text, padding: 0 },
+  searchInput: { flex: 1, fontSize: 14, fontFamily: fonts.text, color: colors.text, padding: 0 },
   filters: { paddingHorizontal: spacing.lg, gap: spacing.sm, marginBottom: spacing.md },
   chips: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
   chip: {
@@ -223,9 +224,9 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
-  chipTextActive: { color: '#fff' },
+  chipActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
+  chipText: { fontSize: 12, fontFamily: fonts.textMedium, color: colors.textMuted, fontWeight: '500' },
+  chipTextActive: { color: colors.primaryStrong, fontFamily: fonts.textBold, fontWeight: '700' },
   dateRow: { flexDirection: 'row', gap: spacing.sm },
   dateBox: {
     flex: 1,
@@ -233,15 +234,15 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  dateWarning: { fontSize: 12, color: colors.warning },
-  dateLabel: { fontSize: 12, color: colors.textMuted, width: 24 },
-  dateInput: { flex: 1, fontSize: 13, color: colors.text, padding: 0 },
+  dateWarning: { fontSize: 12, fontFamily: fonts.text, color: colors.warning },
+  dateLabel: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted, width: 24 },
+  dateInput: { flex: 1, fontSize: 13, fontFamily: fonts.text, color: colors.text, padding: 0 },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   emptyWrapper: { paddingTop: spacing.xl },
 });

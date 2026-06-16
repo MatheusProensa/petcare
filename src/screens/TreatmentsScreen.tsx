@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, typography, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { recordsRepository } from '../repositories/recordsRepository';
 import { displayDate } from '../utils/date';
 import { isActiveMedication } from '../services/events';
@@ -150,11 +150,13 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text },
+  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, fontFamily: fonts.display, color: colors.text },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   yearHeader: {
     fontSize: typography.h3.fontSize,
     fontWeight: typography.h3.fontWeight,
+    fontFamily: typography.h3.fontFamily,
+    letterSpacing: typography.h3.letterSpacing,
     color: colors.text,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
@@ -169,6 +171,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     marginBottom: spacing.sm,
+    ...shadows.sm,
   },
   iconWrapper: {
     width: 36,
@@ -178,11 +181,11 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     justifyContent: 'center',
   },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  title: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
+  title: { flex: 1, fontSize: 15, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
   badge: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radius.full },
-  badgeText: { fontSize: 11, fontWeight: '600' },
-  line: { fontSize: 13, color: colors.textSubtle },
-  details: { fontSize: 12, color: colors.textMuted },
-  typeLabel: { fontSize: 11, color: colors.textMuted, marginTop: 2, textTransform: 'uppercase' },
+  badgeText: { fontSize: 11, fontFamily: fonts.textBold, fontWeight: '700' },
+  line: { fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle },
+  details: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
+  typeLabel: { fontSize: 11, fontFamily: fonts.text, color: colors.textMuted, marginTop: 2, textTransform: 'uppercase' },
   emptyWrapper: { paddingTop: spacing.xxl },
 });

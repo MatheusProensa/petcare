@@ -8,7 +8,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import { Alert } from 'react-native';
-import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, typography, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { backupRepository } from '../repositories/backupRepository';
 import { petsRepository } from '../repositories/petsRepository';
 import { recordsRepository } from '../repositories/recordsRepository';
@@ -250,6 +250,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   headerTitle: {
     fontSize: typography.h4.fontSize,
     fontWeight: typography.h4.fontWeight,
+    fontFamily: fonts.display,
     color: colors.text,
   },
   scroll: {
@@ -265,6 +266,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   slogan: {
     marginTop: spacing.sm,
     fontSize: 14,
+    fontFamily: fonts.text,
     color: colors.textSubtle,
   },
   features: {
@@ -283,6 +285,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xs,
     gap: 4,
+    ...shadows.sm,
   },
   featureIcon: {
     width: 28,
@@ -291,15 +294,18 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   featureLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.textBold,
+    fontWeight: '700',
     color: colors.text,
   },
   featureText: {
     fontSize: 11,
+    fontFamily: fonts.text,
     color: colors.textMuted,
   },
   description: {
     fontSize: 14,
+    fontFamily: fonts.text,
     lineHeight: 22,
     color: colors.textMuted,
     textAlign: 'center',
@@ -311,23 +317,27 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   backupTitle: {
     fontSize: 14,
+    fontFamily: fonts.textSemibold,
     fontWeight: '600',
     color: colors.text,
     marginBottom: 2,
   },
   lastBackup: {
     fontSize: 12,
+    fontFamily: fonts.text,
     color: colors.textSubtle,
     marginBottom: spacing.xs,
   },
   backupHint: {
     fontSize: 11,
+    fontFamily: fonts.text,
     lineHeight: 16,
     color: colors.textSubtle,
   },
   version: {
     marginTop: spacing.xl,
     fontSize: 12,
+    fontFamily: fonts.text,
     color: colors.textSubtle,
   },
 });

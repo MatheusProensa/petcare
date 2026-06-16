@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, typography, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { petsRepository } from '../repositories/petsRepository';
 import { weightsRepository } from '../repositories/weightsRepository';
 import { displayDate, formatDuration } from '../utils/date';
@@ -142,7 +142,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text },
+  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, fontFamily: fonts.display, color: colors.text },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48, gap: spacing.md },
   cardsRow: { flexDirection: 'row', gap: spacing.md },
   card: {
@@ -153,10 +153,11 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     gap: 4,
+    ...shadows.sm,
   },
-  cardLabel: { fontSize: 12, color: colors.textMuted },
-  cardValue: { fontSize: 20, fontWeight: '700', color: colors.text },
-  cardSub: { fontSize: 12, color: colors.textMuted },
+  cardLabel: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
+  cardValue: { fontSize: 20, fontWeight: '800', fontFamily: fonts.displayExtra, color: colors.text },
+  cardSub: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
   emptyWrapper: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.lg },
   addButton: {
     flexDirection: 'row',
@@ -167,6 +168,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm + 2,
     marginTop: spacing.md,
+    shadowColor: colors.primary,
+    ...shadows.sm,
   },
-  addButtonText: { color: colors.onPrimary, fontWeight: '600', fontSize: 14 },
+  addButtonText: { color: colors.onPrimary, fontFamily: fonts.textBold, fontWeight: '700', fontSize: 14 },
 });

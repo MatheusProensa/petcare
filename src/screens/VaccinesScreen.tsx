@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { getRecords } from '../storage';
 import { displayDate, formatDaysUntil, daysUntilISO } from '../utils/date';
 import { getVaccineStatus, getFulfilledRecordIds, VaccineStatus } from '../services/events';
@@ -185,7 +185,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  headerTitle: { fontSize: 16, fontWeight: '700', fontFamily: fonts.display, color: colors.text },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 48 },
   summaryRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
@@ -193,14 +193,15 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     paddingVertical: spacing.sm + 4,
     gap: 2,
+    ...shadows.sm,
   },
-  summaryValue: { fontSize: 20, fontWeight: '700' },
-  summaryLabel: { fontSize: 11, color: colors.textMuted },
+  summaryValue: { fontSize: 20, fontWeight: '800', fontFamily: fonts.displayExtra },
+  summaryLabel: { fontSize: 11, fontFamily: fonts.text, color: colors.textMuted },
   card: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
@@ -209,6 +210,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     marginBottom: spacing.sm,
     overflow: 'hidden',
+    ...shadows.sm,
   },
   statusStripe: { width: 4 },
   cardBody: { flex: 1, padding: spacing.md, gap: 3 },
@@ -218,15 +220,15 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  title: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
+  title: { flex: 1, fontSize: 15, fontFamily: fonts.textSemibold, fontWeight: '600', color: colors.text },
   badge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
     borderRadius: radius.full,
   },
-  badgeText: { fontSize: 11, fontWeight: '600' },
-  line: { fontSize: 13, color: colors.textSubtle },
-  details: { fontSize: 12, color: colors.textMuted },
+  badgeText: { fontSize: 11, fontFamily: fonts.textBold, fontWeight: '700' },
+  line: { fontSize: 13, fontFamily: fonts.text, color: colors.textSubtle },
+  details: { fontSize: 12, fontFamily: fonts.text, color: colors.textMuted },
   doseBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -234,6 +236,6 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     marginTop: spacing.xs,
     alignSelf: 'flex-start',
   },
-  doseBtnText: { fontSize: 12, fontWeight: '600', color: colors.primaryLight },
+  doseBtnText: { fontSize: 12, fontFamily: fonts.textBold, fontWeight: '700', color: colors.primaryLight },
   emptyWrapper: { paddingTop: spacing.xxl },
 });

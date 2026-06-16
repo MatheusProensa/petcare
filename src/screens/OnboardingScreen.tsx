@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, typography, useThemedStyles, Palette } from '../theme';
+import { spacing, typography, fonts, useThemedStyles, Palette } from '../theme';
 import { onboardingRepository } from '../repositories/onboardingRepository';
 import { Button } from '../components/Button';
 import { RootStackParamList } from '../types';
@@ -81,11 +81,13 @@ const createStyles = (colors: Palette) =>
     appName: {
       fontSize: typography.h1.fontSize,
       fontWeight: typography.h1.fontWeight,
+      fontFamily: typography.h1.fontFamily,
       color: colors.primary,
-      letterSpacing: -0.5,
+      letterSpacing: typography.h1.letterSpacing,
     },
     subtitle: {
       fontSize: typography.body.fontSize,
+      fontFamily: typography.body.fontFamily,
       color: colors.textMuted,
       marginTop: spacing.xs,
     },
@@ -115,10 +117,12 @@ const createStyles = (colors: Palette) =>
     slideTitle: {
       fontSize: typography.h4.fontSize,
       fontWeight: typography.h4.fontWeight,
+      fontFamily: typography.h4.fontFamily,
       color: colors.text,
     },
     slideBody: {
       fontSize: typography.label.fontSize,
+      fontFamily: fonts.text,
       color: colors.textSubtle,
       lineHeight: 18,
     },

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { spacing, radius, typography, useTheme, useThemedStyles, Palette } from '../theme';
+import { spacing, radius, typography, fonts, shadows, useTheme, useThemedStyles, Palette } from '../theme';
 import { petsRepository } from '../repositories/petsRepository';
 import { recordsRepository } from '../repositories/recordsRepository';
 import { weightsRepository } from '../repositories/weightsRepository';
@@ -294,11 +294,11 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, color: colors.text },
+  headerTitle: { fontSize: typography.h4.fontSize, fontWeight: typography.h4.fontWeight, fontFamily: fonts.display, color: colors.text },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   list: { paddingBottom: 48 },
   intro: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
-  introText: { fontSize: 13, color: colors.textMuted, lineHeight: 19, marginBottom: spacing.md },
+  introText: { fontSize: 13, fontFamily: fonts.text, color: colors.textMuted, lineHeight: 19, marginBottom: spacing.md },
   filterScroll: { width: '100%' },
   filterRow: { gap: spacing.sm, paddingRight: spacing.lg },
   filterChip: {
@@ -310,14 +310,16 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
   },
   filterChipActive: {
-    backgroundColor: colors.primary + '22',
-    borderColor: colors.primaryLight,
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
   },
-  filterChipText: { fontSize: 13, fontWeight: '500', color: colors.textMuted },
-  filterChipTextActive: { color: colors.primaryLight, fontWeight: '600' },
+  filterChipText: { fontSize: 13, fontFamily: fonts.textMedium, fontWeight: '500', color: colors.textMuted },
+  filterChipTextActive: { color: colors.primaryStrong, fontFamily: fonts.textBold, fontWeight: '700' },
   yearHeader: {
     fontSize: typography.h3.fontSize,
     fontWeight: typography.h3.fontWeight,
+    fontFamily: typography.h3.fontFamily,
+    letterSpacing: typography.h3.letterSpacing,
     color: colors.text,
     paddingHorizontal: spacing.lg,
     marginTop: spacing.md,

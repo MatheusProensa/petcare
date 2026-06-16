@@ -340,8 +340,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   logo: {
-    width: 150,
-    height: 50,
+    width: 160,
+    height: 54,
   },
   title: {
     fontSize: typography.h1.fontSize,

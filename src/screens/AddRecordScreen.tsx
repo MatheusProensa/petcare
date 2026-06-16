@@ -326,7 +326,13 @@ export default function AddRecordScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{recordId ? 'Editar Registro' : 'Novo Registro'}</Text>
+        <Text style={styles.headerTitle}>
+          {recordId
+            ? `Editar ${RECORD_TYPE_LABELS[type]}`
+            : lockType
+              ? `Novo(a) ${RECORD_TYPE_LABELS[type]}`
+              : 'Novo Registro'}
+        </Text>
         <ThemeToggle />
       </View>
 

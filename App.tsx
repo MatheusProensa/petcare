@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 import {
   BricolageGrotesque_700Bold,
   BricolageGrotesque_800ExtraBold,
@@ -38,6 +38,9 @@ import AboutScreen from './src/screens/AboutScreen';
 import LifelineScreen from './src/screens/LifelineScreen';
 import GrowthScreen from './src/screens/GrowthScreen';
 import TreatmentsScreen from './src/screens/TreatmentsScreen';
+
+// Mantém a splash nativa visível até as fontes estarem prontas.
+SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -86,15 +89,6 @@ function Root({ initialRouteName }: { initialRouteName: keyof RootStackParamList
   );
 }
 
-function LoadingScreen() {
-  const { colors } = useTheme();
-  return (
-    <View style={[styles.loading, { backgroundColor: colors.background }]}>
-      <ActivityIndicator color={colors.primary} size="large" />
-    </View>
-  );
-}
-
 function AppContent() {
   const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
 
@@ -104,7 +98,7 @@ function AppContent() {
       .catch(() => setOnboardingSeen(true));
   }, []);
 
-  if (onboardingSeen === null) return <LoadingScreen />;
+  if (onboardingSeen === null) return null;
 
   return <Root initialRouteName={onboardingSeen ? 'Dashboard' : 'Onboarding'} />;
 }
@@ -119,13 +113,11 @@ export default function App() {
     PlusJakartaSans_700Bold,
   });
 
-  if (!fontsLoaded) {
-    return (
-      <View style={[styles.loading, { backgroundColor: '#FBF5EF' }]}>
-        <ActivityIndicator color="#E66A3A" size="large" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
 
   return (
     <ThemeProvider>
@@ -135,11 +127,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

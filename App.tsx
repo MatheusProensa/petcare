@@ -16,11 +16,8 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { ThemeProvider, useTheme } from './src/theme';
 import { ToastProvider } from './src/hooks/useToast';
-import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { onboardingRepository } from './src/repositories/onboardingRepository';
-import { syncDown, syncUp } from './src/services/cloudSync';
 import { RootStackParamList } from './src/types';
-import LoginScreen from './src/screens/LoginScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -94,43 +91,17 @@ function Root({ initialRouteName }: { initialRouteName: keyof RootStackParamList
 }
 
 function AppContent() {
-  const { user, loading } = useAuth();
-  const [ready, setReady] = useState(false);
-  const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Dashboard');
-
-  async function handleSignedIn(uid: string, isNewUser: boolean) {
-    if (!isNewUser) {
-      // Existing user: pull data from cloud
-      await syncDown(uid).catch(() => {});
-    } else {
-      // New user: push whatever local data exists
-      await syncUp(uid).catch(() => {});
-    }
-    const seen = await onboardingRepository.getSeen().catch(() => true);
-    setInitialRoute(seen ? 'Dashboard' : 'Onboarding');
-    setReady(true);
-  }
+  const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (loading) return;
-    if (!user) {
-      setReady(false);
-      return;
-    }
-    // Already logged in: resolve initial route
     onboardingRepository.getSeen()
-      .then(seen => setInitialRoute(seen ? 'Dashboard' : 'Onboarding'))
-      .catch(() => setInitialRoute('Dashboard'))
-      .finally(() => setReady(true));
-  }, [user, loading]);
+      .then(setOnboardingSeen)
+      .catch(() => setOnboardingSeen(true));
+  }, []);
 
-  if (loading || (user && !ready)) return null;
+  if (onboardingSeen === null) return null;
 
-  if (!user) {
-    return <LoginScreen onSignedIn={handleSignedIn} />;
-  }
-
-  return <Root initialRouteName={initialRoute} />;
+  return <Root initialRouteName={onboardingSeen ? 'Dashboard' : 'Onboarding'} />;
 }
 
 export default function App() {
@@ -152,9 +123,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <ToastProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <AppContent />
       </ToastProvider>
     </ThemeProvider>
   );

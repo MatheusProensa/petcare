@@ -360,13 +360,13 @@ export default function DashboardScreen() {
                 <StatCard icon="paw" label="Pets" value={pets.length} />
                 <StatCard
                   icon="notifications"
-                  label="Alertas pendentes"
+                  label="Alertas"
                   value={alerts.length}
                   color={alerts.length > 0 ? colors.warning : colors.success}
                 />
                 <StatCard
                   icon="medkit"
-                  label="Remédios ativos"
+                  label="Remédios"
                   value={activeMedsCount}
                   color={colors.accent}
                   onPress={() => navigation.navigate('Home')}

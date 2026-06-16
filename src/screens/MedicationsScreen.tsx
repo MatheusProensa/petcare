@@ -298,7 +298,12 @@ export default function MedicationsScreen() {
                             onPress: async () => {
                               try {
                                 await medicationsRepository.removeDose(dose.id);
-                                setDoses(prev => prev.filter(d => d.id !== dose.id));
+                                setDoses(prev => {
+                                  const next = prev.filter(d => d.id !== dose.id);
+                                  const remaining = next.filter(d => d.recordId === dose.recordId);
+                                  if (remaining.length === 0) setDosesModalRecord(null);
+                                  return next;
+                                });
                               } catch {
                                 Alert.alert('Erro', 'Não foi possível excluir a dose.');
                               }

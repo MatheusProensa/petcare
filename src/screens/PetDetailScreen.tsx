@@ -501,6 +501,12 @@ export default function PetDetailScreen() {
                 color={colors.info}
                 onPress={() => navigation.navigate('Treatments', { petId })}
               />
+              <QuickAction
+                icon="heart"
+                label="Memórias"
+                color={colors.accent}
+                onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'memory', lockType: true })}
+              />
             </View>
 
             <View style={{ width: '100%', marginBottom: spacing.lg }}>

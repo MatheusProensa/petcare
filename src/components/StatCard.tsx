@@ -38,6 +38,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.xs,
+    alignItems: 'center',
     ...shadows.sm,
   },
   iconWrapper: {
@@ -47,6 +48,6 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  value: { fontSize: 22, fontWeight: '800', fontFamily: fonts.displayExtra, color: colors.text },
-  label: { fontSize: 11, fontFamily: fonts.text, color: colors.textMuted },
+  value: { fontSize: 22, fontWeight: '800', fontFamily: fonts.displayExtra, color: colors.text, textAlign: 'center' },
+  label: { fontSize: 11, fontFamily: fonts.text, color: colors.textMuted, textAlign: 'center' },
 });

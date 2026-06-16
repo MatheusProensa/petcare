@@ -101,6 +101,7 @@ export default function VaccinesScreen() {
                 navigation.navigate('AddRecord', {
                   petId,
                   initialType: 'vaccine',
+                  lockType: true,
                   prefill: {
                     title: item.title,
                     manufacturer: item.manufacturer,
@@ -136,7 +137,7 @@ export default function VaccinesScreen() {
         <View style={styles.headerActions}>
           <ThemeToggle size={20} />
           <TouchableOpacity
-            onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'vaccine' })}
+            onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'vaccine', lockType: true })}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessibilityRole="button"
             accessibilityLabel="Nova vacina"

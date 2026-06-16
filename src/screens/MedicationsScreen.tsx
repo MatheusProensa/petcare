@@ -220,7 +220,7 @@ export default function MedicationsScreen() {
         <View style={styles.headerActions}>
           <ThemeToggle size={20} />
           <TouchableOpacity
-            onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'medication' })}
+            onPress={() => navigation.navigate('AddRecord', { petId, initialType: 'medication', lockType: true })}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessibilityRole="button"
             accessibilityLabel="Novo remédio"

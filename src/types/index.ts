@@ -117,6 +117,8 @@ export type RootStackParamList = {
     petId: string;
     recordId?: string;
     initialType?: RecordType;
+    /** Quando true, esconde o seletor de tipo (vindo de uma tela específica). */
+    lockType?: boolean;
     prefill?: { title?: string; manufacturer?: string; batch?: string; clinic?: string; vaccineType?: VaccineType };
   };
   AddWeight: { petId: string; weightId?: string };

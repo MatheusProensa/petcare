@@ -82,7 +82,7 @@ export default function AddRecordScreen() {
   const RECORD_TYPE_COLORS = recordTypeColors(colors);
   const { showToast } = useToast();
   const route = useRoute<Route>();
-  const { petId, recordId, initialType, prefill } = route.params;
+  const { petId, recordId, initialType, lockType, prefill } = route.params;
 
   const [original, setOriginal] = useState<MedicalRecord | null>(null);
   const [type, setType] = useState<RecordType>(initialType ?? 'vaccine');
@@ -333,31 +333,33 @@ export default function AddRecordScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-          <View style={styles.field}>
-            <Text style={styles.fieldLabel}>Tipo de registro</Text>
-            <View style={styles.typeRow}>
-              {RECORD_TYPES.map(t => (
-                <TouchableOpacity
-                  key={t}
-                  style={[
-                    styles.typeChip,
-                    type === t && {
-                      backgroundColor: RECORD_TYPE_COLORS[t] + '22',
-                      borderColor: RECORD_TYPE_COLORS[t],
-                    },
-                  ]}
-                  onPress={() => handleTypeChange(t)}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[styles.typeChipText, type === t && { color: RECORD_TYPE_COLORS[t] }]}
+          {!lockType && (
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Tipo de registro</Text>
+              <View style={styles.typeRow}>
+                {RECORD_TYPES.map(t => (
+                  <TouchableOpacity
+                    key={t}
+                    style={[
+                      styles.typeChip,
+                      type === t && {
+                        backgroundColor: RECORD_TYPE_COLORS[t] + '22',
+                        borderColor: RECORD_TYPE_COLORS[t],
+                      },
+                    ]}
+                    onPress={() => handleTypeChange(t)}
+                    activeOpacity={0.7}
                   >
-                    {RECORD_TYPE_LABELS[t]}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      style={[styles.typeChipText, type === t && { color: RECORD_TYPE_COLORS[t] }]}
+                    >
+                      {RECORD_TYPE_LABELS[t]}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
+          )}
 
           <Input
             label={TITLE_LABELS[type]}

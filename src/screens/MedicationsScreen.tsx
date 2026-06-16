@@ -274,7 +274,7 @@ export default function MedicationsScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+            <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
               {modalDoses.length === 0 ? (
                 <Text style={styles.modalEmpty}>Nenhuma dose registrada.</Text>
               ) : (

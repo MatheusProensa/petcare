@@ -28,6 +28,7 @@ import {
   FREQUENCY_LABELS,
   REMINDER_OPTIONS,
   VACCINE_TYPE_LABELS,
+  VACCINE_TYPE_SHORT_LABELS,
 } from '../labels';
 import { MedicalRecord, RecordType, Frequency, VaccineType, RootStackParamList } from '../types';
 
@@ -402,15 +403,19 @@ export default function AddRecordScreen() {
                       onPress={() => setVaccineType(prev => prev === vt ? undefined : vt)}
                       activeOpacity={0.7}
                       accessibilityRole="button"
+                      accessibilityLabel={VACCINE_TYPE_LABELS[vt]}
                       accessibilityState={{ selected: active }}
                     >
                       <Text style={[styles.typeChipText, active && { color: colors.primary }]}>
-                        {VACCINE_TYPE_LABELS[vt]}
+                        {VACCINE_TYPE_SHORT_LABELS[vt]}
                       </Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
+              {vaccineType && (
+                <Text style={styles.fieldHint}>{VACCINE_TYPE_LABELS[vaccineType]}</Text>
+              )}
             </View>
           )}
 

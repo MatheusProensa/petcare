@@ -64,6 +64,7 @@ export const DOCUMENT_KIND_ICONS: Record<DocumentKind, keyof typeof Ionicons.gly
  * Rótulos das categorias de proteção de vacinas.
  * Marcas diferentes da mesma categoria cobrem as mesmas doenças.
  */
+/** Rótulo completo — usado nos cards da carteira de vacinação. */
 export const VACCINE_TYPE_LABELS: Record<VaccineType, string> = {
   v8: 'V8 — DHPPI + Lepto',
   v10: 'V10 — DHPPI + Lepto + Corona',
@@ -74,6 +75,20 @@ export const VACCINE_TYPE_LABELS: Record<VaccineType, string> = {
   feline_triple: 'Tríplice Felina (HCV)',
   feline_quadruple: 'Quádrupla Felina (HCV + Raiva)',
   feline_leukemia: 'Leucemia Felina (FeLV)',
+  other: 'Outra',
+};
+
+/** Rótulo curto — usado nos chips do formulário. */
+export const VACCINE_TYPE_SHORT_LABELS: Record<VaccineType, string> = {
+  v8: 'V8',
+  v10: 'V10',
+  rabies: 'Antirrábica',
+  leishmania: 'Leishmaniose',
+  giardia: 'Giardia',
+  bordetella: 'Bordetella',
+  feline_triple: 'Tríplice Felina',
+  feline_quadruple: 'Quádrupla Felina',
+  feline_leukemia: 'Leucemia Felina',
   other: 'Outra',
 };
 

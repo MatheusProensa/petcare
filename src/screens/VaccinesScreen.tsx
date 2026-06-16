@@ -63,37 +63,38 @@ export default function VaccinesScreen() {
     const showCountdown =
       item.nextDate && (status === 'ok' || status === 'due_soon') && daysUntilISO(item.nextDate) >= 0;
     return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => navigation.navigate('AddRecord', { petId, recordId: item.id })}
-        activeOpacity={0.8}
-      >
+      <View style={styles.card}>
         <View style={[styles.statusStripe, { backgroundColor: statusColor[status] }]} />
         <View style={styles.cardBody}>
-          <View style={styles.cardTop}>
-            <Text style={styles.title}>{item.title}</Text>
-            <View style={[styles.badge, { backgroundColor: statusColor[status] + '22' }]}>
-              <Text style={[styles.badgeText, { color: statusColor[status] }]}>
-                {STATUS_META[status].label}
-              </Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AddRecord', { petId, recordId: item.id })}
+            activeOpacity={0.7}
+          >
+            <View style={styles.cardTop}>
+              <Text style={styles.title}>{item.title}</Text>
+              <View style={[styles.badge, { backgroundColor: statusColor[status] + '22' }]}>
+                <Text style={[styles.badgeText, { color: statusColor[status] }]}>
+                  {STATUS_META[status].label}
+                </Text>
+              </View>
             </View>
-          </View>
-          {item.vaccineType && (
-            <View style={[styles.typeBadge, { backgroundColor: colors.primarySoft }]}>
-              <Ionicons name="shield-checkmark-outline" size={11} color={colors.primaryStrong} />
-              <Text style={[styles.typeBadgeText, { color: colors.primaryStrong }]}>
-                {VACCINE_TYPE_LABELS[item.vaccineType]}
+            {item.vaccineType && (
+              <View style={[styles.typeBadge, { backgroundColor: colors.primarySoft }]}>
+                <Ionicons name="shield-checkmark-outline" size={11} color={colors.primaryStrong} />
+                <Text style={[styles.typeBadgeText, { color: colors.primaryStrong }]}>
+                  {VACCINE_TYPE_LABELS[item.vaccineType]}
+                </Text>
+              </View>
+            )}
+            <Text style={styles.line}>Aplicada em {displayDate(item.date)}</Text>
+            {item.nextDate ? (
+              <Text style={styles.line}>
+                Reforço: {displayDate(item.nextDate)}
+                {showCountdown ? ` (${formatDaysUntil(daysUntilISO(item.nextDate))})` : ''}
               </Text>
-            </View>
-          )}
-          <Text style={styles.line}>Aplicada em {displayDate(item.date)}</Text>
-          {item.nextDate ? (
-            <Text style={styles.line}>
-              Reforço: {displayDate(item.nextDate)}
-              {showCountdown ? ` (${formatDaysUntil(daysUntilISO(item.nextDate))})` : ''}
-            </Text>
-          ) : null}
-          {details ? <Text style={styles.details}>{details}</Text> : null}
+            ) : null}
+            {details ? <Text style={styles.details}>{details}</Text> : null}
+          </TouchableOpacity>
           {(status === 'due_soon' || status === 'overdue') && (
             <TouchableOpacity
               style={styles.doseBtn}
@@ -118,7 +119,7 @@ export default function VaccinesScreen() {
             </TouchableOpacity>
           )}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   }
 

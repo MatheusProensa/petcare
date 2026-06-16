@@ -163,3 +163,21 @@ Dúvidas sobre privacidade: matheu.proensa@gmail.com
 - [ ] Preencher ficha com os textos acima
 - [ ] Responder questionário de classificação indicativa (tudo "Não")
 - [ ] Enviar para revisão — prazo médio: 1 a 3 dias úteis
+
+
+Tudo pronto em STORE_LISTING.md. O arquivo tem:
+
+Título (30 chars): PetCare — Saúde do seu pet
+Descrição curta (80 chars): pronta para copiar
+Descrição completa: detalhada com todos os recursos, emojis e destaque para privacidade total
+Notas de lançamento v1.0.0: resumo das funcionalidades
+Política de privacidade: texto completo pronto para hospedar (GitHub Pages, Notion ou Google Sites — todos gratuitos)
+Checklist completo: passo a passo do momento que você tiver os $25 até o app publicado
+
+
+O único trabalho que sobra para você é:
+
+Criar o Feature Graphic (1024×500) no Canva — banner da loja
+Tirar screenshots das 5-6 telas principais
+Hospedar a política de privacidade (Notion é o mais rápido, gratuito e em 5 minutos)
+Quando tiver os $25 é literalmente rodar 3 comandos e copiar os textos.

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "33584582520",
+    "project_id": "petcare-d09ea",
+    "storage_bucket": "petcare-d09ea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33584582520:android:aa2ea631a77fe607e0428d",
+        "android_client_info": {
+          "package_name": "com.proensa.petcare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "33584582520-39bofu2d328v325gv47qmsqbepjomgks.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.proensa.petcare",
+            "certificate_hash": "584e40b83601392ba7867e44c6755b3930f0cc3d"
+          }
+        },
+        {
+          "client_id": "33584582520-9vcp6efel05f73neav4080ij3776r9re.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyQKL3Bgy5alVD5J_Elk_QISKyyuQ_1yw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "33584582520-9vcp6efel05f73neav4080ij3776r9re.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

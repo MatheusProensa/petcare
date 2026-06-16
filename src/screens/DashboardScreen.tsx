@@ -342,7 +342,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   logo: {
     width: 160,
     height: 54,
-    marginLeft: -spacing.md,
+    marginLeft: -spacing.lg,
   },
   title: {
     fontSize: typography.h1.fontSize,

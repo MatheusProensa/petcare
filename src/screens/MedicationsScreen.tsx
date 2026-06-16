@@ -285,7 +285,30 @@ export default function MedicationsScreen() {
                       <Text style={styles.doseDate}>{formatDoseDateTime(dose.createdAt)}</Text>
                       <Text style={styles.doseAgo}>{formatTimeAgo(dose.createdAt)}</Text>
                     </View>
-                    <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                    <TouchableOpacity
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      accessibilityRole="button"
+                      accessibilityLabel="Excluir dose"
+                      onPress={() =>
+                        Alert.alert('Excluir dose', 'Deseja remover este registro de dose?', [
+                          { text: 'Cancelar', style: 'cancel' },
+                          {
+                            text: 'Excluir',
+                            style: 'destructive',
+                            onPress: async () => {
+                              try {
+                                await medicationsRepository.removeDose(dose.id);
+                                setDoses(prev => prev.filter(d => d.id !== dose.id));
+                              } catch {
+                                Alert.alert('Erro', 'Não foi possível excluir a dose.');
+                              }
+                            },
+                          },
+                        ])
+                      }
+                    >
+                      <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                    </TouchableOpacity>
                   </View>
                 ))
               )}

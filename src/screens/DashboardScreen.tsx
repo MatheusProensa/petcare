@@ -271,14 +271,6 @@ export default function DashboardScreen() {
                   onPress={() => navigation.navigate('AddPet', {})}
                 />
               </View>
-              <View style={styles.quickActionItem}>
-                <Button
-                  label="Novo registro"
-                  icon="create-outline"
-                  variant="secondary"
-                  onPress={handleNewRecord}
-                />
-              </View>
             </View>
 
             {alerts.length > 0 && (

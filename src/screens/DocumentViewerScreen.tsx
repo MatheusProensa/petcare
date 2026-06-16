@@ -33,7 +33,7 @@ export default function DocumentViewerScreen() {
           accessibilityRole="button"
           accessibilityLabel="Voltar"
         >
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {title}
@@ -44,7 +44,7 @@ export default function DocumentViewerScreen() {
           accessibilityRole="button"
           accessibilityLabel="Compartilhar documento"
         >
-          <Ionicons name="share-social-outline" size={22} color={colors.textSubtle} />
+          <Ionicons name="share-social-outline" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -62,8 +62,8 @@ const createStyles = (colors: Palette) => StyleSheet.create({
     gap: spacing.md,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    backgroundColor: colors.background,
+    backgroundColor: '#000',
   },
-  headerTitle: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text, textAlign: 'center' },
+  headerTitle: { flex: 1, fontSize: 15, fontWeight: '600', color: '#fff', textAlign: 'center' },
   image: { flex: 1 },
 });
